@@ -1,0 +1,57 @@
+name: ForgeStation
+version: "${project.version}"
+main: com.phmyhu1710.forgestation.ForgeStationPlugin
+api-version: "1.21"
+authors:
+  - phmyhu_1710
+description: |
+  Advanced crafting and smelting system with rank multipliers,
+  custom recipes, MMOItems integration, and more!
+website: https://github.com/SmallFCraft/ForgeStation
+folia-supported: true
+prefix: ForgeStation
+
+softdepend:
+  - Vault
+  - PlayerPoints
+  - CoinsEngine
+  - MMOItems
+  - ExtraStorage
+  - PlaceholderAPI
+
+commands:
+  forgestation:
+    description: Main command for ForgeStation crafting system
+    aliases: [fs, forge, loren, crafting]
+    usage: |
+      /<command> - Mở menu chính
+      /<command> help - Xem hướng dẫn
+      /<command> reload - Reload plugin
+      /<command> recipes <id> - Xem công thức
+      /<command> smelting <id> - Xem công thức nung
+
+permissions:
+  forgestation.admin:
+    description: Full admin access to ForgeStation
+    default: op
+    children:
+      forgestation.reload: op
+      forgestation.use: op
+      forgestation.craft.*: op
+      forgestation.smelt.*: op
+      forgestation.upgrade.*: op
+  forgestation.reload:
+    description: Reload ForgeStation configurations
+    default: op
+  forgestation.use:
+    description: Access ForgeStation main menu
+    default: op
+  forgestation.craft.*:
+    description: Access all crafting recipes
+    default: op
+  forgestation.smelt.*:
+    description: Access all smelting recipes
+    default: op
+  forgestation.upgrade.*:
+    description: Access all upgrades
+    default: op

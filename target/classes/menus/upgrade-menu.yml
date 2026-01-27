@@ -1,0 +1,87 @@
+# ═══════════════════════════════════════════════
+#           FORGESTATION UPGRADE MENU
+# ═══════════════════════════════════════════════
+
+title: "&8&l⬆ &5&lNâng Cấp &8&l⬆"
+size: 27
+
+fill:
+  enabled: true
+  material: GRAY_STAINED_GLASS_PANE
+  name: " "
+
+border:
+  enabled: true
+  material: PURPLE_STAINED_GLASS_PANE
+  name: " "
+  slots: ["0-8", "18-21", "23-26"]
+
+items:
+  # ─────────────────────────────────────────────
+  # Crafting Speed Upgrade
+  # ─────────────────────────────────────────────
+  crafting_speed:
+    slot: 11
+    material: CLOCK
+    glow: true
+    name: "&6&l⚡ Tốc Độ Chế Tạo"
+    lore:
+      - ""
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - "&7Giảm thời gian cooldown"
+      - "&7khi chế tạo vật phẩm."
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - ""
+      - "&fLevel hiện tại: &e%crafting_level%&7/&e10"
+      - ""
+      - "&f&lChi phí nâng cấp:"
+      - "&8┃ &6💰 &e1000 &7Coins"
+      - "&8┃ &b⬤ &e100 &7Points"
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - ""
+      - "&a▶ Click để nâng cấp!"
+    action:
+      type: UPGRADE
+      upgrade-id: crafting_speed
+    sound: ENTITY_PLAYER_LEVELUP
+
+  # ─────────────────────────────────────────────
+  # Smelting Speed Upgrade
+  # ─────────────────────────────────────────────
+  smelting_speed:
+    slot: 15
+    material: FURNACE
+    glow: true
+    name: "&c&l🔥 Tốc Độ Nung"
+    lore:
+      - ""
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - "&7Giảm thời gian nung"
+      - "&7vật phẩm."
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - ""
+      - "&fLevel hiện tại: &e%smelting_level%&7/&e10"
+      - ""
+      - "&f&lChi phí nâng cấp:"
+      - "&8┃ &6💰 &e500 &7Coins"
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - ""
+      - "&a▶ Click để nâng cấp!"
+    action:
+      type: UPGRADE
+      upgrade-id: smelting_speed
+    sound: ENTITY_PLAYER_LEVELUP
+
+  # ─────────────────────────────────────────────
+  # Back Button
+  # ─────────────────────────────────────────────
+  back:
+    slot: 22
+    material: OAK_DOOR
+    name: "&c&l◀ Quay Lại"
+    lore:
+      - "&7Về menu chính"
+    action:
+      type: OPEN_MENU
+      menu: main-menu
+    sound: UI_BUTTON_CLICK

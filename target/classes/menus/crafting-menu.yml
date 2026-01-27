@@ -1,0 +1,117 @@
+# ═══════════════════════════════════════════════
+#           FORGESTATION CRAFTING MENU
+# ═══════════════════════════════════════════════
+
+title: "&8&l⚒ &6&lChế Tạo &8&l⚒"
+size: 54
+
+# Background
+fill:
+  enabled: true
+  material: GRAY_STAINED_GLASS_PANE
+  name: " "
+
+# Border
+border:
+  enabled: true
+  material: BLACK_STAINED_GLASS_PANE
+  name: " "
+  slots: ["0-8", "45-53"]
+
+items:
+  # ─────────────────────────────────────────────
+  # CATEGORY TABS
+  # ─────────────────────────────────────────────
+  weapons-tab:
+    slot: 2
+    material: DIAMOND_SWORD
+    glow: true
+    name: "&6&lVũ Khí"
+    lore:
+      - ""
+      - "&7Chế tạo vũ khí mạnh mẽ"
+      - ""
+      - "&e▶ Click để xem!"
+    action:
+      type: SWITCH_CATEGORY
+      category: weapons
+
+  exchange-tab:
+    slot: 4
+    material: EMERALD
+    glow: true
+    name: "&a&lĐổi Đồ"
+    lore:
+      - ""
+      - "&7Đổi items lấy currency"
+      - ""
+      - "&e▶ Click để xem!"
+    action:
+      type: SWITCH_CATEGORY
+      category: exchange
+
+  materials-tab:
+    slot: 6
+    material: IRON_BLOCK
+    glow: true
+    name: "&7&lVật Liệu"
+    lore:
+      - ""
+      - "&7Chế tạo vật liệu cơ bản"
+      - ""
+      - "&e▶ Click để xem!"
+    action:
+      type: SWITCH_CATEGORY
+      category: blocks
+
+  # ─────────────────────────────────────────────
+  # NAVIGATION BUTTONS
+  # ─────────────────────────────────────────────
+  prev_page:
+    slot: 45
+    material: ARROW
+    name: "&e&l◀ TRANG TRƯỚC"
+    lore:
+      - "&7Click để xem trang trước"
+    action:
+      type: PREV_PAGE
+
+  next_page:
+    slot: 53
+    material: ARROW
+    name: "&e&lTRANG SAU ▶"
+    lore:
+      - "&7Click để xem trang sau"
+    action:
+      type: NEXT_PAGE
+
+  # ─────────────────────────────────────────────
+  # BACK BUTTON
+  # ─────────────────────────────────────────────
+  back:
+    slot: 49
+    material: OAK_DOOR
+    name: "&c&l◀ Quay Lại"
+    lore:
+      - "&7Về menu chính"
+    action:
+      type: OPEN_MENU
+      menu: main-menu
+    sound: UI_BUTTON_CLICK
+
+# Auto Populate with Category Support
+auto-populate:
+  enabled: true
+  # Shared slots for ALL categories
+  slots: ["10-16", "19-25", "28-34"]
+  # Default category when opening menu
+  default-category: weapons
+  recipe-type: "recipe"
+  # Category definitions
+  categories:
+    weapons:
+      folder: weapons
+    exchange:
+      folder: exchange
+    blocks:
+      folder: blocks

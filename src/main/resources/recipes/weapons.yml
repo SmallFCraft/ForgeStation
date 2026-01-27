@@ -1,0 +1,129 @@
+# ═══════════════════════════════════════════════
+#           FORGESTATION WEAPON RECIPES
+# ═══════════════════════════════════════════════
+# Recipes chế tạo vũ khí
+
+recipes:
+  # ─────────────────────────────────────────────
+  # Búa Thần
+  # ─────────────────────────────────────────────
+  mace_mmo:
+    enabled: true
+    display-name: "&6&l⚔ Búa Thần"
+    permission: "forgestation.craft.legendary_sword"
+    # Thời gian chế tạo (giây) - upgrade system sẽ áp dụng % reduction
+    duration: 60
+    
+    icon:
+      material: MACE
+      slot: 11
+      glow: true
+      name: "&6&l⚔ Mace"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU CẦN:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - ""
+        - "&f&lCHI PHÍ:"
+        - "&8┃ &6💰 &e50,000 Coins"
+        - "&8┃ &b⬤ &e500 Points"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - ""
+        - "&7Thời gian: &f%duration%"
+        - "&7Trạng thái: %status%"
+        - ""
+        - "&a▶ Click để chế tạo!"
+    
+    ingredients:
+      diamond_block:
+        type: VANILLA
+        material: DIAMOND_BLOCK
+        amount: 1
+        name: "&fDiamond Block"
+      netherite:
+        type: VANILLA
+        material: NETHERITE_INGOT
+        amount: 2
+        name: "&fNetherite Ingot"
+      kiem_cui_mia:
+        type: MMOITEMS
+        mmoitems-type: SWORD
+        mmoitems-id: K1
+        amount: 1
+        name: "&5Kiếm Cùi Mía"
+    
+    cost:
+      vault: 50000
+      playerpoints: 500
+    
+    result:
+      type: MMOITEMS
+      mmoitems-type: SWORD
+      mmoitems-id: B14
+      amount: 1
+    
+    commands-on-success:
+      - "broadcast &6%player% &eđã chế tạo &6⚔ Búa Thần&e!"
+    
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # ─────────────────────────────────────────────
+  # Cuốc Đá Thần
+  # ─────────────────────────────────────────────
+  divine_pickaxe:
+    enabled: true
+    display-name: "&5&l⛏ Cuốc Đá Thần"
+    permission: "forgestation.craft.divine_pickaxe"
+    # Thời gian chế tạo (giây) - upgrade system sẽ áp dụng % reduction
+    duration: 180
+    
+    icon:
+      material: DIAMOND_PICKAXE
+      slot: 13
+      glow: true
+      name: "&5&l⛏ Cuốc Đá Thần"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - ""
+        - "&f&lCHI PHÍ: &6💰 &e10,000 Coins"
+        - ""
+        - "&a▶ Click để chế tạo!"
+    
+    ingredients:
+      diamond:
+        type: VANILLA
+        material: DIAMOND
+        amount: 20
+        name: "&bDiamond"
+      stick:
+        type: VANILLA
+        material: STICK
+        amount: 2
+        name: "&fStick"
+    
+    cost:
+      vault: 10000
+    
+    result:
+      type: VANILLA
+      material: DIAMOND_PICKAXE
+      amount: 1
+      name: "&5&lCuốc Đá Thần"
+      lore:
+        - "&7Một cuốc huyền thoại"
+        - "&7Được chế tạo bởi &e%player%"
+      enchantments:
+        - "efficiency:5"
+        - "fortune:3"
+        - "unbreaking:3"
+    
+    effects:
+      sound: BLOCK_ANVIL_USE

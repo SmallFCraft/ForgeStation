@@ -1,0 +1,305 @@
+package com.phmyhu1710.forgestation.upgrade;
+
+import com.phmyhu1710.forgestation.ForgeStationPlugin;
+import com.phmyhu1710.forgestation.expression.ExpressionParser;
+import com.phmyhu1710.forgestation.player.PlayerDataManager;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Manages upgrade system
+ */
+public class UpgradeManager {
+
+    private final ForgeStationPlugin plugin;
+    private final Map<String, Upgrade> upgrades = new HashMap<>();
+
+    public UpgradeManager(ForgeStationPlugin plugin) {
+        this.plugin = plugin;
+        reload();
+    }
+
+    public void reload() {
+        upgrades.clear();
+        
+        FileConfiguration config = plugin.getConfigManager().getUpgradesConfig();
+        ConfigurationSection upgradesSection = config.getConfigurationSection("upgrades");
+        
+        if (upgradesSection == null) return;
+        
+        for (String upgradeId : upgradesSection.getKeys(false)) {
+            ConfigurationSection upgradeConfig = upgradesSection.getConfigurationSection(upgradeId);
+            if (upgradeConfig == null) continue;
+            
+            upgrades.put(upgradeId, new Upgrade(upgradeId, upgradeConfig));
+        }
+        
+        plugin.getLogger().info("Loaded " + upgrades.size() + " upgrades");
+    }
+
+    public Upgrade getUpgrade(String id) {
+        return upgrades.get(id);
+    }
+
+    public Map<String, Upgrade> getAllUpgrades() {
+        return new HashMap<>(upgrades);
+    }
+
+    /**
+     * Get player's upgrade level
+     */
+    public int getPlayerLevel(Player player, String upgradeId) {
+        return plugin.getPlayerDataManager().getPlayerData(player).getUpgradeLevel(upgradeId);
+    }
+
+    /**
+     * Get cost for next level
+     */
+    public Map<String, Double> getNextLevelCost(Player player, String upgradeId) {
+        Upgrade upgrade = upgrades.get(upgradeId);
+        if (upgrade == null) {
+            plugin.debug("Upgrade not found: " + upgradeId);
+            return new HashMap<>();
+        }
+        
+        int currentLevel = getPlayerLevel(player, upgradeId);
+        int nextLevel = currentLevel + 1;
+        
+        if (nextLevel > upgrade.getMaxLevel()) {
+            plugin.debug("Max level reached for " + upgradeId);
+            return new HashMap<>();
+        }
+        
+        Map<String, Double> vars = new HashMap<>();
+        vars.put("level", (double) nextLevel);
+        
+        Map<String, Double> costs = new HashMap<>();
+        
+        if (!upgrade.getVaultCostExpr().isEmpty()) {
+            double vaultCost = ExpressionParser.evaluate(upgrade.getVaultCostExpr(), vars);
+            costs.put("vault", vaultCost);
+            plugin.debug("Vault cost for " + upgradeId + " level " + nextLevel + ": " + vaultCost);
+        }
+        if (!upgrade.getPlayerPointsCostExpr().isEmpty()) {
+            double ppCost = ExpressionParser.evaluate(upgrade.getPlayerPointsCostExpr(), vars);
+            costs.put("playerpoints", ppCost);
+            plugin.debug("PlayerPoints cost for " + upgradeId + " level " + nextLevel + ": " + ppCost);
+        }
+        if (!upgrade.getCoinEngineCostExpr().isEmpty()) {
+            double ceCost = ExpressionParser.evaluate(upgrade.getCoinEngineCostExpr(), vars);
+            costs.put("coinengine", ceCost);
+            plugin.debug("CoinEngine cost for " + upgradeId + " level " + nextLevel + ": " + ceCost);
+        }
+        
+        return costs;
+    }
+
+    /**
+     * Try to upgrade
+     */
+    public boolean tryUpgrade(Player player, String upgradeId) {
+        plugin.debug("=== UPGRADE ATTEMPT ===");
+        plugin.debug("Player: " + player.getName());
+        plugin.debug("Upgrade ID: " + upgradeId);
+        
+        Upgrade upgrade = upgrades.get(upgradeId);
+        if (upgrade == null) {
+            plugin.debug("Upgrade not found!");
+            return false;
+        }
+        
+        PlayerDataManager.PlayerData data = plugin.getPlayerDataManager().getPlayerData(player);
+        int currentLevel = data.getUpgradeLevel(upgradeId);
+        int nextLevel = currentLevel + 1;
+        
+        plugin.debug("Current level: " + currentLevel);
+        plugin.debug("Next level: " + nextLevel);
+        plugin.debug("Max level: " + upgrade.getMaxLevel());
+        
+        // Check max level
+        if (nextLevel > upgrade.getMaxLevel()) {
+            plugin.getMessageUtil().send(player, "upgrade.max-level", "max", String.valueOf(upgrade.getMaxLevel()));
+            return false;
+        }
+        
+        // Get costs
+        Map<String, Double> costs = getNextLevelCost(player, upgradeId);
+        double vaultCost = costs.getOrDefault("vault", 0.0);
+        int ppCost = costs.getOrDefault("playerpoints", 0.0).intValue();
+        double coinEngineCost = costs.getOrDefault("coinengine", 0.0);
+        
+        plugin.debug("Calculated costs:");
+        plugin.debug("  Vault: " + vaultCost);
+        plugin.debug("  PlayerPoints: " + ppCost);
+        plugin.debug("  CoinEngine: " + coinEngineCost + " (" + upgrade.getCoinEngineCurrency() + ")");
+        
+        // Get player balances
+        double playerVault = plugin.getEconomyManager().getVaultBalance(player);
+        int playerPP = plugin.getEconomyManager().getPlayerPoints(player);
+        double playerCE = upgrade.getCoinEngineCurrency().isEmpty() ? 0 : 
+            plugin.getEconomyManager().getCoinEngineBalance(player, upgrade.getCoinEngineCurrency());
+        
+        plugin.debug("Player balances:");
+        plugin.debug("  Vault: " + playerVault);
+        plugin.debug("  PlayerPoints: " + playerPP);
+        plugin.debug("  CoinEngine: " + playerCE);
+        
+        // Check if can afford
+        boolean canAfford = plugin.getEconomyManager().canAfford(player, vaultCost, ppCost, 
+                upgrade.getCoinEngineCurrency(), coinEngineCost);
+        
+        plugin.debug("Can afford: " + canAfford);
+        
+        if (!canAfford) {
+            plugin.getMessageUtil().send(player, "upgrade.no-money", 
+                "cost", formatCost(vaultCost, ppCost, coinEngineCost, upgrade.getCoinEngineCurrency()));
+            return false;
+        }
+        
+        // Withdraw
+        plugin.debug("Attempting to withdraw...");
+        boolean withdrawn = plugin.getEconomyManager().withdrawAll(player, vaultCost, ppCost, 
+            upgrade.getCoinEngineCurrency(), coinEngineCost);
+        
+        plugin.debug("Withdraw result: " + withdrawn);
+        
+        if (!withdrawn) {
+            plugin.debug("Withdraw failed!");
+            plugin.getMessageUtil().send(player, "upgrade.no-money", 
+                "cost", formatCost(vaultCost, ppCost, coinEngineCost, upgrade.getCoinEngineCurrency()));
+            return false;
+        }
+        
+        // Apply upgrade
+        data.setUpgradeLevel(upgradeId, nextLevel);
+        plugin.debug("Upgrade applied! New level: " + nextLevel);
+        
+        plugin.getMessageUtil().send(player, "upgrade.success",
+            "upgrade", upgrade.getDisplayName(),
+            "level", String.valueOf(nextLevel));
+        
+        plugin.debug("=== UPGRADE SUCCESS ===");
+        return true;
+    }
+
+    private String formatCost(double vault, int pp, double coinEngine, String currency) {
+        StringBuilder sb = new StringBuilder();
+        if (vault > 0) {
+            sb.append("§6").append(vault).append(" Coins");
+        }
+        if (pp > 0) {
+            if (!sb.isEmpty()) sb.append(" §7+ ");
+            sb.append("§b").append(pp).append(" Points");
+        }
+        if (coinEngine > 0 && !currency.isEmpty()) {
+            if (!sb.isEmpty()) sb.append(" §7+ ");
+            sb.append("§e").append(coinEngine).append(" ").append(currency);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Upgrade data class
+     * IMPROVED: Hỗ trợ PERCENTAGE mode để giảm theo phần trăm
+     */
+    public static class Upgrade {
+        private final String id;
+        private final String displayName;
+        private final int maxLevel;
+        private final String vaultCostExpr;
+        private final String playerPointsCostExpr;
+        private final String coinEngineCurrency;
+        private final String coinEngineCostExpr;
+        private final String effectType;
+        private final double valuePerLevel;
+        
+        // IMPROVED: Percentage-based reduction
+        private final String effectMode; // "PERCENTAGE" hoặc "FIXED" (default)
+        private final double percentPerLevel; // % giảm mỗi level
+        private final int minDuration; // Thời gian tối thiểu (giây)
+
+        public Upgrade(String id, ConfigurationSection config) {
+            this.id = id;
+            this.displayName = config.getString("display-name", id);
+            this.maxLevel = config.getInt("max-level", 10);
+            
+            ConfigurationSection costSection = config.getConfigurationSection("cost-per-level");
+            if (costSection != null) {
+                this.vaultCostExpr = costSection.getString("vault", "");
+                this.playerPointsCostExpr = costSection.getString("playerpoints", "");
+                
+                ConfigurationSection coinEngineSection = costSection.getConfigurationSection("coinengine");
+                if (coinEngineSection != null) {
+                    this.coinEngineCurrency = coinEngineSection.getString("currency", "");
+                    this.coinEngineCostExpr = coinEngineSection.getString("amount", "");
+                } else {
+                    this.coinEngineCurrency = "";
+                    this.coinEngineCostExpr = "";
+                }
+            } else {
+                this.vaultCostExpr = "";
+                this.playerPointsCostExpr = "";
+                this.coinEngineCurrency = "";
+                this.coinEngineCostExpr = "";
+            }
+            
+            ConfigurationSection effectSection = config.getConfigurationSection("effect");
+            if (effectSection != null) {
+                this.effectType = effectSection.getString("type", "");
+                this.valuePerLevel = effectSection.getDouble("value-per-level", 0);
+                
+                // IMPROVED: Read new percentage config
+                this.effectMode = effectSection.getString("mode", "FIXED").toUpperCase();
+                this.percentPerLevel = effectSection.getDouble("percent-per-level", 0);
+                this.minDuration = effectSection.getInt("min-duration", 1);
+            } else {
+                this.effectType = "";
+                this.valuePerLevel = 0;
+                this.effectMode = "FIXED";
+                this.percentPerLevel = 0;
+                this.minDuration = 1;
+            }
+        }
+
+        public String getId() { return id; }
+        public String getDisplayName() { return displayName; }
+        public int getMaxLevel() { return maxLevel; }
+        public String getVaultCostExpr() { return vaultCostExpr; }
+        public String getPlayerPointsCostExpr() { return playerPointsCostExpr; }
+        public String getCoinEngineCurrency() { return coinEngineCurrency; }
+        public String getCoinEngineCostExpr() { return coinEngineCostExpr; }
+        public String getEffectType() { return effectType; }
+        public double getValuePerLevel() { return valuePerLevel; }
+        
+        // IMPROVED: New getters for percentage mode
+        public String getEffectMode() { return effectMode; }
+        public double getPercentPerLevel() { return percentPerLevel; }
+        public int getMinDuration() { return minDuration; }
+        
+        /**
+         * IMPROVED: Tính duration sau khi áp dụng upgrade
+         * @param baseDuration Thời gian gốc (không có upgrade)
+         * @param level Level upgrade hiện tại của player
+         * @return Thời gian sau khi giảm
+         */
+        public int applyDurationReduction(int baseDuration, int level) {
+            if (level <= 0) return baseDuration;
+            
+            int result;
+            if ("PERCENTAGE".equals(effectMode)) {
+                // PERCENTAGE mode: giảm X% mỗi level
+                double reductionPercent = Math.min(level * percentPerLevel, 100) / 100.0;
+                result = (int) Math.ceil(baseDuration * (1 - reductionPercent));
+            } else {
+                // FIXED mode: giảm X giây mỗi level (cũ)
+                result = baseDuration - (int)(level * valuePerLevel);
+            }
+            
+            return Math.max(result, minDuration);
+        }
+    }
+}
