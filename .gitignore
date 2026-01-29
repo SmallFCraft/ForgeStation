@@ -1,2 +1,5 @@
-./target/
+/target/
+*.log
+*.jar
+*.txt
 dependency-reduced-pom.xml

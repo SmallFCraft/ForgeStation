@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class ForgeStationCommand implements CommandExecutor, TabCompleter {
 
     private final ForgeStationPlugin plugin;
-    private final List<String> subCommands = Arrays.asList("reload", "help", "recipes", "smelting");
+    private final List<String> subCommands = Arrays.asList("reload", "help", "category");
 
     public ForgeStationCommand(ForgeStationPlugin plugin) {
         this.plugin = plugin;
@@ -57,17 +57,12 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
             case "help":
                 handleHelp(sender);
                 break;
-            case "recipes":
-            case "recipe":
-            case "craft":
-                handleRecipe(sender, args);
-                break;
-            case "smelting":
-            case "smelt":
-                handleSmelting(sender, args);
+            case "category":
+            case "cat":
+                handleCategory(sender, args);
                 break;
             default:
-                plugin.getMessageUtil().send(sender, "invalid-args", "usage", "/fs [reload|help|recipes|smelting]");
+                plugin.getMessageUtil().send(sender, "invalid-args", "usage", "/fs [reload|help|category]");
                 break;
         }
         
@@ -97,15 +92,14 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§8│ §e/fs           §8- §7Mở menu chính               §8│");
         sender.sendMessage("§8│ §e/fs reload    §8- §7Reload configs               §8│");
         sender.sendMessage("§8│ §e/fs help      §8- §7Hiện trợ giúp                §8│");
-        sender.sendMessage("§8│ §e/fs recipes   §8- §7Xem công thức                §8│");
-        sender.sendMessage("§8│ §e/fs smelting  §8- §7Xem công thức nung          §8│");
+        sender.sendMessage("§8│ §e/fs category  §8- §7Mở category                  §8│");
         sender.sendMessage("§8└───────────────────────────────────┘");
         sender.sendMessage("");
         sender.sendMessage("§7Author: §ephmyhu_1710 §8| §7v" + plugin.getDescription().getVersion());
         sender.sendMessage("");
     }
 
-    private void handleRecipe(CommandSender sender, String[] args) {
+    private void handleCategory(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             plugin.getMessageUtil().send(sender, "player-only");
             return;
@@ -117,53 +111,41 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
         }
         
         if (args.length < 2) {
-            sender.sendMessage("§cSử dụng: /fs recipes <id>");
-            sender.sendMessage("§7Danh sách recipes: §e" + 
-                String.join(", ", plugin.getRecipeManager().getRecipeIds()));
+            sender.sendMessage("§cSử dụng: /fs category <tên category>");
+            sender.sendMessage("§7Danh sách categories:");
+            
+            // List all categories from all menus
+            java.util.Set<String> allCategories = plugin.getMenuManager().getAllCategories();
+            
+            if (allCategories.isEmpty()) {
+                sender.sendMessage("§7  Không có category nào");
+            } else {
+                sender.sendMessage("§e  " + String.join(", ", allCategories));
+            }
             return;
         }
         
-        String recipeId = args[1];
-        Recipe recipe = plugin.getRecipeManager().getRecipe(recipeId);
+        String categoryName = args[1].toLowerCase();
         
-        if (recipe == null) {
-            sender.sendMessage("§cKhông tìm thấy recipe: §e" + recipeId);
+        // Find menu that contains this category
+        String menuName = plugin.getMenuManager().findMenuWithCategory(categoryName);
+        
+        if (menuName == null) {
+            sender.sendMessage("§cKhông tìm thấy category: §e" + categoryName);
+            sender.sendMessage("§7Danh sách categories:");
+            
+            java.util.Set<String> allCategories = plugin.getMenuManager().getAllCategories();
+            
+            if (!allCategories.isEmpty()) {
+                sender.sendMessage("§e  " + String.join(", ", allCategories));
+            }
             return;
         }
         
-        // Open recipe detail GUI
-        plugin.getRecipeDetailGUI().openRecipeGUI(player, recipe);
+        // Open menu with category
+        plugin.getMenuManager().openMenuWithCategory(player, menuName, categoryName);
     }
 
-    private void handleSmelting(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) {
-            plugin.getMessageUtil().send(sender, "player-only");
-            return;
-        }
-        
-        if (!player.hasPermission("forgestation.use")) {
-            plugin.getMessageUtil().send(sender, "no-permission");
-            return;
-        }
-        
-        if (args.length < 2) {
-            sender.sendMessage("§cSử dụng: /fs smelting <id>");
-            sender.sendMessage("§7Danh sách smelting: §e" + 
-                String.join(", ", plugin.getSmeltingManager().getSmeltingIds()));
-            return;
-        }
-        
-        String smeltingId = args[1];
-        SmeltingRecipe recipe = plugin.getSmeltingManager().getRecipe(smeltingId);
-        
-        if (recipe == null) {
-            sender.sendMessage("§cKhông tìm thấy smelting recipe: §e" + smeltingId);
-            return;
-        }
-        
-        // Open smelting detail GUI
-        plugin.getRecipeDetailGUI().openSmeltingGUI(player, recipe);
-    }
 
     @Nullable
     @Override
@@ -178,17 +160,12 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2) {
             String subCmd = args[0].toLowerCase();
             
-            // Tab complete recipe IDs
-            if (subCmd.equals("recipes") || subCmd.equals("recipe") || subCmd.equals("craft")) {
-                return plugin.getRecipeManager().getRecipeIds().stream()
-                    .filter(id -> id.toLowerCase().startsWith(args[1].toLowerCase()))
-                    .collect(Collectors.toList());
-            }
-            
-            // Tab complete smelting IDs
-            if (subCmd.equals("smelting") || subCmd.equals("smelt")) {
-                return plugin.getSmeltingManager().getSmeltingIds().stream()
-                    .filter(id -> id.toLowerCase().startsWith(args[1].toLowerCase()))
+            // Tab complete category names
+            if (subCmd.equals("category") || subCmd.equals("cat")) {
+                java.util.Set<String> allCategories = plugin.getMenuManager().getAllCategories();
+                
+                return allCategories.stream()
+                    .filter(cat -> cat.toLowerCase().startsWith(args[1].toLowerCase()))
                     .collect(Collectors.toList());
             }
         }

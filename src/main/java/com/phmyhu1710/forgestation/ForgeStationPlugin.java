@@ -43,6 +43,7 @@ public class ForgeStationPlugin extends JavaPlugin {
     private SchedulerAdapter scheduler;
     // ISSUE-014 FIX: Output router for configurable item delivery
     private OutputRouter outputRouter;
+    private com.phmyhu1710.forgestation.command.CustomCommandManager customCommandManager;
     
     @Override
     public void onEnable() {
@@ -52,12 +53,12 @@ public class ForgeStationPlugin extends JavaPlugin {
         // Print startup banner
         printBanner();
         
-        // Initialize scheduler (Folia/Spigot)
-        initScheduler();
-        
         // Load configurations
         configManager = new ConfigManager(this);
         configManager.loadAll();
+        
+        // Initialize scheduler (Folia/Spigot)
+        initScheduler();
         
         // Initialize message utility
         messageUtil = new MessageUtil(this);
@@ -77,6 +78,9 @@ public class ForgeStationPlugin extends JavaPlugin {
         
         // Initialize upgrade manager
         upgradeManager = new UpgradeManager(this);
+        
+        // Initialize custom command manager
+        customCommandManager = new com.phmyhu1710.forgestation.command.CustomCommandManager(this);
         
         // Initialize recipe manager
         recipeManager = new RecipeManager(this);
@@ -119,6 +123,11 @@ public class ForgeStationPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
+            // Unregister custom commands
+            if (customCommandManager != null) {
+                customCommandManager.unregisterAll();
+            }
+
             // ⚠️ CRITICAL ORDER: Phải lưu tasks TRƯỚC KHI đóng database!
             
             // 1. Cancel và lưu tất cả smelting tasks vào database
@@ -185,10 +194,10 @@ public class ForgeStationPlugin extends JavaPlugin {
             // Check if Folia
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
             scheduler = new com.phmyhu1710.forgestation.scheduler.FoliaScheduler(this);
-            getLogger().info("Detected Folia - using RegionScheduler");
+            debug("Detected Folia - using RegionScheduler");
         } catch (ClassNotFoundException e) {
             scheduler = new com.phmyhu1710.forgestation.scheduler.BukkitScheduler(this);
-            getLogger().info("Using Bukkit scheduler");
+            debug("Using Bukkit scheduler");
         }
     }
     
@@ -240,6 +249,11 @@ public class ForgeStationPlugin extends JavaPlugin {
         // PERSISTENCE FIX: Lưu active tasks trước khi reload recipes
         var savedSmeltingTasks = smeltingManager.saveAllTasksForReload();
         var savedCraftingTasks = craftingExecutor.saveAllTasksForReload();
+        
+        // Unregister old commands
+        if (customCommandManager != null) {
+            customCommandManager.unregisterAll();
+        }
         
         // Reload configs
         configManager.loadAll();
@@ -316,7 +330,12 @@ public class ForgeStationPlugin extends JavaPlugin {
         return outputRouter;
     }
     
+    public com.phmyhu1710.forgestation.command.CustomCommandManager getCustomCommandManager() {
+        return customCommandManager;
+    }
+    
     public boolean isDebug() {
+        if (configManager == null || configManager.getMainConfig() == null) return false;
         return configManager.getMainConfig().getBoolean("debug", false);
     }
     

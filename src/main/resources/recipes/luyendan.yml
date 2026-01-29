@@ -1,0 +1,111 @@
+open_command:
+  - luyendan
+  - danduoc
+
+recipes:
+  linhthao_def:
+    enabled: true
+    display-name: "&f&lCuộn Phòng Thủ II"
+    duration: 120
+    bulk-exchange: true
+    icon:
+      material: PAPER
+      model-data: 10134
+      name: "&fCuộn Phòng Thủ &6✦ II"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b10 &dLinh Thảo &f→ &e1 &fCuộn Phòng Thủ &6✦ II"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &fCuộn Phòng Thủ &6✦ II"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: LINHTHAO
+      amount: 10
+
+    result:
+      type: MMOITEMS
+      mmoitems-type: CONSUMABLE
+      mmoitems-id: LINHTHAODEF_2
+      amount: 1
+  linhthao_sucmanh:
+    enabled: true
+    display-name: "&f&lCuộn Sức Mạnh II"
+    duration: 120
+    bulk-exchange: true
+    icon:
+      material: PAPER
+      model-data: 10136
+      name: "&fCuộn Sức Mạnh &6✦ II"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b10 &dLinh Thảo &f→ &e1 &fCuộn Sức Mạnh &6✦ II"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &fCuộn Sức Mạnh &6✦ II"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: LINHTHAO
+      amount: 10
+
+    result:
+      type: MMOITEMS
+      mmoitems-type: CONSUMABLE
+      mmoitems-id: LINHTHAOSUCMANH_2
+      amount: 1
+  linhthao_daoda:
+    enabled: true
+    display-name: "&f&lĐan Dược Đào Đá II"
+    duration: 120
+    bulk-exchange: true
+    icon:
+      material: PAPER
+      model-data: 10108
+      name: "&fĐan Dược Đào Đá &6✦ II"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b10 &dLinh Thảo &f→ &e1 &fĐan Dược Đào Đá &6✦ II"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &fĐan Dược Đào Đá &6✦ II"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: LINHTHAO
+      amount: 10
+
+    result:
+      type: MMOITEMS
+      mmoitems-type: CONSUMABLE
+      mmoitems-id: LINHTHAODAODA_2
+      amount: 1
+

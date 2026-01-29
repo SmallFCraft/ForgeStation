@@ -23,6 +23,8 @@ public class Recipe {
     
     // Icon
     private final Material iconMaterial;
+    private final String iconMaterialString;  // Raw material string for hook support
+    private final int iconModelData;  // -1 = not set
     private final int iconSlot;
     private final boolean iconGlow;
     private final String iconName;
@@ -64,13 +66,26 @@ public class Recipe {
         // Icon
         ConfigurationSection iconSection = config.getConfigurationSection("icon");
         if (iconSection != null) {
-            this.iconMaterial = Material.valueOf(iconSection.getString("material", "STONE").toUpperCase());
+            this.iconMaterialString = iconSection.getString("material", "STONE");
+            // Try to parse as Material, fallback to STONE if it's a hook prefix
+            Material parsedMat = Material.STONE;
+            try {
+                if (!iconMaterialString.contains("-")) {
+                    parsedMat = Material.valueOf(iconMaterialString.toUpperCase());
+                }
+            } catch (Exception e) {
+                // Keep STONE for hook items
+            }
+            this.iconMaterial = parsedMat;
+            this.iconModelData = iconSection.getInt("model-data", -1);
             this.iconSlot = iconSection.getInt("slot", 0);
             this.iconGlow = iconSection.getBoolean("glow", false);
             this.iconName = iconSection.getString("name", displayName);
             this.iconLore = iconSection.getStringList("lore");
         } else {
             this.iconMaterial = Material.STONE;
+            this.iconMaterialString = "STONE";
+            this.iconModelData = -1;
             this.iconSlot = 0;
             this.iconGlow = false;
             this.iconName = displayName;
@@ -146,6 +161,8 @@ public class Recipe {
     public boolean isBulkExchange() { return bulkExchange; }
     
     public Material getIconMaterial() { return iconMaterial; }
+    public String getIconMaterialString() { return iconMaterialString; }
+    public int getIconModelData() { return iconModelData; }
     public int getIconSlot() { return iconSlot; }
     public boolean isIconGlow() { return iconGlow; }
     public String getIconName() { return iconName; }

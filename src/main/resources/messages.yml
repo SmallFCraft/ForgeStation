@@ -50,6 +50,7 @@ craft:
   # Instant mode messages
   success: "%prefix%&a✓ &7Chế tạo &e%item% &7thành công!"
   failed: "%prefix%&c✗ &7Không đủ nguyên liệu!"
+  missing-material: "%prefix%&c✗ &7Thiếu nguyên liệu: &e%amount%x %material%&7!"
   no-money: "%prefix%&c✗ &7Không đủ &e%currency%&7! Cần: &e%amount%"
   cooldown: "%prefix%&e⏳ &7Vui lòng chờ &e%time%&7!"
   no-space: "%prefix%&c✗ &7Inventory đầy!"
@@ -60,6 +61,7 @@ craft:
   complete: "%prefix%&a✓ &7Đã chế tạo xong &e%item%&7!"
   cancelled: "%prefix%&c✗ &7Đã hủy quá trình chế tạo!"
   already-crafting: "%prefix%&c✗ &7Bạn đang có quá trình chế tạo khác!"
+  no-space: "%prefix%&c✗ &7Kho đồ của bạn đã đầy! Vui lòng dọn trống trước khi chế tạo."
   # Persistence messages
   pending-delivered: "%prefix%&a📦 &7Bạn nhận được &e%count% &7items từ quá trình chế tạo khi offline!"
   complete-while-offline: "%prefix%&a✓ &7Quá trình chế tạo &e%item% &7đã hoàn tất khi bạn offline!"
@@ -78,6 +80,7 @@ smelt:
   complete: "%prefix%&a✓ &7Đã nung xong &e%item%&7!"
   cancelled: "%prefix%&c✗ &7Đã hủy quá trình nung!"
   already-smelting: "%prefix%&c✗ &7Bạn đang có quá trình nung khác!"
+  no-space: "%prefix%&c✗ &7Kho đồ của bạn đã đầy! Vui lòng dọn trống trước khi nung."
   no-fuel: "%prefix%&c✗ &7Không đủ nhiên liệu!"
   no-permission: "%prefix%&c✗ &7Bạn không có quyền nung công thức này!"
   missing-materials: "%prefix%&c✗ &7Không đủ nguyên liệu! Cần: &e%amount%× %material%"

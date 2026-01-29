@@ -34,7 +34,7 @@ public class SQLiteDatabase {
             
             createTables();
             
-            plugin.getLogger().info("SQLite database connected");
+            plugin.debug("SQLite database connected");
         } catch (ClassNotFoundException e) {
             plugin.getLogger().severe("SQLite JDBC driver not found! This should not happen.");
             plugin.getLogger().severe("Falling back to direct connection...");
@@ -43,7 +43,7 @@ public class SQLiteDatabase {
             try {
                 connection = DriverManager.getConnection("jdbc:sqlite:" + dbFile.getAbsolutePath());
                 createTables();
-                plugin.getLogger().info("SQLite database connected (fallback mode)");
+                plugin.debug("SQLite database connected (fallback mode)");
             } catch (SQLException ex) {
                 plugin.getLogger().severe("Failed to connect to SQLite: " + ex.getMessage());
                 ex.printStackTrace();
@@ -145,7 +145,7 @@ public class SQLiteDatabase {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                plugin.getLogger().info("SQLite database disconnected");
+                plugin.debug("SQLite database disconnected");
             }
         } catch (SQLException e) {
             plugin.getLogger().severe("Error closing database: " + e.getMessage());

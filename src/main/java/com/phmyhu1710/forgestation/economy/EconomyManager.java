@@ -105,76 +105,87 @@ public class EconomyManager {
     }
 
     /**
+     * Get player's total EXP
+     */
+    public int getExp(Player player) {
+        // Simple calculation or use Bukkit's total experience
+        // Note: getTotalExperience() sometimes desyncs with levels, but for simple cost checks it's usually the standard way.
+        // For better precision, we should calculate from Level + Exp bar.
+        return com.phmyhu1710.forgestation.util.ExperienceUtil.getTotalExperience(player);
+    }
+    
+    /**
+     * Withdraw EXP from player
+     */
+    public boolean withdrawExp(Player player, int amount) {
+        if (getExp(player) < amount) return false;
+        
+        // Use ExperienceUtil for safe withdrawal to handle levels correctly
+        com.phmyhu1710.forgestation.util.ExperienceUtil.setTotalExperience(player, getExp(player) - amount);
+        return true;
+    }
+
+    /**
      * Check if player can afford specified costs
      */
-    public boolean canAfford(Player player, double vault, int playerPoints, String coinEngineCurrency, double coinEngineAmount) {
+    public boolean canAfford(Player player, double vault, int playerPoints, int exp, String coinEngineCurrency, double coinEngineAmount) {
         plugin.debug("=== CHECKING AFFORDABILITY ===");
-        plugin.debug("Required - Vault: " + vault + ", PP: " + playerPoints + ", CE: " + coinEngineAmount + " (" + coinEngineCurrency + ")");
+        plugin.debug("Required - Vault: " + vault + ", PP: " + playerPoints + ", EXP: " + exp + ", CE: " + coinEngineAmount);
         
         if (vault > 0) {
             double balance = getVaultBalance(player);
-            plugin.debug("Vault check: " + balance + " >= " + vault + " ? " + (balance >= vault));
             if (balance < vault) return false;
         }
         
         if (playerPoints > 0) {
             int balance = getPlayerPoints(player);
-            plugin.debug("PP check: " + balance + " >= " + playerPoints + " ? " + (balance >= playerPoints));
             if (balance < playerPoints) return false;
+        }
+        
+        if (exp > 0) {
+            int balance = getExp(player);
+            if (balance < exp) return false;
         }
         
         if (coinEngineAmount > 0 && !coinEngineCurrency.isEmpty()) {
             double balance = getCoinEngineBalance(player, coinEngineCurrency);
-            plugin.debug("CE check: " + balance + " >= " + coinEngineAmount + " ? " + (balance >= coinEngineAmount));
             if (balance < coinEngineAmount) return false;
         }
         
         plugin.debug("Can afford: TRUE");
         return true;
     }
+    
+    // Legacy overload for backward compatibility if needed, or update callers
+    public boolean canAfford(Player player, double vault, int playerPoints, String coinEngineCurrency, double coinEngineAmount) {
+        return canAfford(player, vault, playerPoints, 0, coinEngineCurrency, coinEngineAmount);
+    }
 
     /**
      * Withdraw all costs
      */
-    public boolean withdrawAll(Player player, double vault, int playerPoints, String coinEngineCurrency, double coinEngineAmount) {
+    public boolean withdrawAll(Player player, double vault, int playerPoints, int exp, String coinEngineCurrency, double coinEngineAmount) {
         plugin.debug("=== WITHDRAWING ===");
-        plugin.debug("Amounts - Vault: " + vault + ", PP: " + playerPoints + ", CE: " + coinEngineAmount);
+        plugin.debug("Amounts - Vault: " + vault + ", PP: " + playerPoints + ", EXP: " + exp + ", CE: " + coinEngineAmount);
         
-        if (!canAfford(player, vault, playerPoints, coinEngineCurrency, coinEngineAmount)) {
+        if (!canAfford(player, vault, playerPoints, exp, coinEngineCurrency, coinEngineAmount)) {
             plugin.debug("Cannot afford - aborting withdraw");
             return false;
         }
         
         boolean success = true;
         
-        if (vault > 0) {
-            plugin.debug("Withdrawing Vault: " + vault);
-            boolean vaultSuccess = withdrawVault(player, vault);
-            plugin.debug("Vault withdraw result: " + vaultSuccess);
-            success &= vaultSuccess;
-        } else {
-            plugin.debug("Skipping Vault withdraw (amount = 0)");
-        }
-        
-        if (playerPoints > 0) {
-            plugin.debug("Withdrawing PP: " + playerPoints);
-            boolean ppSuccess = withdrawPlayerPoints(player, playerPoints);
-            plugin.debug("PP withdraw result: " + ppSuccess);
-            success &= ppSuccess;
-        } else {
-            plugin.debug("Skipping PP withdraw (amount = 0)");
-        }
-        
-        if (coinEngineAmount > 0 && !coinEngineCurrency.isEmpty()) {
-            plugin.debug("Withdrawing CE: " + coinEngineAmount + " " + coinEngineCurrency);
-            boolean ceSuccess = withdrawCoinEngine(player, coinEngineCurrency, coinEngineAmount);
-            plugin.debug("CE withdraw result: " + ceSuccess);
-            success &= ceSuccess;
-        } else {
-            plugin.debug("Skipping CE withdraw (amount = 0 or no currency)");
-        }
+        if (vault > 0) success &= withdrawVault(player, vault);
+        if (playerPoints > 0) success &= withdrawPlayerPoints(player, playerPoints);
+        if (exp > 0) success &= withdrawExp(player, exp);
+        if (coinEngineAmount > 0 && !coinEngineCurrency.isEmpty()) success &= withdrawCoinEngine(player, coinEngineCurrency, coinEngineAmount);
         
         plugin.debug("Overall withdraw success: " + success);
         return success;
+    }
+    
+    // Legacy overload
+    public boolean withdrawAll(Player player, double vault, int playerPoints, String coinEngineCurrency, double coinEngineAmount) {
+        return withdrawAll(player, vault, playerPoints, 0, coinEngineCurrency, coinEngineAmount);
     }
 }

@@ -35,11 +35,11 @@ permissions:
     description: Full admin access to ForgeStation
     default: op
     children:
-      forgestation.reload: op
-      forgestation.use: op
-      forgestation.craft.*: op
-      forgestation.smelt.*: op
-      forgestation.upgrade.*: op
+      forgestation.reload: true
+      forgestation.use: true
+      forgestation.craft.*: true
+      forgestation.smelt.*: true
+      forgestation.upgrade.*: true
   forgestation.reload:
     description: Reload ForgeStation configurations
     default: op

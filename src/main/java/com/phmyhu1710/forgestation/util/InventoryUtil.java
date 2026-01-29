@@ -229,4 +229,61 @@ public class InventoryUtil {
                 break;
         }
     }
+    /**
+     * Check if player has space for items
+     * Simulates adding items to a copy of inventory
+     */
+    public static boolean hasSpace(Player player, java.util.List<ItemStack> itemsToAdd) {
+        if (itemsToAdd == null || itemsToAdd.isEmpty()) return true;
+        
+        // Count items needed per material/type
+        // Simple simulation: check if we can add them to a dummy inventory
+        // OR better: use Bukkit's addItem on a copy
+        
+        PlayerInventory inv = player.getInventory();
+        ItemStack[] contents = inv.getStorageContents();
+        ItemStack[] copy = new ItemStack[contents.length];
+        
+        // Deep copy
+        for (int i = 0; i < contents.length; i++) {
+            copy[i] = contents[i] != null ? contents[i].clone() : null;
+        }
+        
+        // Try adding
+        for (ItemStack item : itemsToAdd) {
+            if (item == null) continue;
+            int remaining = item.getAmount();
+            
+            // 1. Try stacking with existing
+            for (int i = 0; i < copy.length; i++) {
+                if (remaining <= 0) break;
+                ItemStack slot = copy[i];
+                if (slot != null && slot.isSimilar(item)) {
+                    int space = slot.getMaxStackSize() - slot.getAmount();
+                    if (space > 0) {
+                        int add = Math.min(space, remaining);
+                        slot.setAmount(slot.getAmount() + add);
+                        remaining -= add;
+                    }
+                }
+            }
+            
+            // 2. Try empty slots
+            if (remaining > 0) {
+                for (int i = 0; i < copy.length; i++) {
+                    if (remaining <= 0) break;
+                    if (copy[i] == null || copy[i].getType() == Material.AIR) {
+                        int add = Math.min(item.getMaxStackSize(), remaining);
+                        copy[i] = item.clone();
+                        copy[i].setAmount(add);
+                        remaining -= add;
+                    }
+                }
+            }
+            
+            if (remaining > 0) return false;
+        }
+        
+        return true;
+    }
 }

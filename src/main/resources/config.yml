@@ -5,7 +5,7 @@
 # Version: 1.0.0
 
 # Debug mode (enable for development only - causes performance issues in production)
-debug: true
+debug: false
 
 # ─────────────────────────────────────────────
 # Output Settings
@@ -49,10 +49,19 @@ performance:
 # ─────────────────────────────────────────────
 # Hooks
 # ─────────────────────────────────────────────
+currency:
+  vault: "&aBạc"
+  playerpoints: "&bNguyên Thạch"
+  exp: "&aEXP"
+  coinengine: "&dCông Đức"
+
 hooks:
+  # Currency
   vault: true
   playerpoints: true
   coinengine: true
+  # Items
   mmoitems: true
   extrastorage: true
+  # Placeholder
   placeholderapi: true

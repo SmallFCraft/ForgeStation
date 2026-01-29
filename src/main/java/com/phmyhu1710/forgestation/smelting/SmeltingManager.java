@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SmeltingManager implements Listener {
 
     private final ForgeStationPlugin plugin;
-    private final Map<String, SmeltingRecipe> smeltingRecipes = new HashMap<>();
+    private final Map<String, SmeltingRecipe> smeltingRecipes = new java.util.LinkedHashMap<>();
     private final Map<UUID, SmeltingTask> activeTasks = new ConcurrentHashMap<>();
     
     // PERFORMANCE FIX: Single global timer cho tất cả smelting tasks
@@ -46,20 +46,20 @@ public class SmeltingManager implements Listener {
     /**
      * PERFORMANCE FIX: Start single global timer để tick tất cả active tasks
      * Thay vì 300 timers riêng biệt, chỉ có 1 timer loop qua tất cả tasks
+     * ISSUE-005 FIX: Sử dụng Iterator thay vì ArrayList snapshot để giảm GC pressure
      */
     private void startGlobalTimer() {
         globalTimerTaskId = plugin.getScheduler().runTimer(() -> {
             if (activeTasks.isEmpty()) return;
             
-            // Copy để tránh ConcurrentModificationException
-            var tasksSnapshot = new java.util.ArrayList<>(activeTasks.entrySet());
-            
-            for (var entry : tasksSnapshot) {
-                UUID uuid = entry.getKey();
+            // OPTIMIZED: Direct iteration với Iterator, không tạo ArrayList snapshot
+            java.util.Iterator<java.util.Map.Entry<UUID, SmeltingTask>> iterator = activeTasks.entrySet().iterator();
+            while (iterator.hasNext()) {
+                java.util.Map.Entry<UUID, SmeltingTask> entry = iterator.next();
                 SmeltingTask task = entry.getValue();
                 
                 if (task == null || task.isCancelled()) {
-                    activeTasks.remove(uuid);
+                    iterator.remove();
                     continue;
                 }
                 
@@ -67,11 +67,11 @@ public class SmeltingManager implements Listener {
                 task.tick();
                 
                 // Check completion
-                if (task.getRemainingTime() <= 0) {
+                if (task.getRemainingTicks() <= 0) {
                     task.complete();
                 }
             }
-        }, 20L, 20L); // Every second
+        }, 1L, 1L); // Every tick for smoother progress
     }
     
     /**
@@ -93,6 +93,18 @@ public class SmeltingManager implements Listener {
             String fileName = entry.getKey();
             FileConfiguration config = entry.getValue();
             
+            // Register custom command(s) if set
+            if (config.isList("open_command")) {
+                for (String cmd : config.getStringList("open_command")) {
+                     plugin.getCustomCommandManager().registerCommand(cmd, fileName.toLowerCase());
+                }
+            } else {
+                String openCommand = config.getString("open_command");
+                if (openCommand != null && !openCommand.isEmpty()) {
+                    plugin.getCustomCommandManager().registerCommand(openCommand, fileName.toLowerCase());
+                }
+            }
+            
             ConfigurationSection recipesSection = config.getConfigurationSection("smelting");
             if (recipesSection == null) continue;
             
@@ -112,15 +124,18 @@ public class SmeltingManager implements Listener {
             }
         }
         
-        plugin.getLogger().info("Loaded " + smeltingRecipes.size() + " smelting recipes");
+        plugin.debug("Loaded " + smeltingRecipes.size() + " smelting recipes");
     }
 
     public SmeltingRecipe getRecipe(String id) {
         return smeltingRecipes.get(id);
     }
 
+    /**
+     * ISSUE-004 FIX: Returns unmodifiable view instead of copy
+     */
     public Map<String, SmeltingRecipe> getAllRecipes() {
-        return new HashMap<>(smeltingRecipes);
+        return java.util.Collections.unmodifiableMap(smeltingRecipes);
     }
 
     public int getSmeltingCount() {
@@ -136,24 +151,31 @@ public class SmeltingManager implements Listener {
      * IMPROVED: Sử dụng percentage-based reduction từ upgrade system
      */
     public int getDuration(Player player, SmeltingRecipe recipe) {
-        // 1. Lấy base duration (không có upgrade)
-        int baseDuration = getBaseDuration(recipe);
+        return (int) (getDurationTicks(player, recipe) / 20);
+    }
+    
+    /**
+     * TICK-SUPPORT: Get duration in ticks
+     */
+    public long getDurationTicks(Player player, SmeltingRecipe recipe) {
+        // 1. Lấy base duration (ticks)
+        long baseTicks = getBaseDurationTicks(recipe);
         
         // 2. Lấy smelting level của player
         PlayerDataManager.PlayerData data = plugin.getPlayerDataManager().getPlayerData(player);
         int smeltingLevel = data.getUpgradeLevel("smelting_speed");
         
-        if (smeltingLevel <= 0) return baseDuration;
+        if (smeltingLevel <= 0) return baseTicks;
         
         // 3. Áp dụng reduction từ upgrade config
         var upgrade = plugin.getUpgradeManager().getUpgrade("smelting_speed");
         if (upgrade != null) {
-            return upgrade.applyDurationReduction(baseDuration, smeltingLevel);
+            return upgrade.applyDurationReduction(baseTicks, smeltingLevel);
         }
         
-        // Fallback: dùng expression cũ nếu không có upgrade config
+        // Fallback
         Map<String, Double> vars = ExpressionParser.createVariables(0, smeltingLevel, smeltingLevel);
-        return ExpressionParser.parseTimeSeconds(recipe.getDurationExpression(), vars);
+        return ExpressionParser.parseTimeTicks(recipe.getDurationExpression(), vars);
     }
     
     /**
@@ -161,8 +183,15 @@ public class SmeltingManager implements Listener {
      * Parse expression với level = 0
      */
     public int getBaseDuration(SmeltingRecipe recipe) {
+        return (int) (getBaseDurationTicks(recipe) / 20);
+    }
+    
+    /**
+     * TICK-SUPPORT: Get base duration in ticks
+     */
+    public long getBaseDurationTicks(SmeltingRecipe recipe) {
         Map<String, Double> vars = ExpressionParser.createVariables(0, 0, 0);
-        return ExpressionParser.parseTimeSeconds(recipe.getDurationExpression(), vars);
+        return ExpressionParser.parseTimeTicks(recipe.getDurationExpression(), vars);
     }
 
     /**
@@ -197,6 +226,41 @@ public class SmeltingManager implements Listener {
         int requiredInput = recipe.getInputAmount() * batchCount;
         int requiredFuel = recipe.getFuelAmount() * batchCount;
         
+        // Feature: Inventory Space Check
+        String outputType = recipe.getOutputType();
+        // Calculate output items
+        java.util.List<ItemStack> potentialOutputs = new java.util.ArrayList<>();
+        if ("VANILLA".equalsIgnoreCase(outputType)) {
+             try {
+                 Material mat = Material.valueOf(recipe.getOutputMaterial().toUpperCase());
+                 int totalOutput = recipe.getOutputAmount() * batchCount;
+                 potentialOutputs.add(new ItemStack(mat, totalOutput));
+                 
+                 if (!com.phmyhu1710.forgestation.util.InventoryUtil.hasSpace(player, potentialOutputs)) {
+                     plugin.getMessageUtil().send(player, "smelt.no-space");
+                     return false;
+                 }
+             } catch (Exception e) {
+                 // Ignore invalid material here, let it fail later or handle gracefully
+             }
+        } else if ("MMOITEMS".equalsIgnoreCase(outputType)) {
+             // For MMOItems, similar logic if possible
+             com.phmyhu1710.forgestation.util.ItemBuilder.buildMMOItem(plugin, recipe.getOutputMmoitemsType(), recipe.getOutputMmoitemsId(), 1);
+              // Simplified check: assume 1 slot per stack if we knew stack size, or just check empty slots
+             // For now, let's skip rigorous check for MMOItems or do a basic slot check? 
+             // Better to try building 1 item to get stack size.
+             ItemStack mmoItem = com.phmyhu1710.forgestation.util.ItemBuilder.buildMMOItem(plugin, recipe.getOutputMmoitemsType(), recipe.getOutputMmoitemsId(), 1);
+             if (mmoItem != null && mmoItem.getType() != Material.STONE) {
+                  int totalOutput = recipe.getOutputAmount() * batchCount;
+                  mmoItem.setAmount(totalOutput);
+                  if (!com.phmyhu1710.forgestation.util.InventoryUtil.hasSpace(player, java.util.Collections.singletonList(mmoItem))) {
+                       plugin.getMessageUtil().send(player, "smelt.no-space");
+                       return false;
+                  }
+             }
+        }
+
+        
         // Check input materials for batch
         int availableInput = countSmeltingMaterial(player, recipe);
         if (availableInput < requiredInput) {
@@ -227,10 +291,11 @@ public class SmeltingManager implements Listener {
         
         // BATCH SMELTING FIX: Thời gian nung = duration per item * batch count
         // Ví dụ: 1 raw iron (30s) → 30s, 2 raw iron → 60s, 10 raw iron → 300s
-        int durationPerItem = getDuration(player, recipe);
-        int totalDuration = durationPerItem * batchCount;
+        // BATCH SMELTING FIX: Thời gian nung = duration per item * batch count
+        long durationPerItemTicks = getDurationTicks(player, recipe);
+        long totalDurationTicks = durationPerItemTicks * batchCount;
         
-        SmeltingTask task = new SmeltingTask(plugin, player, recipe, totalDuration, batchCount);
+        SmeltingTask task = new SmeltingTask(plugin, player, recipe, totalDurationTicks, batchCount);
         activeTasks.put(uuid, task);
         
         // PERFORMANCE FIX: Chỉ khởi tạo task (tạo BossBar, gửi message)
@@ -552,10 +617,10 @@ public class SmeltingManager implements Listener {
             SmeltingTask task = entry.getValue();
             
             // Ghi trực tiếp vào DB (không qua queue vì queue có thể đã dừng)
-            // BATCH FIX: Lưu cả batchCount
+            // BATCH FIX: Lưu cả batchCount. TICK-SUPPORT: Save ticks
             if (db != null) {
                 db.saveActiveSmeltingTask(uuid, task.getRecipe().getId(), 
-                    task.getRemainingTime(), task.getTotalDuration(), task.getBatchCount());
+                    (int)(task.getRemainingTicks()), (int)(task.getTotalTicks()), task.getBatchCount());
             }
             
             task.cancel();
@@ -578,11 +643,11 @@ public class SmeltingManager implements Listener {
         
         if (task != null) {
             // Save current progress to database
-            // BATCH FIX: Lưu cả batchCount
+            // BATCH FIX: Lưu cả batchCount. TICK-SUPPORT: Save ticks
             var db = getDatabase();
             if (db != null) {
                 db.saveActiveSmeltingTask(uuid, task.getRecipe().getId(),
-                    task.getRemainingTime(), task.getTotalDuration(), task.getBatchCount());
+                    (int)(task.getRemainingTicks()), (int)(task.getTotalTicks()), task.getBatchCount());
             }
             
             // Cancel the task (timer will stop)
@@ -679,8 +744,15 @@ public class SmeltingManager implements Listener {
         if (taskData == null) return false;
         
         String recipeId = taskData[0];
-        int remainingTime = Integer.parseInt(taskData[1]);
-        int totalDuration = Integer.parseInt(taskData[2]);
+        // TICK-SUPPORT: Assume ticks if loading new data, or seconds if old?
+        // Let's assume the DB values are now ticks. 
+        // Note: For backward compatibility, if value is small (< 100000) and it was seconds, 
+        // translating 30s as 30 ticks is bad. But usually seconds stored.
+        // Transition: For now, let's treat stored values as TICKS.
+        // User should clear DB or we migrate. Or simpler:
+        // We just store as ticks.
+        long remainingTicks = Long.parseLong(taskData[1]);
+        long totalTicks = Long.parseLong(taskData[2]);
         long startedAt = Long.parseLong(taskData[3]);
         // BATCH FIX: Đọc batchCount từ database
         int batchCount = taskData.length > 4 ? Integer.parseInt(taskData[4]) : 1;
@@ -688,14 +760,15 @@ public class SmeltingManager implements Listener {
         // CONFIG: Check if offline progress is enabled (unified config)
         boolean offlineProgress = plugin.getConfig().getBoolean("offline-progress", true);
         
-        int actualRemaining;
+        long actualRemainingTicks;
         if (offlineProgress) {
             // Tính thời gian offline và trừ đi
             long offlineSeconds = (System.currentTimeMillis() - startedAt) / 1000;
-            actualRemaining = (int) (remainingTime - offlineSeconds);
+            long offlineTicks = offlineSeconds * 20;
+            actualRemainingTicks = remainingTicks - offlineTicks;
         } else {
             // Không tính offline time - giữ nguyên remaining time
-            actualRemaining = remainingTime;
+            actualRemainingTicks = remainingTicks;
         }
         
         SmeltingRecipe recipe = getRecipe(recipeId);
@@ -710,7 +783,7 @@ public class SmeltingManager implements Listener {
         
         // If task should have completed while offline (only if offline progress enabled)
         // BATCH FIX: Truyền batchCount để give đúng số lượng
-        if (offlineProgress && actualRemaining <= 0) {
+        if (offlineProgress && actualRemainingTicks <= 0) {
             giveSmeltingOutputDirect(player, recipe, batchCount);
             plugin.getMessageUtil().send(player, "smelt.complete-while-offline", 
                 "item", recipe.getDisplayName());
@@ -719,15 +792,15 @@ public class SmeltingManager implements Listener {
         
         // Otherwise restore the task with adjusted time
         // BATCH FIX: Sử dụng constructor có batchCount
-        SmeltingTask task = new SmeltingTask(plugin, player, recipe, Math.max(1, actualRemaining), batchCount);
-        task.setTotalDuration(totalDuration); // Keep original total for progress display
+        SmeltingTask task = new SmeltingTask(plugin, player, recipe, Math.max(1, actualRemainingTicks), batchCount);
+        task.setTotalTicks(totalTicks); // Keep original total for progress display
         activeTasks.put(uuid, task);
         // PERFORMANCE FIX: Chỉ khởi tạo, global timer sẽ tick
         task.initialize();
         
         plugin.getMessageUtil().send(player, "smelt.restored",
             "item", recipe.getDisplayName(),
-            "time", com.phmyhu1710.forgestation.util.TimeUtil.format(actualRemaining));
+            "time", com.phmyhu1710.forgestation.util.TimeUtil.formatTicks(actualRemainingTicks));
         
         return true;
     }

@@ -20,6 +20,10 @@
 # %max_batch% - Số batch tối đa có thể nung
 # %status% - Trạng thái tổng hợp
 
+open_command:
+  - smelting
+  - nungquang
+  - nungore
 smelting:
   # ─────────────────────────────────────────────
   # Nung Sắt
@@ -67,8 +71,7 @@ smelting:
       material: IRON_INGOT
       amount: 1
 
-    # Base duration - upgrade system sẽ áp dụng % reduction
-    duration: 30
+    duration: 15
 
     fuel:
       enabled: true
@@ -122,8 +125,7 @@ smelting:
       material: GOLD_INGOT
       amount: 1
 
-    # Base duration - upgrade system sẽ áp dụng % reduction
-    duration: 25
+    duration: 15
 
     fuel:
       enabled: true
@@ -177,8 +179,7 @@ smelting:
       material: COPPER_INGOT
       amount: 1
 
-    # Base duration - upgrade system sẽ áp dụng % reduction
-    duration: 20
+    duration: 15
 
     fuel:
       enabled: true

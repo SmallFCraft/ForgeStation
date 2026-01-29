@@ -29,19 +29,19 @@ upgrades:
       - ""
       - "&7Hiệu ứng: &a-8% &7mỗi level"
       - "&7Max: &a-80% &7thời gian"
-    max-level: 10
+    max-level: 50
     
     # Chi phí mỗi level (expression với biến 'level')
     cost-per-level:
-      vault: "100000 * level * level"  # Chi phí tăng theo cấp số nhân
-      playerpoints: "100 * level"
+      vault: "100000 * level * level"
+      exp: "50 * level"
     
     # Hiệu ứng cải tiến - PERCENTAGE based
     effect:
       type: REDUCE_CRAFT_COOLDOWN
       mode: PERCENTAGE  # PERCENTAGE hoặc FIXED
-      percent-per-level: 8  # Giảm 8% mỗi level (max 80% ở level 10)
-      min-duration: 3  # Thời gian tối thiểu (giây)
+      percent-per-level: 1.5  
+      min-duration: 0.5 # (Tính theo giây)
     
     # Icon trong menu upgrade
     icon:
@@ -59,7 +59,7 @@ upgrades:
       - ""
       - "&7Hiệu ứng: &a-10% &7mỗi level"
       - "&7Max: &a-100% &7thời gian"
-    max-level: 10
+    max-level: 50
     
     cost-per-level:
       vault: "100000 * level * level"  # Chi phí tăng theo cấp số nhân
@@ -68,8 +68,8 @@ upgrades:
     effect:
       type: REDUCE_SMELT_DURATION
       mode: PERCENTAGE
-      percent-per-level: 10  # Giảm 10% mỗi level (max 100% ở level 10)
-      min-duration: 2  # Thời gian tối thiểu mỗi item (giây)
+      percent-per-level: 1.8
+      min-duration: 0.5  # Tính theo giây
     
     icon:
       material: FURNACE

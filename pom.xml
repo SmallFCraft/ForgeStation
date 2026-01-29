@@ -47,6 +47,8 @@
             <id>phoenix</id>
             <url>https://nexus.phoenixdevt.fr/repository/maven-public/</url>
         </repository>
+
+
     </repositories>
 
     <dependencies>
@@ -81,6 +83,8 @@
             <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
+
+
 
         <!-- Caffeine Cache -->
         <dependency>

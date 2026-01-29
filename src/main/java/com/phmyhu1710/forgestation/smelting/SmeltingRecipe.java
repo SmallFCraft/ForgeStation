@@ -19,6 +19,8 @@ public class SmeltingRecipe {
     
     // Icon
     private final Material iconMaterial;
+    private final String iconMaterialString;  // Raw material string for hook support
+    private final int iconModelData;  // -1 = not set
     private final int iconSlot;
     private final String iconName;
     private final List<String> iconLore;
@@ -53,12 +55,25 @@ public class SmeltingRecipe {
         // Icon
         ConfigurationSection iconSection = config.getConfigurationSection("icon");
         if (iconSection != null) {
-            this.iconMaterial = Material.valueOf(iconSection.getString("material", "FURNACE").toUpperCase());
+            this.iconMaterialString = iconSection.getString("material", "FURNACE");
+            // Try to parse as Material, fallback to FURNACE if it's a hook prefix
+            Material parsedMat = Material.FURNACE;
+            try {
+                if (!iconMaterialString.contains("-")) {
+                    parsedMat = Material.valueOf(iconMaterialString.toUpperCase());
+                }
+            } catch (Exception e) {
+                // Keep FURNACE for hook items
+            }
+            this.iconMaterial = parsedMat;
+            this.iconModelData = iconSection.getInt("model-data", -1);
             this.iconSlot = iconSection.getInt("slot", 0);
             this.iconName = iconSection.getString("name", displayName);
             this.iconLore = iconSection.getStringList("lore");
         } else {
             this.iconMaterial = Material.FURNACE;
+            this.iconMaterialString = "FURNACE";
+            this.iconModelData = -1;
             this.iconSlot = 0;
             this.iconName = displayName;
             this.iconLore = new ArrayList<>();
@@ -119,6 +134,8 @@ public class SmeltingRecipe {
     public String getDurationExpression() { return durationExpression; }
     
     public Material getIconMaterial() { return iconMaterial; }
+    public String getIconMaterialString() { return iconMaterialString; }
+    public int getIconModelData() { return iconModelData; }
     public int getIconSlot() { return iconSlot; }
     public String getIconName() { return iconName; }
     public List<String> getIconLore() { return iconLore; }

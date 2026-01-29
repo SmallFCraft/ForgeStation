@@ -20,8 +20,8 @@ public class ExchangeTask {
     private final ForgeStationPlugin plugin;
     private final UUID playerUuid;
     private final Recipe recipe;
-    private int totalDuration; // in seconds
-    private int remainingTime;
+    private long totalTicks; // in ticks
+    private long remainingTicks;
     private boolean cancelled = false;
     
     // Exchange data - stored for when complete
@@ -33,13 +33,13 @@ public class ExchangeTask {
     private BossBar bossBar;
     private static final String BOSSBAR_FORMAT = "&e⚡ &f%s &8| &e%s &8| &a%d%%";
 
-    public ExchangeTask(ForgeStationPlugin plugin, Player player, Recipe recipe, int duration,
+    public ExchangeTask(ForgeStationPlugin plugin, Player player, Recipe recipe, long durationTicks,
                         int actualExchanges, double multiplier, int remainder) {
         this.plugin = plugin;
         this.playerUuid = player.getUniqueId();
         this.recipe = recipe;
-        this.totalDuration = duration;
-        this.remainingTime = duration;
+        this.totalTicks = durationTicks;
+        this.remainingTicks = durationTicks;
         this.actualExchanges = actualExchanges;
         this.multiplier = multiplier;
         this.remainder = remainder;
@@ -60,12 +60,12 @@ public class ExchangeTask {
     }
     
     /**
-     * Tick method - called every second by global timer
+     * Tick method - called every tick by global timer
      */
     public void tick() {
         if (cancelled) return;
         
-        remainingTime--;
+        remainingTicks--;
         updateBossBar();
     }
     
@@ -97,7 +97,7 @@ public class ExchangeTask {
         String title = formatBossBarTitle();
         bossBar.setTitle(MessageUtil.colorize(title));
         
-        double progress = (double) (totalDuration - remainingTime) / totalDuration;
+        double progress = (double) (totalTicks - remainingTicks) / totalTicks;
         bossBar.setProgress(Math.min(1.0, Math.max(0.0, progress)));
         
         bossBar.setColor(getBossBarColor());
@@ -121,7 +121,7 @@ public class ExchangeTask {
         if (actualExchanges > 1) {
             itemName = actualExchanges + "× " + itemName;
         }
-        String timeStr = TimeUtil.formatCompact(remainingTime);
+        String timeStr = TimeUtil.formatTicksCompact(remainingTicks);
         return String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
     }
     
@@ -232,25 +232,46 @@ public class ExchangeTask {
         return recipe;
     }
 
-    public int getTotalDuration() {
-        return totalDuration;
+    public long getTotalTicks() {
+        return totalTicks;
     }
     
-    public void setTotalDuration(int totalDuration) {
-        this.totalDuration = totalDuration;
+    /**
+     * COMPATIBILITY: Get total duration in seconds
+     */
+    public int getTotalDuration() {
+        return (int) (totalTicks / 20);
+    }
+    
+    public void setTotalTicks(long totalTicks) {
+        this.totalTicks = totalTicks;
+    }
+    
+    /**
+     * COMPATIBILITY
+     */
+    public void setTotalDuration(int seconds) {
+        this.totalTicks = seconds * 20L;
     }
 
-    public int getRemainingTime() {
-        return remainingTime;
+    public long getRemainingTicks() {
+        return remainingTicks;
     }
     
-    public void setRemainingTime(int remainingTime) {
-        this.remainingTime = remainingTime;
+    /**
+     * COMPATIBILITY: Get remaining time in seconds
+     */
+    public int getRemainingTime() {
+        return (int) (remainingTicks / 20);
+    }
+    
+    public void setRemainingTicks(long remainingTicks) {
+        this.remainingTicks = remainingTicks;
     }
 
     public int getProgress() {
-        if (totalDuration == 0) return 100;
-        return (int) (((double) (totalDuration - remainingTime) / totalDuration) * 100);
+        if (totalTicks == 0) return 100;
+        return (int) (((double) (totalTicks - remainingTicks) / totalTicks) * 100);
     }
 
     public boolean isCancelled() {

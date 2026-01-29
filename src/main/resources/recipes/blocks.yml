@@ -1,7 +1,10 @@
 # ═══════════════════════════════════════════════
 #         FORGESTATION BLOCKS RECIPES
 # ═══════════════════════════════════════════════
-
+open_command:
+  - craftnhanh
+  - chetaonhanh
+  - craftblock
 recipes:
   block_coal:
     enabled: true

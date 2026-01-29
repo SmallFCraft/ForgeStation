@@ -1,0 +1,196 @@
+open_command:
+  - event_tet
+  - sukien
+recipes:
+  trengaytet:
+    enabled: true
+    display-name: "&a&lTre Trúc Trường Sinh"
+    duration: 10
+    bulk-exchange: true
+    icon:
+      material: "basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGU1NjQ4OTcwYzA1ZWU0ODExYzQ4OTk5ZjVhOGJmYzkxNzg0NDBiY2UyYjc1ZDUxYjllZGZlMGUwYTMwNTZlZSJ9fX0="
+      name: "&a&lTre Trúc Trường Sinh"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b128 &dTre &f→ &e1 &a&lTre Trúc Trường Sinh"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &a&lTre Trúc Trường Sinh"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: EXTRA_STORAGE
+      material: BAMBOO
+      amount: 128
+    result:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: TRENGAYTET
+      amount: 1
+  miangaytet:
+    enabled: true
+    display-name: "&a&lMía Ngọt Khai Xuân"
+    duration: 10
+    bulk-exchange: true
+    icon:
+      material: "basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjY1ODQ5YWY0ZmMxYTc0ODQ3YmJlMmU3ZmVkZDJlYWIyY2RhMjU0NjUxZTViNmM0YWJhNzk0OTNhODMxN2FkNSJ9fX0="
+      name: "&a&lMía Ngọt Khai Xuân"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b128 &dMía &f→ &e1 &a&lMía Ngọt Khai Xuân"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &a&lMía Ngọt Khai Xuân"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: EXTRA_STORAGE
+      material: SUGAR_CANE
+      amount: 128
+    result:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: MIANGAYTET
+      amount: 1
+  THITHEONGAYTET:
+    enabled: true
+    display-name: "&C&lThịt Heo Tụ Phúc"
+    duration: 10
+    bulk-exchange: true
+    icon:
+      material: "basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjcwZDdhOGZlZTFkOWUzNmY0MGE5MWRjYzkxODQ4ZTY0MTBhOTVmZjIwNjdlNDE2ZmM4ZmZhZGExMjhiYzUxOSJ9fX0="
+      name: "&C&lThịt Heo Tụ Phúc"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b128 &dThịt Heo &f→ &e1 &C&lThịt Heo Tụ Phúc"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &C&lThịt Heo Tụ Phúc"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: EXTRA_STORAGE
+      material: PORKCHOP
+      amount: 128
+    result:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: THITHEONGAYTET
+      amount: 1
+  LASENNGAYTET:
+    enabled: true
+    display-name: "&a&lLá Sen Thanh Tịnh"
+    duration: 10
+    bulk-exchange: true
+    icon:
+      material: "basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDBjY2Y4NGJlMDQ5YmRjOWE5ODhiZDI3NGU3MGQ5NjgwMzgxYjhhNWU4NjM0OTk1YmJiODc2YTg4M2I0YTRmMiJ9fX0="
+      name: "&a&lLá Sen Thanh Tịnh"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b128 &dLá Sen &f→ &e1 &a&lLá Sen Thanh Tịnh"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &a&lLá Sen Thanh Tịnh"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: EXTRA_STORAGE
+      material: LILY_PAD
+      amount: 128
+    result:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: LASENNGAYTET
+      amount: 1
+  DUAHAUNGAYTET:
+    enabled: true
+    display-name: "&C&lDưa Hấu Khai Lộc"
+    duration: 10
+    bulk-exchange: true
+    icon:
+      material: "basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDU1NzI2MWY4YmNhOTgxNWY3YTZjZTBjMTNhZjJhZTQyN2NiNDc1YWJjNzFkOTVmZmRhN2VjYjgwNWU2OGZkIn19fQ=="
+      name: "&C&lDưa Hấu Khai Lộc"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b128 &dKhối Dưa Hấu &f→ &e1 &C&lDưa Hấu Khai Lộc"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &C&lDưa Hấu Khai Lộc"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: EXTRA_STORAGE
+      material: MELON
+      amount: 128
+    result:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: DUAHAUNGAYTET
+      amount: 1
+  LUANGAYTET:
+    enabled: true
+    display-name: "&e&lLúa Linh Xuân"
+    duration: 10
+    bulk-exchange: true
+    icon:
+      material: "basehead-eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2IzYzg0ZTRiZGFmNWNjNWY4NTYzMmFjOTI4ZDA1OWZjMmYxZmYwY2M5ZTU5OThmMWZlOGIyMjc4ODFhZGE4NSJ9fX0="
+      name: "&e&lLúa Linh Xuân"
+      lore:
+        - ""
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&fTỷ lệ: &b128 &dKhối Dưa Hấu &f→ &e1 &e&lLúa Linh Xuân"
+        - ""
+
+        - "&fSẽ nhận: &e%estimated_points% &e&lLúa Linh Xuân"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - ""
+        - "&7Số lượng trong túi: &b%player_input%"
+        - ""
+        - "&e▶ Click trái: &fĐổi 1 lần"
+        - "&e▶ Click phải: &fĐổi tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: EXTRA_STORAGE
+      material: MELON
+      amount: 128
+    result:
+      type: MMOITEMS
+      mmoitems-type: MATERIAL
+      mmoitems-id: LUANGAYTET
+      amount: 1

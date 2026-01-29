@@ -104,6 +104,31 @@ public class ExpressionParser {
         return evaluateInt(timeStr, variables);
     }
 
+    /**
+     * TICK-SUPPORT: Parse time expression to ticks
+     * 支持 "0.5s" -> 10 ticks
+     */
+    public static long parseTimeTicks(String timeStr, Map<String, Double> variables) {
+        if (timeStr == null || timeStr.isEmpty()) return 0;
+        
+        timeStr = timeStr.trim().toLowerCase();
+        
+        // Check for suffix
+        if (timeStr.endsWith("s")) {
+            String value = timeStr.substring(0, timeStr.length() - 1);
+            return (long) (evaluate(value, variables) * 20);
+        } else if (timeStr.endsWith("m")) {
+            String value = timeStr.substring(0, timeStr.length() - 1);
+            return (long) (evaluate(value, variables) * 60 * 20);
+        } else if (timeStr.endsWith("h")) {
+            String value = timeStr.substring(0, timeStr.length() - 1);
+            return (long) (evaluate(value, variables) * 3600 * 20);
+        }
+        
+        // Plain number or expression (assume seconds)
+        return (long) (evaluate(timeStr, variables) * 20);
+    }
+
     private static boolean isMathFunction(String name) {
         return switch (name.toLowerCase()) {
             case "abs", "acos", "asin", "atan", "ceil", "cos", "cosh", "exp",

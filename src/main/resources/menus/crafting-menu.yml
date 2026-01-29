@@ -20,51 +20,6 @@ border:
 
 items:
   # ─────────────────────────────────────────────
-  # CATEGORY TABS
-  # ─────────────────────────────────────────────
-  weapons-tab:
-    slot: 2
-    material: DIAMOND_SWORD
-    glow: true
-    name: "&6&lVũ Khí"
-    lore:
-      - ""
-      - "&7Chế tạo vũ khí mạnh mẽ"
-      - ""
-      - "&e▶ Click để xem!"
-    action:
-      type: SWITCH_CATEGORY
-      category: weapons
-
-  exchange-tab:
-    slot: 4
-    material: EMERALD
-    glow: true
-    name: "&a&lĐổi Đồ"
-    lore:
-      - ""
-      - "&7Đổi items lấy currency"
-      - ""
-      - "&e▶ Click để xem!"
-    action:
-      type: SWITCH_CATEGORY
-      category: exchange
-
-  materials-tab:
-    slot: 6
-    material: IRON_BLOCK
-    glow: true
-    name: "&7&lVật Liệu"
-    lore:
-      - ""
-      - "&7Chế tạo vật liệu cơ bản"
-      - ""
-      - "&e▶ Click để xem!"
-    action:
-      type: SWITCH_CATEGORY
-      category: blocks
-
-  # ─────────────────────────────────────────────
   # NAVIGATION BUTTONS
   # ─────────────────────────────────────────────
   prev_page:
@@ -102,16 +57,62 @@ items:
 # Auto Populate with Category Support
 auto-populate:
   enabled: true
-  # Shared slots for ALL categories
+  mode: "browser"
+  # Slots to display category icons in browser mode
+  category-slots: [20, 21, 22, 23, 24]
+  # Slots to display recipes in recipe mode
   slots: ["10-16", "19-25", "28-34"]
-  # Default category when opening menu
-  default-category: weapons
   recipe-type: "recipe"
-  # Category definitions
+  
+  # Category definitions with icons
   categories:
     weapons:
       folder: weapons
+      icon:
+        material: DIAMOND_SWORD
+        name: "&6&lVũ Khí"
+        lore:
+          - ""
+          - "&7Có &e%category_count%&7 công thức"
+          - ""
+          - "&e▶ Click để xem!"
     exchange:
       folder: exchange
+      icon:
+        material: EMERALD
+        name: "&a&lĐổi Đồ"
+        lore:
+          - ""
+          - "&7Có &e%category_count%&7 công thức"
+          - ""
+          - "&e▶ Click để xem!"
     blocks:
       folder: blocks
+      icon:
+        material: IRON_BLOCK
+        name: "&7&lVật Liệu"
+        lore:
+          - ""
+          - "&7Có &e%category_count%&7 công thức"
+          - ""
+          - "&e▶ Click để xem!"
+    luyendan:
+      folder: luyendan
+      icon:
+        material: BREWING_STAND
+        name: "&d&lLuyện Đan"
+        lore:
+          - ""
+          - "&7Có &e%category_count%&7 công thức"
+          - ""
+          - "&e▶ Click để xem!"
+    event_tet:
+      folder: event_tet
+      icon:
+        material: FIREWORK_ROCKET
+        name: "&c&lSự Kiện Tết"
+        lore:
+          - ""
+          - "&7Có &e%category_count%&7 công thức"
+          - ""
+          - "&e▶ Click để xem!"

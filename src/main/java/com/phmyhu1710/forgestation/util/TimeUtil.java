@@ -94,4 +94,40 @@ public final class TimeUtil {
         }
         return h + " giờ";
     }
+
+    /**
+     * Format ticks thành dạng dễ đọc, hỗ trợ số thập phân cho giây
+     * @param ticks Số ticks (1s = 20 ticks)
+     * @return Formatted string (e.g. "0.5s", "1.5s")
+     */
+    public static String formatTicks(long ticks) {
+        if (ticks < 0) return "0s";
+        
+        double seconds = ticks / 20.0;
+        if (seconds < 60) {
+            // Nếu là số nguyên thì không hiện thập phân
+            if (seconds == (int) seconds) {
+                return (int) seconds + "s";
+            }
+            return String.format("%.1fs", seconds);
+        }
+        
+        return format((int) Math.ceil(seconds));
+    }
+
+    /**
+     * Format ticks cho BossBar
+     */
+    public static String formatTicksCompact(long ticks) {
+         if (ticks < 0) return "0s";
+         
+         double seconds = ticks / 20.0;
+         if (seconds < 60) {
+             if (seconds == (int) seconds) {
+                 return (int) seconds + "s";
+             }
+             return String.format("%.1fs", seconds);
+         }
+         return formatCompact((int) Math.ceil(seconds));
+    }
 }

@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -50,6 +51,11 @@ public class MenuManager implements Listener {
     // Per-category page tracking: UUID -> (category -> page)
     private final Map<UUID, Map<String, Integer>> categoryPages = new ConcurrentHashMap<>();
     
+    // Chat input tracking for direct craft/smelt
+    private final Map<UUID, String> awaitingCraftInput = new ConcurrentHashMap<>();
+    private final Map<UUID, String> awaitingSmeltInput = new ConcurrentHashMap<>();
+    private final Cache<UUID, Long> chatLimiter;
+    
     // Rate limiting
     private final Cache<UUID, Long> rateLimiter;
     
@@ -71,6 +77,10 @@ public class MenuManager implements Listener {
             .maximumSize(1000)
             .build();
         
+        this.chatLimiter = Caffeine.newBuilder()
+            .expireAfterWrite(800, TimeUnit.MILLISECONDS)
+            .build();
+        
         // Register listener
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -84,9 +94,70 @@ public class MenuManager implements Listener {
             String menuName = entry.getKey();
             FileConfiguration config = entry.getValue();
             
+            // Auto-detect and add missing categories from recipe folder names
+            autoDetectCategories(config, menuName);
+            
             MenuTemplate template = new MenuTemplate(menuName, config);
             menuTemplates.put(menuName, template);
             plugin.debug("Loaded menu template: " + menuName);
+        }
+    }
+    
+    /**
+     * Auto-detect categories from recipe folder names and add to menu config if missing
+     */
+    private void autoDetectCategories(FileConfiguration menuConfig, String menuName) {
+        ConfigurationSection autoPopulateSection = menuConfig.getConfigurationSection("auto-populate");
+        if (autoPopulateSection == null || !autoPopulateSection.getBoolean("enabled", false)) {
+            return;
+        }
+        
+        String recipeType = autoPopulateSection.getString("recipe-type", "recipe");
+        if (!autoPopulateSection.contains("categories")) {
+            autoPopulateSection.createSection("categories");
+        }
+        
+        ConfigurationSection categoriesSection = autoPopulateSection.getConfigurationSection("categories");
+        if (categoriesSection == null) {
+            return;
+        }
+        
+        // Get all recipe file names (folder names)
+        Set<String> existingCategories = new HashSet<>(categoriesSection.getKeys(false));
+        Set<String> detectedFolders = new HashSet<>();
+        boolean hasNewCategories = false;
+        
+        // Detect from recipe files
+        if (recipeType.equalsIgnoreCase("recipe")) {
+            Map<String, FileConfiguration> recipeConfigs = plugin.getConfigManager().getRecipeConfigs();
+            for (String fileName : recipeConfigs.keySet()) {
+                detectedFolders.add(fileName.toLowerCase());
+            }
+        } else if (recipeType.equalsIgnoreCase("smelting")) {
+            Map<String, FileConfiguration> smeltingConfigs = plugin.getConfigManager().getSmeltingConfigs();
+            for (String fileName : smeltingConfigs.keySet()) {
+                detectedFolders.add(fileName.toLowerCase());
+            }
+        }
+        
+        // Add missing categories automatically
+        for (String folderName : detectedFolders) {
+            if (!existingCategories.contains(folderName)) {
+                plugin.getLogger().info("[MenuManager] Auto-detected category: " + folderName + " for menu: " + menuName);
+                ConfigurationSection newCategorySection = categoriesSection.createSection(folderName);
+                newCategorySection.set("folder", folderName);
+                hasNewCategories = true;
+            }
+        }
+        
+        // Save config if new categories were added
+        if (hasNewCategories) {
+            try {
+                menuConfig.save(new File(plugin.getDataFolder(), "menus/" + menuName + ".yml"));
+                plugin.getLogger().info("[MenuManager] Auto-saved menu config with new categories: " + menuName);
+            } catch (Exception e) {
+                plugin.getLogger().warning("[MenuManager] Could not auto-save menu config: " + e.getMessage());
+            }
         }
     }
     
@@ -117,6 +188,52 @@ public class MenuManager implements Listener {
             activeCategories.put(uuid, category);
         }
         openMenu(player, menuName, 0, true);
+    }
+    
+    /**
+     * Get all categories from a menu template
+     */
+    public List<String> getCategoriesForMenu(String menuName) {
+        MenuTemplate template = menuTemplates.get(menuName);
+        if (template == null || template.getAutoPopulate() == null) {
+            return new ArrayList<>();
+        }
+        
+        MenuTemplate.AutoPopulateConfig config = template.getAutoPopulate();
+        if (!config.hasCategoryMode()) {
+            return new ArrayList<>();
+        }
+        
+        return new ArrayList<>(config.getCategories().keySet());
+    }
+    
+    /**
+     * Find menu that contains the specified category
+     */
+    public String findMenuWithCategory(String category) {
+        for (Map.Entry<String, MenuTemplate> entry : menuTemplates.entrySet()) {
+            MenuTemplate template = entry.getValue();
+            if (template.getAutoPopulate() != null && template.getAutoPopulate().hasCategoryMode()) {
+                if (template.getAutoPopulate().getCategories().containsKey(category)) {
+                    return entry.getKey();
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Get all categories from all menus
+     */
+    public Set<String> getAllCategories() {
+        Set<String> allCategories = new HashSet<>();
+        for (Map.Entry<String, MenuTemplate> entry : menuTemplates.entrySet()) {
+            MenuTemplate template = entry.getValue();
+            if (template.getAutoPopulate() != null && template.getAutoPopulate().hasCategoryMode()) {
+                allCategories.addAll(template.getAutoPopulate().getCategories().keySet());
+            }
+        }
+        return allCategories;
     }
 
     /**
@@ -235,67 +352,121 @@ public class MenuManager implements Listener {
         // PERF-FIX: Tạo inventory snapshot 1 lần cho toàn bộ auto-populate
         Map<String, Integer> invSnapshot = com.phmyhu1710.forgestation.util.InventoryUtil.createInventorySnapshot(player);
         
-        // Use category mode if categories exist
-        if (config.hasCategoryMode() && activeCategory != null) {
-            // Get category config
-            MenuTemplate.CategoryConfig catConfig = config.getCategories().get(activeCategory);
-            if (catConfig == null) {
-                // Fallback to source-based if no category found
-                for (MenuTemplate.PopulateSource src : config.getSources()) {
-                    if (src.getIdentifier().equals(activeCategory)) {
-                        handleLegacyPopulate(player, config, inv, page, src, invSnapshot);
-                        return;
-                    }
-                }
+        // Use category mode
+        if (config.hasCategoryMode()) {
+            // Browser View: Show categories if mode is browser and no category selected
+            if ("browser".equalsIgnoreCase(config.getMode()) && activeCategory == null) {
+                populateCategoryBrowser(player, config, inv);
                 return;
             }
-            
-            // Get slots - from sharedSlots or from first source
-            List<Integer> slots = config.getSharedSlots();
-            if (slots.isEmpty()) {
-                // Try to get from sources
-                for (MenuTemplate.PopulateSource src : config.getSources()) {
-                    if (!src.getSlots().isEmpty()) {
-                        slots = src.getSlots();
-                        break;
+
+            if (activeCategory != null) {
+                // Get category config
+                MenuTemplate.CategoryConfig catConfig = config.getCategories().get(activeCategory);
+                if (catConfig == null) {
+                    // Fallback to source-based if no category found
+                    for (MenuTemplate.PopulateSource src : config.getSources()) {
+                        if (src.getIdentifier().equals(activeCategory)) {
+                            handleLegacyPopulate(player, config, inv, page, src, invSnapshot);
+                            return;
+                        }
+                    }
+                    return;
+                }
+                
+                // Get slots - from sharedSlots or from first source
+                List<Integer> slots = config.getSharedSlots();
+                if (slots.isEmpty()) {
+                    // Try to get from sources
+                    for (MenuTemplate.PopulateSource src : config.getSources()) {
+                        if (!src.getSlots().isEmpty()) {
+                            slots = src.getSlots();
+                            break;
+                        }
                     }
                 }
-            }
-            if (slots.isEmpty()) return;
-            
-            // Get recipe IDs for this category
-            List<String> recipeIds = getFilteredRecipeIdsForCategory(catConfig, config.getRecipeType());
-            
-            int itemsPerPage = slots.size();
-            int startIndex = page * itemsPerPage;
-            
-            // Populate items
-            for (int i = 0; i < itemsPerPage; i++) {
-                int recipeIndex = startIndex + i;
-                if (recipeIndex >= recipeIds.size()) break;
+                if (slots.isEmpty()) return;
                 
-                String id = recipeIds.get(recipeIndex);
-                int slot = slots.get(i);
+                // Get recipe IDs for this category
+                List<String> recipeIds = getFilteredRecipeIdsForCategory(catConfig, config.getRecipeType());
                 
-                if (config.getRecipeType().equalsIgnoreCase("smelting")) {
-                    var recipe = plugin.getSmeltingManager().getRecipe(id);
-                    if (recipe != null) {
-                        ItemStack icon = createSmeltingIcon(player, recipe);
-                        inv.setItem(slot, icon);
-                    }
-                } else {
-                    var recipe = plugin.getRecipeManager().getRecipe(id);
-                    if (recipe != null) {
-                        ItemStack icon = createRecipeIcon(player, recipe, invSnapshot);
-                        inv.setItem(slot, icon);
+                int itemsPerPage = slots.size();
+                int startIndex = page * itemsPerPage;
+                
+                // Populate items
+                for (int i = 0; i < itemsPerPage; i++) {
+                    int recipeIndex = startIndex + i;
+                    if (recipeIndex >= recipeIds.size()) break;
+                    
+                    String id = recipeIds.get(recipeIndex);
+                    int slot = slots.get(i);
+                    
+                    if (config.getRecipeType().equalsIgnoreCase("smelting")) {
+                        var recipe = plugin.getSmeltingManager().getRecipe(id);
+                        if (recipe != null) {
+                            ItemStack icon = createSmeltingIcon(player, recipe);
+                            inv.setItem(slot, icon);
+                        }
+                    } else {
+                        var recipe = plugin.getRecipeManager().getRecipe(id);
+                        if (recipe != null) {
+                            ItemStack icon = createRecipeIcon(player, recipe, invSnapshot);
+                            inv.setItem(slot, icon);
+                        }
                     }
                 }
+            } else {
+                // Legacy logic or empty state if in direct mode with no category?
+                // If direct mode and no active category (should default to default-category handled by getActiveCategory?)
+                // Actually openMenu calls `getActiveCategory(uuid)` before this?
+                // Wait, logic in openMenu (not shown here entirely) typically sets activeCategory default if null?
+                // Let's assume typical flow handles defaults.
             }
         } else {
             // Legacy mode: populate from all sources
             for (MenuTemplate.PopulateSource source : config.getSources()) {
                 handleLegacyPopulate(player, config, inv, page, source, invSnapshot);
             }
+        }
+    }
+
+    private void populateCategoryBrowser(Player player, MenuTemplate.AutoPopulateConfig config, Inventory inv) {
+        List<Integer> slots = config.getCategorySlots();
+        if (slots == null || slots.isEmpty()) return;
+        
+        List<MenuTemplate.CategoryConfig> categories = new ArrayList<>(config.getCategories().values());
+        
+        for (int i = 0; i < slots.size(); i++) {
+            if (i >= categories.size()) break;
+            
+            MenuTemplate.CategoryConfig cat = categories.get(i);
+            MenuTemplate.MenuItem icon = cat.getIcon();
+            if (icon == null) continue;
+            
+            // Calculate count
+            int count = getFilteredRecipeIdsForCategory(cat, config.getRecipeType()).size();
+            
+            // Create item
+            ItemStack item = new ItemStack(icon.getMaterial());
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(MessageUtil.colorize(icon.getName()));
+                
+                List<String> lore = new ArrayList<>();
+                for (String line : icon.getLore()) {
+                    lore.add(MessageUtil.colorize(line.replace("%category_count%", String.valueOf(count))));
+                }
+                meta.setLore(lore);
+                
+                if (icon.isGlow()) {
+                    meta.addEnchant(Enchantment.LUCK_OF_THE_SEA, 1, true);
+                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
+                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                
+                item.setItemMeta(meta);
+            }
+            inv.setItem(slots.get(i), item);
         }
     }
     
@@ -372,7 +543,15 @@ public class MenuManager implements Listener {
             
             List<String> lore = new ArrayList<>();
             for (String line : item.getLore()) {
-                lore.add(MessageUtil.colorize(parsePlaceholders(player, line, item)));
+                String parsed = parsePlaceholders(player, line, item);
+                // SPLIT FIX: Support multiline placeholders
+                if (parsed.contains("\n")) {
+                    for (String subLine : parsed.split("\n")) {
+                         lore.add(MessageUtil.colorize(subLine));
+                    }
+                } else {
+                    lore.add(MessageUtil.colorize(parsed));
+                }
             }
             meta.setLore(lore);
             
@@ -389,7 +568,15 @@ public class MenuManager implements Listener {
         String name = parsePlaceholders(player, item.getName(), item);
         List<String> lore = new ArrayList<>();
         for (String line : item.getLore()) {
-            lore.add(parsePlaceholders(player, line, item));
+            String parsed = parsePlaceholders(player, line, item);
+            // SPLIT FIX: Support multiline placeholders
+            if (parsed.contains("\n")) {
+                 for (String subLine : parsed.split("\n")) {
+                      lore.add(parsed); // colorize handled in createItem
+                 }
+            } else {
+                 lore.add(parsed);
+            }
         }
         
         return createItem(material, name, lore, item.isGlow());
@@ -429,6 +616,15 @@ public class MenuManager implements Listener {
         UUID uuid = player.getUniqueId();
         Map<String, String> cache = placeholderCache.get(uuid, k -> new ConcurrentHashMap<>());
         
+        
+        // Global Currency Placeholders
+        if (text.contains("%currency_")) {
+             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfig().getString("currency.vault", "Coins")));
+             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfig().getString("currency.playerpoints", "Points")));
+             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfig().getString("currency.exp", "EXP")));
+             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfig().getString("currency.coinengine", "C")));
+        }
+
         // Custom internal placeholders (dynamic, không cache)
         text = parseInternalPlaceholders(player, text, item);
         
@@ -460,17 +656,106 @@ public class MenuManager implements Listener {
         text = text.replace("%player_name%", player.getName());
         
         // Prefix
-        if (plugin.getHookManager().getVaultChat() != null) {
-             String prefix = plugin.getHookManager().getVaultChat().getPlayerPrefix(player);
-             text = text.replace("%player_prefix%", prefix != null ? prefix : "");
-        } else {
-             text = text.replace("%player_prefix%", "");
+        // Prefix (Legacy support removed, rely on PAPI)
+        text = text.replace("%player_prefix%", "");
+        
+        
+        // Upgrade placeholders (Dynamic)
+        // Format: %upgrade_level_<id>%, %upgrade_cost_vault_<id>%, etc.
+        var data = plugin.getPlayerDataManager().getPlayerData(player);
+        if (text.contains("upgrade_")) {
+             for (com.phmyhu1710.forgestation.upgrade.UpgradeManager.Upgrade upgrade : plugin.getUpgradeManager().getAllUpgrades().values()) {
+                 String id = upgrade.getId();
+                 if (!text.contains(id)) continue;
+                 
+                 // Level
+                 if (text.contains("upgrade_level_" + id)) {
+                     text = text.replace("%upgrade_level_" + id + "%", 
+                         String.valueOf(data.getUpgradeLevel(id)));
+                 }
+                 
+                 // Max Level
+                 if (text.contains("upgrade_max_level_" + id)) {
+                     text = text.replace("%upgrade_max_level_" + id + "%", 
+                         String.valueOf(upgrade.getMaxLevel()));
+                 }
+                 
+                 // Costs (Next Level)
+                 if (text.contains("upgrade_cost_")) {
+                     java.util.Map<String, Double> costs = plugin.getUpgradeManager().getNextLevelCost(player, id);
+                     
+                     if (text.contains("upgrade_cost_display_" + id)) {
+                         StringBuilder display = new StringBuilder();
+                         boolean hasCost = false;
+                         
+                         // Vault
+                         double vault = costs.getOrDefault("vault", 0.0);
+                         if (vault > 0) {
+                             display.append("&8┃ &6💰 &e").append(MessageUtil.formatNumber(vault))
+                                    .append(" &7").append(plugin.getConfig().getString("currency.vault", "Coins"));
+                             hasCost = true;
+                         }
+                         
+                         // PlayerPoints
+                         double pp = costs.getOrDefault("playerpoints", 0.0);
+                         if (pp > 0) {
+                             if (hasCost) display.append("\n");
+                             display.append("&8┃ &b⬤ &e").append(MessageUtil.formatNumber(pp))
+                                    .append(" &7").append(plugin.getConfig().getString("currency.playerpoints", "Points"));
+                             hasCost = true;
+                         }
+                         
+                         // EXP
+                         double exp = costs.getOrDefault("exp", 0.0);
+                         if (exp > 0) {
+                             if (hasCost) display.append("\n");
+                             display.append("&8┃ &a✦ &e").append(MessageUtil.formatNumber(exp))
+                                    .append(" &7").append(plugin.getConfig().getString("currency.exp", "EXP"));
+                             hasCost = true;
+                         }
+                         
+                         // CoinEngine
+                         double ce = costs.getOrDefault("coinengine", 0.0);
+                         if (ce > 0) {
+                             if (hasCost) display.append("\n");
+                             display.append("&8┃ &e⛃ &e").append(MessageUtil.formatNumber(ce))
+                                    .append(" &7").append(upgrade.getCoinEngineCurrency());
+                             hasCost = true;
+                         }
+                         
+                         if (!hasCost) {
+                             // Check if max level
+                             if (data.getUpgradeLevel(id) >= upgrade.getMaxLevel()) {
+                                 display.append("&a✔ &fĐã đạt cấp tối đa");
+                             } else {
+                                 display.append("&a✔ &fMiễn phí");
+                             }
+                         }
+                         
+                         text = text.replace("%upgrade_cost_display_" + id + "%", display.toString());
+                     }
+                 
+                     if (text.contains("upgrade_cost_vault_" + id)) {
+                         text = text.replace("%upgrade_cost_vault_" + id + "%", 
+                             MessageUtil.formatNumber(costs.getOrDefault("vault", 0.0)));
+                     }
+                     if (text.contains("upgrade_cost_point_" + id)) {
+                         text = text.replace("%upgrade_cost_point_" + id + "%", 
+                             MessageUtil.formatNumber(costs.getOrDefault("playerpoints", 0.0)));
+                     }
+                     if (text.contains("upgrade_cost_exp_" + id)) {
+                         text = text.replace("%upgrade_cost_exp_" + id + "%", 
+                             MessageUtil.formatNumber(costs.getOrDefault("exp", 0.0)));
+                     }
+                 }
+             }
         }
         
-        // Upgrade levels - từ cache, không hit DB
-        var data = plugin.getPlayerDataManager().getPlayerData(player);
-        text = text.replace("%crafting_level%", String.valueOf(data.getUpgradeLevel("crafting_speed")));
-        text = text.replace("%smelting_level%", String.valueOf(data.getUpgradeLevel("smelting_speed")));
+        // Legacy support remove soon if needed, but keeping for now as backup fallback
+        if (text.contains("%crafting_level%")) 
+             text = text.replace("%crafting_level%", String.valueOf(data.getUpgradeLevel("crafting_speed")));
+        if (text.contains("%smelting_level%"))
+             text = text.replace("%smelting_level%", String.valueOf(data.getUpgradeLevel("smelting_speed")));
         
         // Balances
         text = text.replace("%vault_balance%", MessageUtil.formatNumber(
@@ -631,6 +916,24 @@ public class MenuManager implements Listener {
             UUID uuid = player.getUniqueId();
             String activeCategory = activeCategories.get(uuid);
             
+            // Browser Mode Click
+            if (config.getMode().equalsIgnoreCase("browser") && activeCategory == null) {
+                List<Integer> catSlots = config.getCategorySlots();
+                if (catSlots != null && catSlots.contains(slot)) {
+                    int index = catSlots.indexOf(slot);
+                    List<String> catIds = new ArrayList<>(config.getCategories().keySet());
+                    
+                    if (index < catIds.size()) {
+                        String catId = catIds.get(index);
+                        // Trigger SWITCH_CATEGORY
+                        MenuTemplate.MenuAction action = new MenuTemplate.MenuAction(
+                            createActionConfig("SWITCH_CATEGORY", catId), "UI_BUTTON_CLICK");
+                        handleAction(player, action, event);
+                        return;
+                    }
+                }
+            }
+            
             // Category mode: check shared slots
             if (config.hasCategoryMode() && activeCategory != null) {
                 List<Integer> slots = config.getSharedSlots();
@@ -670,11 +973,11 @@ public class MenuManager implements Listener {
                         if (config.getRecipeType().equalsIgnoreCase("smelting")) {
                             MenuTemplate.MenuAction action = new MenuTemplate.MenuAction(
                                 createActionConfig("SMELT", recipeId), null);
-                            handleAction(player, action);
+                            handleAction(player, action, event);
                         } else {
                             MenuTemplate.MenuAction action = new MenuTemplate.MenuAction(
                                 createActionConfig("CRAFT", recipeId), null);
-                            handleAction(player, action);
+                            handleAction(player, action, event);
                         }
                         return;
                     }
@@ -696,11 +999,11 @@ public class MenuManager implements Listener {
                             if (config.getRecipeType().equalsIgnoreCase("smelting")) {
                                 MenuTemplate.MenuAction action = new MenuTemplate.MenuAction(
                                     createActionConfig("SMELT", recipeId), null);
-                                handleAction(player, action);
+                                handleAction(player, action, event);
                             } else {
                                 MenuTemplate.MenuAction action = new MenuTemplate.MenuAction(
                                     createActionConfig("CRAFT", recipeId), null);
-                                handleAction(player, action);
+                                handleAction(player, action, event);
                             }
                             return;
                         }
@@ -716,7 +1019,7 @@ public class MenuManager implements Listener {
         for (MenuTemplate.MenuItem item : template.getItems()) {
             if (item.getSlot() == slot && item.getAction() != null) {
                 plugin.debug("Found action: type=" + item.getAction().getType() + ", value=" + item.getAction().getValue());
-                handleAction(player, item.getAction());
+                handleAction(player, item.getAction(), event);
                 actionFound = true;
                 break;
             }
@@ -738,11 +1041,25 @@ public class MenuManager implements Listener {
         event.setCancelled(true);
     }
 
-    private void handleAction(Player player, MenuTemplate.MenuAction action) {
+    private void handleAction(Player player, MenuTemplate.MenuAction action, InventoryClickEvent event) {
         UUID uuid = player.getUniqueId();
         
         switch (action.getType().toUpperCase()) {
             case "OPEN_MENU":
+                // Hijack for Browser Mode "Back" navigation
+                String curMenu = activeMenus.get(uuid);
+                if (curMenu != null && activeCategories.get(uuid) != null) {
+                    MenuTemplate tmpl = menuTemplates.get(curMenu);
+                    if (tmpl != null && tmpl.getAutoPopulate() != null && 
+                        "browser".equalsIgnoreCase(tmpl.getAutoPopulate().getMode())) {
+                        
+                        // Go back to browser view (clear category, keep menu)
+                        activeCategories.remove(uuid);
+                        openMenu(player, curMenu, 0, true);
+                        return;
+                    }
+                }
+
                 // Remove from current tracking and schedule new menu
                 activeMenus.remove(uuid);
                 activeCategories.remove(uuid); // Reset category when opening new menu
@@ -836,11 +1153,53 @@ public class MenuManager implements Listener {
             case "EXCHANGE":
                 var recipe = plugin.getRecipeManager().getRecipe(action.getValue());
                 if (recipe != null) {
-                    activeMenus.remove(uuid);
-                    player.closeInventory();
-                    plugin.getScheduler().runLater(() -> {
-                        plugin.getRecipeDetailGUI().openRecipeGUI(player, recipe);
-                    }, 1);
+                    // Direct execution based on click type
+                    if (event != null && event.isShiftClick()) {
+                        // Shift + Click = Open chat input for custom amount
+                        awaitingCraftInput.put(uuid, recipe.getId());
+                        activeMenus.remove(uuid);
+                        player.closeInventory();
+                        plugin.getMessageUtil().send(player, "exchange.input-prompt");
+                    } else if (event != null && event.isRightClick()) {
+                        // Right click = Craft/Exchange all
+                        activeMenus.remove(uuid);
+                        player.closeInventory();
+                        if (recipe.isExchangeRecipe() && !recipe.getIngredients().isEmpty()) {
+                            com.phmyhu1710.forgestation.crafting.Recipe.Ingredient input = recipe.getIngredients().get(0);
+                            int playerHas = com.phmyhu1710.forgestation.util.InventoryUtil.countItems(plugin, player, input);
+                            plugin.getCraftingExecutor().executeExchange(player, recipe, playerHas);
+                        } else {
+                            // Fix: Execute craft with max possible batches
+                            int maxBatches = Integer.MAX_VALUE;
+                            for (com.phmyhu1710.forgestation.crafting.Recipe.Ingredient ing : recipe.getIngredients()) {
+                                int required = ing.getBaseAmount() > 0 ? ing.getBaseAmount() : ing.getAmount();
+                                if (required <= 0) continue;
+                                int playerHas = com.phmyhu1710.forgestation.util.InventoryUtil.countItems(plugin, player, ing);
+                                int batches = playerHas / required;
+                                maxBatches = Math.min(maxBatches, batches);
+                            }
+                            
+                            if (maxBatches == Integer.MAX_VALUE) maxBatches = 0;
+                            
+                            if (maxBatches > 0) {
+                                plugin.getCraftingExecutor().executeCraft(player, recipe, maxBatches);
+                            } else {
+                                // Trigger executeCraft with 1 to let it show the error message
+                                plugin.getCraftingExecutor().executeCraft(player, recipe, 1);
+                            }
+                        }
+                    } else {
+                        // Left click = Craft/Exchange 1 time
+                        activeMenus.remove(uuid);
+                        player.closeInventory();
+                        if (recipe.isExchangeRecipe() && !recipe.getIngredients().isEmpty()) {
+                            com.phmyhu1710.forgestation.crafting.Recipe.Ingredient input = recipe.getIngredients().get(0);
+                            int baseAmount = input.getBaseAmount() > 0 ? input.getBaseAmount() : input.getAmount();
+                            plugin.getCraftingExecutor().executeExchange(player, recipe, baseAmount);
+                        } else {
+                            plugin.getCraftingExecutor().executeCraft(player, recipe);
+                        }
+                    }
                 }
                 break;
             case "SMELT":
@@ -848,11 +1207,31 @@ public class MenuManager implements Listener {
                 var smeltRecipe = plugin.getSmeltingManager().getRecipe(action.getValue());
                 plugin.debug("Smelting recipe lookup result: " + (smeltRecipe != null ? smeltRecipe.getId() : "NULL"));
                 if (smeltRecipe != null) {
-                    activeMenus.remove(uuid);
-                    player.closeInventory();
-                    plugin.getScheduler().runLater(() -> {
-                        plugin.getRecipeDetailGUI().openSmeltingGUI(player, smeltRecipe);
-                    }, 1);
+                    // Direct execution based on click type
+                    if (event != null && event.isShiftClick()) {
+                        // Shift + Click = Open chat input for custom amount
+                        awaitingSmeltInput.put(uuid, smeltRecipe.getId());
+                        activeMenus.remove(uuid);
+                        player.closeInventory();
+                        plugin.getMessageUtil().send(player, "smelt.input-prompt");
+                    } else if (event != null && event.isRightClick()) {
+                        // Right click = Smelt all
+                        activeMenus.remove(uuid);
+                        player.closeInventory();
+                        int maxBatch = plugin.getSmeltingManager().getMaxBatchCount(player, smeltRecipe);
+                        if (maxBatch > 0) {
+                            plugin.getSmeltingManager().startSmelting(player, smeltRecipe, maxBatch);
+                        } else {
+                            plugin.getMessageUtil().send(player, "smelt.missing-materials",
+                                "material", smeltRecipe.getInputMaterial(),
+                                "amount", String.valueOf(smeltRecipe.getInputAmount()));
+                        }
+                    } else {
+                        // Left click = Smelt 1 batch
+                        activeMenus.remove(uuid);
+                        player.closeInventory();
+                        plugin.getSmeltingManager().startSmelting(player, smeltRecipe, 1);
+                    }
                 } else {
                     plugin.debug("Failed to find smelting recipe! Available IDs: " + plugin.getSmeltingManager().getSmeltingIds());
                 }
@@ -945,7 +1324,7 @@ public class MenuManager implements Listener {
                 }
             }
         }
-        Collections.sort(recipeIds);
+        // Collections.sort(recipeIds); // Removed to respect config order
         
         // Update cache
         source.setCachedRecipeIds(recipeIds);
@@ -997,7 +1376,7 @@ public class MenuManager implements Listener {
                 }
             }
         }
-        Collections.sort(recipeIds);
+        // Collections.sort(recipeIds); // Removed to respect config order
         
         // Update cache
         category.setCachedRecipeIds(recipeIds);
@@ -1058,5 +1437,139 @@ public class MenuManager implements Listener {
      */
     public void invalidateCache(UUID uuid) {
         placeholderCache.invalidate(uuid);
+    }
+    
+    /**
+     * Handle chat input for custom craft/smelt amounts
+     */
+    @EventHandler(priority = org.bukkit.event.EventPriority.LOWEST)
+    public void onPlayerChat(org.bukkit.event.player.AsyncPlayerChatEvent event) {
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+        
+        // Handle smelting input
+        if (awaitingSmeltInput.containsKey(uuid)) {
+            if (chatLimiter.getIfPresent(uuid) != null) {
+                event.setCancelled(true);
+                return;
+            }
+            chatLimiter.put(uuid, System.currentTimeMillis());
+            
+            event.setCancelled(true);
+            String smeltingId = awaitingSmeltInput.remove(uuid);
+            String input = event.getMessage().trim();
+            
+            var recipe = plugin.getSmeltingManager().getRecipe(smeltingId);
+            if (recipe == null) return;
+            
+            // Handle "all" keyword
+            if (input.equalsIgnoreCase("all")) {
+                plugin.getScheduler().runSync(() -> {
+                    int maxBatch = plugin.getSmeltingManager().getMaxBatchCount(player, recipe);
+                    if (maxBatch > 0) {
+                        plugin.getSmeltingManager().startSmelting(player, recipe, maxBatch);
+                    } else {
+                        plugin.getMessageUtil().send(player, "smelt.missing-materials",
+                            "material", recipe.getInputMaterial(),
+                            "amount", String.valueOf(recipe.getInputAmount()));
+                    }
+                });
+                return;
+            }
+            
+            int amount = com.phmyhu1710.forgestation.util.NumberParser.parse(input);
+            if (amount <= 0) {
+                plugin.getScheduler().runSync(() -> {
+                    plugin.getMessageUtil().send(player, "smelt.input-invalid");
+                });
+                return;
+            }
+            
+            plugin.getScheduler().runSync(() -> {
+                plugin.getSmeltingManager().startSmelting(player, recipe, amount);
+            });
+            return;
+        }
+        
+        // Handle crafting/exchange input
+        if (awaitingCraftInput.containsKey(uuid)) {
+            if (chatLimiter.getIfPresent(uuid) != null) {
+                event.setCancelled(true);
+                return;
+            }
+            chatLimiter.put(uuid, System.currentTimeMillis());
+            
+            event.setCancelled(true);
+            String recipeId = awaitingCraftInput.remove(uuid);
+            String input = event.getMessage().trim();
+            
+            var recipe = plugin.getRecipeManager().getRecipe(recipeId);
+            if (recipe == null) return;
+            
+            // Handle "all" keyword
+            if (input.equalsIgnoreCase("all")) {
+                plugin.getScheduler().runSync(() -> {
+                    if (recipe.isExchangeRecipe()) {
+                        if (!recipe.getIngredients().isEmpty()) {
+                            com.phmyhu1710.forgestation.crafting.Recipe.Ingredient ing = recipe.getIngredients().get(0);
+                            int playerHas = com.phmyhu1710.forgestation.util.InventoryUtil.countItems(plugin, player, ing);
+                            plugin.getCraftingExecutor().executeExchange(player, recipe, playerHas);
+                        }
+                    } else {
+                        // Crafting recipe: calculate max batches
+                        int maxBatches = Integer.MAX_VALUE;
+                        for (com.phmyhu1710.forgestation.crafting.Recipe.Ingredient ing : recipe.getIngredients()) {
+                            int required = ing.getBaseAmount() > 0 ? ing.getBaseAmount() : ing.getAmount();
+                            if (required <= 0) continue;
+                            int playerHas = com.phmyhu1710.forgestation.util.InventoryUtil.countItems(plugin, player, ing);
+                            int batches = playerHas / required;
+                            maxBatches = Math.min(maxBatches, batches);
+                        }
+                        if (maxBatches == Integer.MAX_VALUE) maxBatches = 0;
+                        
+                        if (maxBatches > 0) {
+                            plugin.getCraftingExecutor().executeCraft(player, recipe, maxBatches);
+                        } else {
+                            plugin.getCraftingExecutor().executeCraft(player, recipe, 1); // Trigger fail msg
+                        }
+                    }
+                });
+                return;
+            }
+            
+            int amount = com.phmyhu1710.forgestation.util.NumberParser.parse(input);
+            if (amount <= 0) {
+                plugin.getScheduler().runSync(() -> {
+                    plugin.getMessageUtil().send(player, "exchange.input-invalid");
+                });
+                return;
+            }
+            
+            plugin.getScheduler().runSync(() -> {
+                if (recipe.isExchangeRecipe()) {
+                    plugin.getCraftingExecutor().executeExchange(player, recipe, amount);
+                } else {
+                    // Crafting recipe
+                    int batches = amount;
+                    // If bulk-exchange mode, input is treated as raw material amount
+                    if (recipe.isBulkExchange() && !recipe.getIngredients().isEmpty()) {
+                        int cost = recipe.getIngredients().get(0).getBaseAmount();
+                        if (cost <= 0) cost = recipe.getIngredients().get(0).getAmount();
+                        if (cost > 0) batches = amount / cost;
+                    }
+                    plugin.getCraftingExecutor().executeCraft(player, recipe, batches);
+                }
+            });
+        }
+    }
+    
+    /**
+     * Cleanup on player quit
+     */
+    @EventHandler
+    public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        awaitingCraftInput.remove(uuid);
+        awaitingSmeltInput.remove(uuid);
     }
 }

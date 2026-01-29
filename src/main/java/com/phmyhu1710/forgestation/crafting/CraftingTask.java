@@ -23,8 +23,8 @@ public class CraftingTask {
     private final ForgeStationPlugin plugin;
     private final UUID playerUuid;
     private final Recipe recipe;
-    private int totalDuration; // in seconds
-    private int remainingTime;
+    private long totalTicks; // in ticks
+    private long remainingTicks;
     private boolean cancelled = false;
     private int batchCount = 1;
     
@@ -32,16 +32,16 @@ public class CraftingTask {
     private BossBar bossBar;
     private static final String BOSSBAR_FORMAT = "&b⚒ &f%s &8| &e%s &8| &a%d%%";
 
-    public CraftingTask(ForgeStationPlugin plugin, Player player, Recipe recipe, int duration) {
-        this(plugin, player, recipe, duration, 1);
+    public CraftingTask(ForgeStationPlugin plugin, Player player, Recipe recipe, long durationTicks) {
+        this(plugin, player, recipe, durationTicks, 1);
     }
     
-    public CraftingTask(ForgeStationPlugin plugin, Player player, Recipe recipe, int duration, int batchCount) {
+    public CraftingTask(ForgeStationPlugin plugin, Player player, Recipe recipe, long durationTicks, int batchCount) {
         this.plugin = plugin;
         this.playerUuid = player.getUniqueId();
         this.recipe = recipe;
-        this.totalDuration = duration;
-        this.remainingTime = duration;
+        this.totalTicks = durationTicks;
+        this.remainingTicks = durationTicks;
         this.batchCount = Math.max(1, batchCount);
     }
 
@@ -67,12 +67,12 @@ public class CraftingTask {
     }
     
     /**
-     * Tick method - được gọi mỗi giây bởi global timer
+     * Tick method - được gọi mỗi tick bởi global timer
      */
     public void tick() {
         if (cancelled) return;
         
-        remainingTime--;
+        remainingTicks--;
         updateBossBar();
     }
     
@@ -104,7 +104,7 @@ public class CraftingTask {
         String title = formatBossBarTitle();
         bossBar.setTitle(MessageUtil.colorize(title));
         
-        double progress = (double) (totalDuration - remainingTime) / totalDuration;
+        double progress = (double) (totalTicks - remainingTicks) / totalTicks;
         bossBar.setProgress(Math.min(1.0, Math.max(0.0, progress)));
         
         bossBar.setColor(getBossBarColor());
@@ -124,14 +124,14 @@ public class CraftingTask {
     }
     
     /**
-     * UNIFIED: Sử dụng TimeUtil.formatCompact để hiển thị thời gian (hỗ trợ phút/giờ)
+     * UNIFIED: Sử dụng TimeUtil.formatTicksCompact để hiển thị thời gian
      */
     private String formatBossBarTitle() {
         String itemName = recipe.getDisplayName();
         if (batchCount > 1) {
             itemName = batchCount + "× " + itemName;
         }
-        String timeStr = TimeUtil.formatCompact(remainingTime);
+        String timeStr = TimeUtil.formatTicksCompact(remainingTicks);
         return String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
     }
     
@@ -193,15 +193,21 @@ public class CraftingTask {
         
         switch (result.getType().toUpperCase()) {
             case "MMOITEMS":
-                // FIX: Give MMOItem to player
-                ItemStack mmoItem = ItemBuilder.buildMMOItem(plugin, result.getMmoitemsType(), result.getMmoitemsId(), 1);
-                if (mmoItem != null && mmoItem.getType() != Material.STONE) {
-                    // Give each item individually (MMOItems usually can't stack)
-                    for (int i = 0; i < totalAmount; i++) {
-                        ItemStack clone = mmoItem.clone();
-                        plugin.getOutputRouter().routeOutput(player, clone, "MMOITEM_" + result.getMmoitemsId());
+                // PERF-FIX: Batch items instead of giving 1 by 1
+                ItemStack mmoTemplate = ItemBuilder.buildMMOItem(plugin, result.getMmoitemsType(), result.getMmoitemsId(), 1);
+                
+                if (mmoTemplate != null && mmoTemplate.getType() != Material.STONE) {
+                    int maxStack = mmoTemplate.getMaxStackSize();
+                    int remaining = totalAmount;
+                    
+                    while (remaining > 0) {
+                        int batch = Math.min(remaining, maxStack);
+                        ItemStack stack = mmoTemplate.clone();
+                        stack.setAmount(batch);
+                        plugin.getOutputRouter().routeOutput(player, stack, "MMOITEM_" + result.getMmoitemsId());
+                        remaining -= batch;
                     }
-                    plugin.debug("Gave " + totalAmount + "x MMOItem " + result.getMmoitemsType() + ":" + result.getMmoitemsId() + " to " + player.getName());
+                    plugin.debug("Gave " + totalAmount + "x MMOItem in batches to " + player.getName());
                 } else {
                     plugin.getLogger().warning("Failed to create MMOItem: " + result.getMmoitemsType() + ":" + result.getMmoitemsId());
                 }
@@ -213,10 +219,20 @@ public class CraftingTask {
                 break;
                 
             default: // VANILLA
-                ItemStack output = ItemBuilder.buildResult(plugin, player, result);
-                output.setAmount(totalAmount);
-                plugin.getOutputRouter().routeOutput(player, output, result.getMaterial());
-                plugin.debug("Gave " + totalAmount + "x " + result.getMaterial() + " to " + player.getName());
+                ItemStack vanillaTemplate = ItemBuilder.buildResult(plugin, player, result);
+                if (vanillaTemplate != null) {
+                    int maxStack = vanillaTemplate.getMaxStackSize();
+                    int remaining = totalAmount;
+                    
+                    while (remaining > 0) {
+                        int batch = Math.min(remaining, maxStack);
+                        ItemStack stack = vanillaTemplate.clone();
+                        stack.setAmount(batch);
+                        plugin.getOutputRouter().routeOutput(player, stack, result.getMaterial());
+                        remaining -= batch;
+                    }
+                    plugin.debug("Gave " + totalAmount + "x " + result.getMaterial() + " in batches to " + player.getName());
+                }
                 break;
         }
     }
@@ -239,21 +255,42 @@ public class CraftingTask {
         return recipe;
     }
 
-    public int getTotalDuration() {
-        return totalDuration;
+    public long getTotalTicks() {
+        return totalTicks;
     }
     
-    public void setTotalDuration(int totalDuration) {
-        this.totalDuration = totalDuration;
+    /**
+     * COMPATIBILITY: Get total duration in seconds
+     */
+    public int getTotalDuration() {
+        return (int) (totalTicks / 20);
+    }
+    
+    public void setTotalTicks(long totalTicks) {
+        this.totalTicks = totalTicks;
+    }
+    
+    /**
+     * COMPATIBILITY: Set total duration in seconds
+     */
+    public void setTotalDuration(int seconds) {
+        this.totalTicks = seconds * 20L;
     }
 
+    public long getRemainingTicks() {
+        return remainingTicks;
+    }
+    
+    /**
+     * COMPATIBILITY: Get remaining time in seconds
+     */
     public int getRemainingTime() {
-        return remainingTime;
+        return (int) (remainingTicks / 20);
     }
 
     public int getProgress() {
-        if (totalDuration == 0) return 100;
-        return (int) (((double) (totalDuration - remainingTime) / totalDuration) * 100);
+        if (totalTicks == 0) return 100;
+        return (int) (((double) (totalTicks - remainingTicks) / totalTicks) * 100);
     }
 
     public boolean isCancelled() {

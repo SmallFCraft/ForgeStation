@@ -3,6 +3,7 @@ package com.phmyhu1710.forgestation.upgrade;
 import com.phmyhu1710.forgestation.ForgeStationPlugin;
 import com.phmyhu1710.forgestation.expression.ExpressionParser;
 import com.phmyhu1710.forgestation.player.PlayerDataManager;
+import com.phmyhu1710.forgestation.util.MessageUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -38,15 +39,18 @@ public class UpgradeManager {
             upgrades.put(upgradeId, new Upgrade(upgradeId, upgradeConfig));
         }
         
-        plugin.getLogger().info("Loaded " + upgrades.size() + " upgrades");
+        plugin.debug("Loaded " + upgrades.size() + " upgrades");
     }
 
     public Upgrade getUpgrade(String id) {
         return upgrades.get(id);
     }
 
+    /**
+     * ISSUE-008 FIX: Returns unmodifiable view instead of copy to reduce allocations
+     */
     public Map<String, Upgrade> getAllUpgrades() {
-        return new HashMap<>(upgrades);
+        return java.util.Collections.unmodifiableMap(upgrades);
     }
 
     /**
@@ -94,6 +98,11 @@ public class UpgradeManager {
             costs.put("coinengine", ceCost);
             plugin.debug("CoinEngine cost for " + upgradeId + " level " + nextLevel + ": " + ceCost);
         }
+        if (!upgrade.getExpCostExpr().isEmpty()) {
+            int expCost = ExpressionParser.evaluateInt(upgrade.getExpCostExpr(), vars);
+            costs.put("exp", (double) expCost);
+            plugin.debug("Exp cost for " + upgradeId + " level " + nextLevel + ": " + expCost);
+        }
         
         return costs;
     }
@@ -130,39 +139,43 @@ public class UpgradeManager {
         Map<String, Double> costs = getNextLevelCost(player, upgradeId);
         double vaultCost = costs.getOrDefault("vault", 0.0);
         int ppCost = costs.getOrDefault("playerpoints", 0.0).intValue();
+        int expCost = costs.getOrDefault("exp", 0.0).intValue();
         double coinEngineCost = costs.getOrDefault("coinengine", 0.0);
         
         plugin.debug("Calculated costs:");
         plugin.debug("  Vault: " + vaultCost);
         plugin.debug("  PlayerPoints: " + ppCost);
+        plugin.debug("  Exp: " + expCost);
         plugin.debug("  CoinEngine: " + coinEngineCost + " (" + upgrade.getCoinEngineCurrency() + ")");
         
         // Get player balances
         double playerVault = plugin.getEconomyManager().getVaultBalance(player);
         int playerPP = plugin.getEconomyManager().getPlayerPoints(player);
+        int playerExp = plugin.getEconomyManager().getExp(player);
         double playerCE = upgrade.getCoinEngineCurrency().isEmpty() ? 0 : 
             plugin.getEconomyManager().getCoinEngineBalance(player, upgrade.getCoinEngineCurrency());
         
         plugin.debug("Player balances:");
         plugin.debug("  Vault: " + playerVault);
         plugin.debug("  PlayerPoints: " + playerPP);
+        plugin.debug("  Exp: " + playerExp);
         plugin.debug("  CoinEngine: " + playerCE);
         
         // Check if can afford
-        boolean canAfford = plugin.getEconomyManager().canAfford(player, vaultCost, ppCost, 
+        boolean canAfford = plugin.getEconomyManager().canAfford(player, vaultCost, ppCost, expCost,
                 upgrade.getCoinEngineCurrency(), coinEngineCost);
         
         plugin.debug("Can afford: " + canAfford);
         
         if (!canAfford) {
             plugin.getMessageUtil().send(player, "upgrade.no-money", 
-                "cost", formatCost(vaultCost, ppCost, coinEngineCost, upgrade.getCoinEngineCurrency()));
+                "cost", formatCost(vaultCost, ppCost, expCost, coinEngineCost, upgrade.getCoinEngineCurrency()));
             return false;
         }
         
         // Withdraw
         plugin.debug("Attempting to withdraw...");
-        boolean withdrawn = plugin.getEconomyManager().withdrawAll(player, vaultCost, ppCost, 
+        boolean withdrawn = plugin.getEconomyManager().withdrawAll(player, vaultCost, ppCost, expCost,
             upgrade.getCoinEngineCurrency(), coinEngineCost);
         
         plugin.debug("Withdraw result: " + withdrawn);
@@ -170,7 +183,7 @@ public class UpgradeManager {
         if (!withdrawn) {
             plugin.debug("Withdraw failed!");
             plugin.getMessageUtil().send(player, "upgrade.no-money", 
-                "cost", formatCost(vaultCost, ppCost, coinEngineCost, upgrade.getCoinEngineCurrency()));
+                "cost", formatCost(vaultCost, ppCost, expCost, coinEngineCost, upgrade.getCoinEngineCurrency()));
             return false;
         }
         
@@ -186,18 +199,22 @@ public class UpgradeManager {
         return true;
     }
 
-    private String formatCost(double vault, int pp, double coinEngine, String currency) {
+    private String formatCost(double vault, int pp, int exp, double coinEngine, String currency) {
         StringBuilder sb = new StringBuilder();
         if (vault > 0) {
-            sb.append("§6").append(vault).append(" Coins");
+            sb.append("§6").append(MessageUtil.formatNumber(vault)).append(" ").append(MessageUtil.colorize(plugin.getConfig().getString("currency.vault", "Coins")));
         }
         if (pp > 0) {
             if (!sb.isEmpty()) sb.append(" §7+ ");
-            sb.append("§b").append(pp).append(" Points");
+            sb.append("§b").append(MessageUtil.formatNumber(pp)).append(" ").append(MessageUtil.colorize(plugin.getConfig().getString("currency.playerpoints", "Points")));
+        }
+        if (exp > 0) {
+            if (!sb.isEmpty()) sb.append(" §7+ ");
+            sb.append("§a").append(MessageUtil.formatNumber(exp)).append(" ").append(MessageUtil.colorize(plugin.getConfig().getString("currency.exp", "EXP")));
         }
         if (coinEngine > 0 && !currency.isEmpty()) {
             if (!sb.isEmpty()) sb.append(" §7+ ");
-            sb.append("§e").append(coinEngine).append(" ").append(currency);
+            sb.append("§e").append(MessageUtil.formatNumber(coinEngine)).append(" ").append(currency);
         }
         return sb.toString();
     }
@@ -214,13 +231,14 @@ public class UpgradeManager {
         private final String playerPointsCostExpr;
         private final String coinEngineCurrency;
         private final String coinEngineCostExpr;
+        private final String expCostExpr;
         private final String effectType;
         private final double valuePerLevel;
         
         // IMPROVED: Percentage-based reduction
         private final String effectMode; // "PERCENTAGE" hoặc "FIXED" (default)
         private final double percentPerLevel; // % giảm mỗi level
-        private final int minDuration; // Thời gian tối thiểu (giây)
+        private final long minDurationTicks; // Thời gian tối thiểu (ticks)
 
         public Upgrade(String id, ConfigurationSection config) {
             this.id = id;
@@ -231,6 +249,7 @@ public class UpgradeManager {
             if (costSection != null) {
                 this.vaultCostExpr = costSection.getString("vault", "");
                 this.playerPointsCostExpr = costSection.getString("playerpoints", "");
+                this.expCostExpr = costSection.getString("exp", "");
                 
                 ConfigurationSection coinEngineSection = costSection.getConfigurationSection("coinengine");
                 if (coinEngineSection != null) {
@@ -243,6 +262,7 @@ public class UpgradeManager {
             } else {
                 this.vaultCostExpr = "";
                 this.playerPointsCostExpr = "";
+                this.expCostExpr = "";
                 this.coinEngineCurrency = "";
                 this.coinEngineCostExpr = "";
             }
@@ -255,13 +275,15 @@ public class UpgradeManager {
                 // IMPROVED: Read new percentage config
                 this.effectMode = effectSection.getString("mode", "FIXED").toUpperCase();
                 this.percentPerLevel = effectSection.getDouble("percent-per-level", 0);
-                this.minDuration = effectSection.getInt("min-duration", 1);
+                // TICK-SUPPORT: Read min-duration as double seconds and convert to ticks
+                double minDurationSec = effectSection.getDouble("min-duration", 1.0);
+                this.minDurationTicks = (long) (minDurationSec * 20);
             } else {
                 this.effectType = "";
                 this.valuePerLevel = 0;
                 this.effectMode = "FIXED";
                 this.percentPerLevel = 0;
-                this.minDuration = 1;
+                this.minDurationTicks = 20; // 1 second default
             }
         }
 
@@ -270,6 +292,7 @@ public class UpgradeManager {
         public int getMaxLevel() { return maxLevel; }
         public String getVaultCostExpr() { return vaultCostExpr; }
         public String getPlayerPointsCostExpr() { return playerPointsCostExpr; }
+        public String getExpCostExpr() { return expCostExpr; }
         public String getCoinEngineCurrency() { return coinEngineCurrency; }
         public String getCoinEngineCostExpr() { return coinEngineCostExpr; }
         public String getEffectType() { return effectType; }
@@ -278,28 +301,30 @@ public class UpgradeManager {
         // IMPROVED: New getters for percentage mode
         public String getEffectMode() { return effectMode; }
         public double getPercentPerLevel() { return percentPerLevel; }
-        public int getMinDuration() { return minDuration; }
+        public long getMinDurationTicks() { return minDurationTicks; }
         
         /**
-         * IMPROVED: Tính duration sau khi áp dụng upgrade
-         * @param baseDuration Thời gian gốc (không có upgrade)
+         * TICK-SUPPORT: Tính duration sau khi áp dụng upgrade (theo ticks)
+         * @param baseTicks Thời gian gốc (ticks)
          * @param level Level upgrade hiện tại của player
-         * @return Thời gian sau khi giảm
+         * @return Thời gian sau khi giảm (ticks)
          */
-        public int applyDurationReduction(int baseDuration, int level) {
-            if (level <= 0) return baseDuration;
+        public long applyDurationReduction(long baseTicks, int level) {
+            if (level <= 0) return baseTicks;
             
-            int result;
+            long result;
             if ("PERCENTAGE".equals(effectMode)) {
                 // PERCENTAGE mode: giảm X% mỗi level
                 double reductionPercent = Math.min(level * percentPerLevel, 100) / 100.0;
-                result = (int) Math.ceil(baseDuration * (1 - reductionPercent));
+                result = (long) Math.ceil(baseTicks * (1 - reductionPercent));
             } else {
-                // FIXED mode: giảm X giây mỗi level (cũ)
-                result = baseDuration - (int)(level * valuePerLevel);
+                // FIXED mode: giảm X giây mỗi level (cũ) -> convert to ticks
+                // valuePerLevel is in seconds
+                long reductionTicks = (long) (level * valuePerLevel * 20);
+                result = baseTicks - reductionTicks;
             }
             
-            return Math.max(result, minDuration);
+            return Math.max(result, minDurationTicks);
         }
     }
 }

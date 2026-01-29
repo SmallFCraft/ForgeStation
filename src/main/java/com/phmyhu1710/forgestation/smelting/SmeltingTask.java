@@ -25,8 +25,8 @@ public class SmeltingTask {
     private final ForgeStationPlugin plugin;
     private final UUID playerUuid;
     private final SmeltingRecipe recipe;
-    private int totalDuration; // in seconds (không còn final vì cần set khi restore)
-    private int remainingTime;
+    private long totalTicks; // in ticks
+    private long remainingTicks;
     private boolean cancelled = false;
     private int batchCount = 1; // BATCH SMELTING: Số lượng batch đang nung
     
@@ -34,16 +34,16 @@ public class SmeltingTask {
     private BossBar bossBar;
     private static final String BOSSBAR_FORMAT = "&6🔥 &f%s &8| &e%s &8| &a%d%%";
 
-    public SmeltingTask(ForgeStationPlugin plugin, Player player, SmeltingRecipe recipe, int duration) {
-        this(plugin, player, recipe, duration, 1);
+    public SmeltingTask(ForgeStationPlugin plugin, Player player, SmeltingRecipe recipe, long durationTicks) {
+        this(plugin, player, recipe, durationTicks, 1);
     }
     
-    public SmeltingTask(ForgeStationPlugin plugin, Player player, SmeltingRecipe recipe, int duration, int batchCount) {
+    public SmeltingTask(ForgeStationPlugin plugin, Player player, SmeltingRecipe recipe, long durationTicks, int batchCount) {
         this.plugin = plugin;
         this.playerUuid = player.getUniqueId();
         this.recipe = recipe;
-        this.totalDuration = duration;
-        this.remainingTime = duration;
+        this.totalTicks = durationTicks;
+        this.remainingTicks = durationTicks;
         this.batchCount = Math.max(1, batchCount);
     }
 
@@ -70,14 +70,14 @@ public class SmeltingTask {
     }
     
     /**
-     * PERFORMANCE FIX: Tick method - được gọi mỗi giây bởi SmeltingManager global timer
+     * PERFORMANCE FIX: Tick method - được gọi mỗi tick bởi SmeltingManager global timer
      */
     public void tick() {
         if (cancelled) return;
         
-        remainingTime--;
+        remainingTicks--;
         
-        // BOSSBAR PROGRESS: Cập nhật BossBar mỗi giây
+        // BOSSBAR PROGRESS: Cập nhật BossBar mỗi tick cho mượt
         updateBossBar();
     }
     
@@ -117,7 +117,7 @@ public class SmeltingTask {
         bossBar.setTitle(MessageUtil.colorize(title));
         
         // Cập nhật progress (0.0 -> 1.0)
-        double progress = (double) (totalDuration - remainingTime) / totalDuration;
+        double progress = (double) (totalTicks - remainingTicks) / totalTicks;
         bossBar.setProgress(Math.min(1.0, Math.max(0.0, progress)));
         
         // Cập nhật màu dựa trên thời gian còn lại
@@ -150,7 +150,7 @@ public class SmeltingTask {
         if (batchCount > 1) {
             itemName = batchCount + "× " + itemName;
         }
-        String timeStr = TimeUtil.formatCompact(remainingTime);
+        String timeStr = TimeUtil.formatTicksCompact(remainingTicks);
         return String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
     }
     
@@ -254,24 +254,45 @@ public class SmeltingTask {
         return recipe;
     }
 
+    public long getTotalTicks() {
+        return totalTicks;
+    }
+    
+    /**
+     * COMPATIBILITY: Get total duration in seconds
+     */
     public int getTotalDuration() {
-        return totalDuration;
+        return (int) (totalTicks / 20);
     }
     
     /**
      * SMELTING PERSISTENCE FIX: Set total duration (dùng khi restore task)
      */
-    public void setTotalDuration(int totalDuration) {
-        this.totalDuration = totalDuration;
+    public void setTotalTicks(long totalTicks) {
+        this.totalTicks = totalTicks;
+    }
+    
+    /**
+     * COMPATIBILITY: Set total duration in seconds
+     */
+    public void setTotalDuration(int seconds) {
+        this.totalTicks = seconds * 20L;
     }
 
+    public long getRemainingTicks() {
+        return remainingTicks;
+    }
+    
+    /**
+     * COMPATIBILITY: Get remaining time in seconds
+     */
     public int getRemainingTime() {
-        return remainingTime;
+        return (int) (remainingTicks / 20);
     }
 
     public int getProgress() {
-        if (totalDuration == 0) return 100;
-        return (int) (((double) (totalDuration - remainingTime) / totalDuration) * 100);
+        if (totalTicks == 0) return 100;
+        return (int) (((double) (totalTicks - remainingTicks) / totalTicks) * 100);
     }
 
     public boolean isCancelled() {

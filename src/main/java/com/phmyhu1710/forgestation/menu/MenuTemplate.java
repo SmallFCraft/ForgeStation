@@ -230,10 +230,18 @@ public class MenuTemplate {
         private final List<Integer> sharedSlots;
         private final String defaultCategory;
         private final Map<String, CategoryConfig> categories;
+        
+        // Browser Mode Support
+        private final String mode; // "direct" or "browser"
+        private final List<Integer> categorySlots;
 
         public AutoPopulateConfig(ConfigurationSection config) {
             this.sources = new ArrayList<>();
-            this.categories = new HashMap<>();
+            this.categories = new java.util.LinkedHashMap<>();
+            
+            // Mode
+            this.mode = config.getString("mode", "direct");
+            this.categorySlots = parseSlotList(config.getList("category-slots"));
             
             // Recipe type
             if (config.contains("type")) {
@@ -259,6 +267,7 @@ public class MenuTemplate {
                 }
             }
             
+            // ... (legacy sources parsing omitted for brevity if unchanged, but I need to include context or keep it)
             // Legacy sources support (backward compatibility)
             ConfigurationSection sourcesSection = config.getConfigurationSection("sources");
             if (sourcesSection != null && categories.isEmpty()) {
@@ -290,7 +299,12 @@ public class MenuTemplate {
         public List<PopulateSource> getSources() { return sources; }
         public String getRecipeType() { return recipeType; }
         public List<Integer> getSharedSlots() { return sharedSlots; }
+        public String getMode() { return mode; }
+        public List<Integer> getCategorySlots() { return categorySlots; }
+        
         public String getDefaultCategory() { 
+            if (mode.equalsIgnoreCase("browser")) return null; // Browser mode starts with no category selected
+            
             if (defaultCategory != null) return defaultCategory;
             // Return first category if no default specified
             if (!categories.isEmpty()) return categories.keySet().iterator().next();
@@ -345,6 +359,9 @@ public class MenuTemplate {
         private final String id;
         private final List<String> folders;
         private List<String> cachedRecipeIds = null;
+        
+        // Browser Mode Support
+        private final MenuItem icon;
 
         public CategoryConfig(String id, ConfigurationSection config) {
             this.id = id;
@@ -361,11 +378,19 @@ public class MenuTemplate {
                 // Use category id as folder name by default
                 folders.add(id);
             }
+            
+            // Icon for browser mode
+            if (config.contains("icon")) {
+                this.icon = new MenuItem(id + "-icon", config.getConfigurationSection("icon"));
+            } else {
+                this.icon = null;
+            }
         }
 
         public String getId() { return id; }
         public List<String> getFolders() { return folders; }
         public List<String> getCachedRecipeIds() { return cachedRecipeIds; }
         public void setCachedRecipeIds(List<String> ids) { this.cachedRecipeIds = ids; }
+        public MenuItem getIcon() { return icon; }
     }
 }

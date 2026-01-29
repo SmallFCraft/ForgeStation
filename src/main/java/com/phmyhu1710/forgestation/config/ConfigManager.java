@@ -75,10 +75,10 @@ public class ConfigManager {
         // Load menus folder
         loadFolder("menus", menuConfigs);
         
-        plugin.getLogger().info("Loaded configurations:");
-        plugin.getLogger().info("  - " + recipeConfigs.size() + " recipe files");
-        plugin.getLogger().info("  - " + smeltingConfigs.size() + " smelting files");
-        plugin.getLogger().info("  - " + menuConfigs.size() + " menu files");
+        plugin.debug("Loaded configurations:");
+        plugin.debug("  - " + recipeConfigs.size() + " recipe files");
+        plugin.debug("  - " + smeltingConfigs.size() + " smelting files");
+        plugin.debug("  - " + menuConfigs.size() + " menu files");
     }
 
     private void saveDefaultResource(String resourcePath) {
@@ -100,12 +100,15 @@ public class ConfigManager {
     private void loadFolder(String folderName, Map<String, FileConfiguration> target) {
         target.clear();
         File folder = new File(plugin.getDataFolder(), folderName);
-        plugin.getLogger().info("Loading folder: " + folder.getAbsolutePath());
+        plugin.debug("Loading folder: " + folder.getAbsolutePath());
         
         if (!folder.exists()) {
             folder.mkdirs();
-            plugin.getLogger().info("Created folder: " + folderName);
+            plugin.debug("Created folder: " + folderName);
         }
+        
+        // Auto-extract all files from JAR if they don't exist in data folder
+        extractFolderFromJar(folderName, folder);
         
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".yml"));
         if (files == null) {
@@ -113,11 +116,11 @@ public class ConfigManager {
             return;
         }
         
-        plugin.getLogger().info("Found " + files.length + " yml files in " + folderName);
+        plugin.debug("Found " + files.length + " yml files in " + folderName);
         
         for (File file : files) {
             String name = file.getName().replace(".yml", "");
-            plugin.getLogger().info("Loading file: " + file.getName());
+            plugin.debug("Loading file: " + file.getName());
             
             try {
                 FileConfiguration config = YamlConfiguration.loadConfiguration(file);
@@ -131,11 +134,53 @@ public class ConfigManager {
                 }
                 
                 target.put(name, config);
-                plugin.getLogger().info("Successfully loaded: " + name);
+                plugin.debug("Successfully loaded: " + name);
             } catch (Exception e) {
                 plugin.getLogger().severe("Failed to load " + file.getName() + ": " + e.getMessage());
                 e.printStackTrace();
             }
+        }
+    }
+    
+    /**
+     * Extract all files from JAR folder to data folder if they don't exist
+     */
+    private void extractFolderFromJar(String folderName, File targetFolder) {
+        try {
+            // Try to get all resources from the folder in JAR
+            java.util.jar.JarFile jarFile = new java.util.jar.JarFile(
+                new File(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
+            
+            java.util.Enumeration<java.util.jar.JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                java.util.jar.JarEntry entry = entries.nextElement();
+                String entryName = entry.getName();
+                
+                // Check if entry is in our target folder and is a YAML file
+                if (entryName.startsWith(folderName + "/") && entryName.endsWith(".yml") && !entry.isDirectory()) {
+                    String fileName = entryName.substring(folderName.length() + 1);
+                    File targetFile = new File(targetFolder, fileName);
+                    
+                    // Only extract if file doesn't exist
+                    if (!targetFile.exists()) {
+                        plugin.getLogger().info("Extracting " + fileName + " from JAR to " + targetFolder.getName() + "/");
+                        try (InputStream is = jarFile.getInputStream(entry);
+                             java.io.FileOutputStream fos = new java.io.FileOutputStream(targetFile)) {
+                            
+                            byte[] buffer = new byte[8192];
+                            int bytesRead;
+                            while ((bytesRead = is.read(buffer)) != -1) {
+                                fos.write(buffer, 0, bytesRead);
+                            }
+                        }
+                    }
+                }
+            }
+            jarFile.close();
+        } catch (Exception e) {
+            // Fallback: If JarFile approach fails (e.g., running from IDE or classpath),
+            // files will be loaded from data folder if they exist, or admin can manually copy them
+            plugin.debug("Could not extract folder using JarFile (this is normal when running from IDE): " + e.getMessage());
         }
     }
 

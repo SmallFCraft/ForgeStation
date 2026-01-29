@@ -35,7 +35,7 @@ public class ExtraStorageHook {
             mGetInstance = apiClass.getMethod("getInstance");
             mGetUser = apiClass.getMethod("getUser", org.bukkit.OfflinePlayer.class);
             available = true;
-            plugin.getLogger().info("ExtraStorage hook initialized with cached methods!");
+            plugin.debug("ExtraStorage hook initialized with cached methods!");
         } catch (ClassNotFoundException e) {
             plugin.debug("ExtraStorage not available");
         } catch (NoSuchMethodException e) {

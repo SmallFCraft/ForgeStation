@@ -4,13 +4,17 @@
 # Recipes để đổi items lấy currency
 # Các recipes này SỬ DỤNG rank multiplier
 
+open_command:
+  - doinguyenthach
+  - doint
+  - doidiem
 recipes:
   # ─────────────────────────────────────────────
-  # Đổi Kim Cương lấy Nguyên Thạch
+  # Đổi Kim Cương lấy %currency_playerpoints%
   # ─────────────────────────────────────────────
   doint_kc:
     enabled: true
-    display-name: "&b&l💎 Đổi Kim Cương → Nguyên Thạch"
+    display-name: "&b&l💎 Đổi Kim Cương → %currency_playerpoints%"
     permission: "forgestation.exchange.diamond_points"
     
     # ⭐ BẬT RANK MULTIPLIER cho recipe này
@@ -27,11 +31,11 @@ recipes:
       lore:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        - "&fTỷ lệ: &b1800 💎 &f→ &e1 Nguyên Thạch &7(base)"
+        - "&fTỷ lệ: &b1800 💎 &f→ &e1 %currency_playerpoints% &7(base)"
         - ""
         - "&fRank của bạn: &e%player_rank_display%"
         - "&fHệ số nhân: &ax%multiplier%"
-        - "&fSẽ nhận: &e%estimated_points% Nguyên Thạch"
+        - "&fSẽ nhận: &e%estimated_points% %currency_playerpoints%"
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         - ""
         - "&7Số lượng trong túi: &b%player_input%"
@@ -58,7 +62,7 @@ recipes:
 
   doint_block_kc:
     enabled: true
-    display-name: "&b&l💎 Đổi Khối Kim Cương → Nguyên Thạch"
+    display-name: "&b&l💎 Đổi Khối Kim Cương → %currency_playerpoints%"
     permission: "forgestation.exchange.diamond_points"
     
     use-rank-multiplier: true
@@ -72,11 +76,11 @@ recipes:
       lore:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        - "&fTỷ lệ: &b1800 💎 &f→ &e10 Nguyên Thạch &7(base)"
+        - "&fTỷ lệ: &b1800 💎 &f→ &e10 %currency_playerpoints% &7(base)"
         - ""
         - "&fRank của bạn: &e%player_rank_display%"
         - "&fHệ số nhân: &ax%multiplier%"
-        - "&fSẽ nhận: &e%estimated_points% Nguyên Thạch"
+        - "&fSẽ nhận: &e%estimated_points% %currency_playerpoints%"
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         - ""
         - "&7Số lượng trong túi: &b%player_input%"
@@ -102,11 +106,11 @@ recipes:
       particles: VILLAGER_HAPPY
 
   # ─────────────────────────────────────────────
-  # Đổi Emerald lấy Nguyên Thạch
+  # Đổi Emerald lấy %currency_playerpoints%
   # ─────────────────────────────────────────────
   doint_lb:
     enabled: true
-    display-name: "&a&l💚 Đổi Emerald → Nguyên Thạch"
+    display-name: "&a&l💚 Đổi Emerald → %currency_playerpoints%"
     permission: "forgestation.exchange.emerald_coins"
     
     use-rank-multiplier: true
@@ -119,11 +123,11 @@ recipes:
       lore:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        - "&fTỷ lệ: &a1800 💚 &f→ &61 Nguyên Thạch &7(base)"
+        - "&fTỷ lệ: &a1800 💚 &f→ &61 %currency_playerpoints% &7(base)"
         - ""
         - "&fRank của bạn: &e%player_rank_display%"
         - "&fHệ số nhân: &ax%multiplier%"
-        - "&fSẽ nhận: &e%estimated_points% Nguyên Thạch"
+        - "&fSẽ nhận: &e%estimated_points% %currency_playerpoints%"
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         - ""
         - "&7Số lượng trong túi: &b%player_input%"
@@ -146,7 +150,7 @@ recipes:
 
   doint_block_lb:
     enabled: true
-    display-name: "&a&l💚 Đổi Khối Emerald → Nguyên Thạch"
+    display-name: "&a&l💚 Đổi Khối Emerald → %currency_playerpoints%"
     permission: "forgestation.exchange.emerald_coins"
     
     use-rank-multiplier: true
@@ -159,11 +163,11 @@ recipes:
       lore:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        - "&fTỷ lệ: &a1800 💚 &f→ &610 Nguyên Thạch &7(base)"
+        - "&fTỷ lệ: &a1800 💚 &f→ &610 %currency_playerpoints% &7(base)"
         - ""
         - "&fRank của bạn: &e%player_rank_display%"
         - "&fHệ số nhân: &ax%multiplier%"
-        - "&fSẽ nhận: &e%estimated_points% Nguyên Thạch"
+        - "&fSẽ nhận: &e%estimated_points% %currency_playerpoints%"
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         - ""
         - "&7Số lượng trong túi: &b%player_input%"

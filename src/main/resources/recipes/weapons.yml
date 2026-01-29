@@ -3,6 +3,7 @@
 # ═══════════════════════════════════════════════
 # Recipes chế tạo vũ khí
 
+open_command: craftweapon
 recipes:
   # ─────────────────────────────────────────────
   # Búa Thần
@@ -27,8 +28,8 @@ recipes:
         - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
         - ""
         - "&f&lCHI PHÍ:"
-        - "&8┃ &6💰 &e50,000 Coins"
-        - "&8┃ &b⬤ &e500 Points"
+        - "&8┃ &6💰 &e50,000 %currency_vault%"
+        - "&8┃ &b⬤ &e500 %currency_playerpoints%"
         - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
         - ""
         - "&7Thời gian: &f%duration%"
@@ -93,7 +94,7 @@ recipes:
         - "%ingredients_list%"
         - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
         - ""
-        - "&f&lCHI PHÍ: &6💰 &e10,000 Coins"
+        - "&f&lCHI PHÍ: &6💰 &e10,000 %currency_vault%"
         - ""
         - "&a▶ Click để chế tạo!"
     

@@ -2,20 +2,13 @@ package com.phmyhu1710.forgestation.menu;
 
 import com.phmyhu1710.forgestation.ForgeStationPlugin;
 import com.phmyhu1710.forgestation.crafting.Recipe;
-import com.phmyhu1710.forgestation.util.NumberParser;
 import com.phmyhu1710.forgestation.smelting.SmeltingRecipe;
 import com.phmyhu1710.forgestation.util.MessageUtil;
 import com.phmyhu1710.forgestation.util.InventoryUtil;
+import com.phmyhu1710.forgestation.hook.ItemHook;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -24,189 +17,17 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * Manages recipe detail GUIs for individual recipe/smelting viewing
  */
-public class RecipeDetailGUI implements Listener {
+public class RecipeDetailGUI {
 
     private final ForgeStationPlugin plugin;
-    
-    // Track active recipe detail menus: UUID -> recipe/smelting id
-    private final Map<UUID, String> activeRecipeMenus = new ConcurrentHashMap<>();
-    private final Map<UUID, String> activeSmeltingMenus = new ConcurrentHashMap<>();
-    
-    // Track source menu and category for back navigation
-    private final Map<UUID, String> sourceMenus = new ConcurrentHashMap<>();
-    private final Map<UUID, String> sourceCategories = new ConcurrentHashMap<>();
-    
-    // Track players waiting for chat input: UUID -> recipe id
-    private final Map<UUID, String> awaitingChatInput = new ConcurrentHashMap<>();
-    
-    // BATCH SMELTING: Track players waiting for smelting chat input
-    private final Map<UUID, String> awaitingSmeltingInput = new ConcurrentHashMap<>();
-    
-    private final Cache<UUID, Long> chatLimiter = Caffeine.newBuilder()
-        .expireAfterWrite(800, TimeUnit.MILLISECONDS)
-        .build();
 
     public RecipeDetailGUI(ForgeStationPlugin plugin) {
         this.plugin = plugin;
-        Bukkit.getPluginManager().registerEvents(this, plugin);
-    }
-
-    /**
-     * Open recipe detail GUI
-     */
-    public void openRecipeGUI(Player player, Recipe recipe) {
-        Inventory inv = Bukkit.createInventory(null, 27, 
-            MessageUtil.colorize("&8&l⚒ " + recipe.getDisplayName()));
-        
-        // Fill background
-        ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i = 0; i < 27; i++) {
-            inv.setItem(i, glass);
-        }
-        
-        // Recipe icon in center
-        ItemStack icon = createRecipeIcon(player, recipe);
-        inv.setItem(13, icon);
-        
-        // Craft button (left click = 1, right click = all)
-        ItemStack craftBtn = createItem(Material.LIME_CONCRETE, "&a&l✓ CHẾ TẠO",
-            "",
-            "&7Click để thực hiện chế tạo!",
-            "",
-            "&e▶ Click trái: &fChế 1 lần",
-            recipe.isBulkExchange() ? "&e▶ Click phải: &fChế tất cả" : "",
-            recipe.isBulkExchange() ? "&e▶ Shift + Click: &fNhập số lượng" : "");
-        inv.setItem(15, craftBtn);
-        
-        // Cancel button
-        ItemStack cancelBtn = createItem(Material.RED_CONCRETE, "&c&l✖ HỦY",
-            "&7Quay lại menu");
-        inv.setItem(11, cancelBtn);
-        
-        // Requirements info
-        ItemStack reqInfo = createRequirementsIcon(player, recipe);
-        inv.setItem(4, reqInfo);
-        
-        activeRecipeMenus.put(player.getUniqueId(), recipe.getId());
-        
-        // Save source menu and category for back navigation
-        sourceMenus.put(player.getUniqueId(), "crafting-menu");
-        String category = plugin.getMenuManager().getActiveCategory(player.getUniqueId());
-        if (category != null) {
-            sourceCategories.put(player.getUniqueId(), category);
-        }
-        
-        player.openInventory(inv);
-    }
-
-    /**
-     * Open smelting detail GUI
-     * BATCH SMELTING: Thêm 3 click modes như Crafting
-     * PERF-FIX: Sử dụng snapshot để tránh scan inventory nhiều lần
-     */
-    public void openSmeltingGUI(Player player, SmeltingRecipe recipe) {
-        Inventory inv = Bukkit.createInventory(null, 27, 
-            MessageUtil.colorize("&8&l🔥 " + recipe.getDisplayName()));
-        
-        // Fill background - PERF-FIX: Không clone, dùng chung 1 instance
-        ItemStack glass = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
-        for (int i = 0; i < 27; i++) {
-            inv.setItem(i, glass);
-        }
-        
-        // PERF-FIX: Tạo snapshot 1 lần, dùng cho tất cả operations
-        var snapshot = plugin.getSmeltingManager().createSnapshot(player, recipe);
-        
-        // Recipe icon in center - pass snapshot
-        ItemStack icon = createSmeltingIconWithSnapshot(player, recipe, snapshot);
-        inv.setItem(13, icon);
-        
-        // Start button with 3 click modes
-        // BATCH SMELTING FIX: Hiển thị thời gian cho từng mode
-        int durationPerItem = plugin.getSmeltingManager().getDuration(player, recipe);
-        int totalDurationAll = durationPerItem * snapshot.maxBatch;
-        
-        ItemStack startBtn = createItem(Material.LIME_CONCRETE, "&a&l✓ BẮT ĐẦU NUNG",
-            "",
-            "&7Click để bắt đầu nung!",
-            "",
-            "&e▶ Click trái: &fNung 1 item &7(" + durationPerItem + "s)",
-            "&e▶ Click phải: &fNung " + snapshot.maxBatch + " items &7(" + formatTime(totalDurationAll) + ")",
-            "&e▶ Shift + Click: &fNhập số lượng",
-            "",
-            "&7Thời gian mỗi item: &e" + durationPerItem + "s");
-        inv.setItem(15, startBtn);
-        
-        // Cancel button
-        ItemStack cancelBtn = createItem(Material.RED_CONCRETE, "&c&l✖ HỦY",
-            "&7Quay lại menu");
-        inv.setItem(11, cancelBtn);
-        
-        // Requirements info - pass snapshot
-        ItemStack reqInfo = createSmeltingRequirementsIconWithSnapshot(player, recipe, snapshot);
-        inv.setItem(4, reqInfo);
-        
-        activeSmeltingMenus.put(player.getUniqueId(), recipe.getId());
-        
-        // Save source menu and category for back navigation
-        sourceMenus.put(player.getUniqueId(), "smelting-menu");
-        String category = plugin.getMenuManager().getActiveCategory(player.getUniqueId());
-        if (category != null) {
-            sourceCategories.put(player.getUniqueId(), category);
-        }
-        
-        player.openInventory(inv);
-    }
-    
-    /**
-     * BATCH SMELTING: Create requirements icon for smelting
-     * PERF-FIX: Sử dụng snapshot thay vì gọi nhiều methods
-     */
-    private ItemStack createSmeltingRequirementsIconWithSnapshot(Player player, SmeltingRecipe recipe, 
-            InventoryUtil.SmeltingSnapshot snapshot) {
-        int inputNeed = recipe.getInputAmount();
-        int fuelNeed = recipe.getFuelAmount();
-        
-        boolean hasInput = snapshot.inputCount >= inputNeed;
-        boolean hasFuel = !recipe.isFuelRequired() || snapshot.fuelCount >= fuelNeed;
-        boolean canSmelt = hasInput && hasFuel;
-        
-        Material mat = canSmelt ? Material.LIME_DYE : Material.RED_DYE;
-        String status = canSmelt ? "&a✓ Có thể nung" : "&c✗ Thiếu nguyên liệu";
-        
-        List<String> loreLines = new ArrayList<>();
-        loreLines.add("");
-        loreLines.add(MessageUtil.colorize(status));
-        loreLines.add("");
-        loreLines.add(MessageUtil.colorize("&f&lNGUYÊN LIỆU:"));
-        loreLines.add(MessageUtil.colorize("&8┃ &7" + recipe.getInputMaterial() + " &8× &e" + inputNeed + 
-            " &7(" + (hasInput ? "&a" : "&c") + snapshot.inputCount + "&7)"));
-        
-        if (recipe.isFuelRequired()) {
-            loreLines.add("");
-            loreLines.add(MessageUtil.colorize("&f&lNHIÊN LIỆU:"));
-            loreLines.add(MessageUtil.colorize("&8┃ &7" + recipe.getFuelMaterial() + " &8× &e" + fuelNeed +
-                " &7(" + (hasFuel ? "&a" : "&c") + snapshot.fuelCount + "&7)"));
-        }
-        
-        return createItem(mat, "&f&lTRẠNG THÁI", loreLines.toArray(new String[0]));
-    }
-    
-    /**
-     * Legacy method for backward compatibility
-     */
-    private ItemStack createSmeltingRequirementsIcon(Player player, SmeltingRecipe recipe) {
-        var snapshot = plugin.getSmeltingManager().createSnapshot(player, recipe);
-        return createSmeltingRequirementsIconWithSnapshot(player, recipe, snapshot);
+        // NOTE: Event listeners removed - this class is now only used for icon creation
     }
 
     public ItemStack createRecipeIconForMenu(Player player, Recipe recipe) {
@@ -226,10 +47,30 @@ public class RecipeDetailGUI implements Listener {
     
     /**
      * PERF-FIX: Recipe icon với inventory snapshot - tránh scan nhiều lần
+     * Supports custom model data and item hooks (ItemsAdder, Oraxen, Nexo)
      */
     private ItemStack createRecipeIconWithSnapshot(Player player, Recipe recipe, Map<String, Integer> invSnapshot) {
-        ItemStack item = new ItemStack(recipe.getIconMaterial());
+        ItemStack item;
+        String materialString = recipe.getIconMaterialString();
+        
+        // Check for item hook (itemsadder-, oraxen-, nexo-)
+        ItemHook hook = plugin.getHookManager().getItemHookByPrefix(materialString);
+        if (hook != null) {
+            String itemId = materialString.substring(hook.getPrefix().length());
+            item = hook.getItem(itemId);
+            if (item == null || item.getType() == Material.STONE) {
+                item = new ItemStack(recipe.getIconMaterial());
+            }
+        } else {
+            item = new ItemStack(recipe.getIconMaterial());
+        }
+        
         ItemMeta meta = item.getItemMeta();
+        
+        // Apply custom model data if present
+        if (recipe.getIconModelData() > 0) {
+            meta.setCustomModelData(recipe.getIconModelData());
+        }
         
         meta.setDisplayName(MessageUtil.colorize(parseRecipePlaceholdersWithSnapshot(player, recipe, recipe.getIconName(), invSnapshot)));
         
@@ -344,6 +185,14 @@ public class RecipeDetailGUI implements Listener {
     private String parseRecipePlaceholdersWithSnapshot(Player player, Recipe recipe, String text, Map<String, Integer> invSnapshot) {
         if (text == null) return "";
         
+        // Global Currency Placeholders
+        if (text.contains("%currency_")) {
+             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfig().getString("currency.vault", "Coins")));
+             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfig().getString("currency.playerpoints", "Points")));
+             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfig().getString("currency.exp", "EXP")));
+             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfig().getString("currency.coinengine", "C")));
+        }
+        
         // Player info
         text = text.replace("%player_name%", player.getName());
         
@@ -357,12 +206,8 @@ public class RecipeDetailGUI implements Listener {
         text = text.replace("%multiplier%", String.format("%.1f", multiplier));
         
         // Prefix
-        if (plugin.getHookManager().getVaultChat() != null) {
-             String prefix = plugin.getHookManager().getVaultChat().getPlayerPrefix(player);
-             text = text.replace("%player_prefix%", prefix != null ? prefix : "");
-        } else {
-             text = text.replace("%player_prefix%", "");
-        }
+        // Prefix (Legacy support removed, rely on PAPI)
+        text = text.replace("%player_prefix%", "");
         
         // Input materials count (for exchange recipes)
         if (!recipe.getIngredients().isEmpty()) {
@@ -379,14 +224,39 @@ public class RecipeDetailGUI implements Listener {
             text = text.replace("%player_diamonds%", formattedCount); // backward compat
             text = text.replace("%player_items%", formattedCount); // backward compat
             
-            // Estimated output for exchange recipes
-            if (recipe.isExchangeRecipe() && !recipe.getRewards().isEmpty()) {
+            // Estimated output for exchange recipes (bulk-exchange)
+            if (recipe.isBulkExchange()) {
                 int baseAmount = ing.getBaseAmount() > 0 ? ing.getBaseAmount() : ing.getAmount();
-                int exchangeTimes = playerHas / baseAmount;
-                Recipe.Reward reward = recipe.getRewards().get(0);
-                double estimatedPoints = exchangeTimes * reward.getBaseAmount() * multiplier;
-                text = text.replace("%estimated_points%", MessageUtil.formatNumber((int) estimatedPoints));
+                if (baseAmount > 0) {
+                    int exchangeTimes = playerHas / baseAmount;
+                    
+                    // Try rewards first (for currency exchange)
+                    if (recipe.isExchangeRecipe() && !recipe.getRewards().isEmpty()) {
+                        Recipe.Reward reward = recipe.getRewards().get(0);
+                        double estimatedPoints = exchangeTimes * reward.getBaseAmount() * multiplier;
+                        text = text.replace("%estimated_points%", MessageUtil.formatNumber((int) estimatedPoints));
+                    }
+                    // Fallback to result (for item exchange)
+                    else if (recipe.getResult() != null) {
+                        int resultAmount = recipe.getResult().getAmount();
+                        double estimatedPoints = exchangeTimes * resultAmount * multiplier;
+                        text = text.replace("%estimated_points%", MessageUtil.formatNumber((int) estimatedPoints));
+                    }
+                    // Default to 0 if neither rewards nor result
+                    else {
+                        text = text.replace("%estimated_points%", "0");
+                    }
+                } else {
+                    text = text.replace("%estimated_points%", "0");
+                }
             }
+            // Cleanup placeholder if not bulk-exchange
+            else {
+                text = text.replace("%estimated_points%", "0");
+            }
+        } else {
+            // No ingredients - replace placeholder with 0
+            text = text.replace("%estimated_points%", "0");
         }
         
         // Status - PERF-FIX: Sử dụng snapshot
@@ -457,18 +327,37 @@ public class RecipeDetailGUI implements Listener {
     
     /**
      * PERF-FIX: Smelting icon với snapshot - tránh scan inventory nhiều lần
+     * Supports custom model data and item hooks (ItemsAdder, Oraxen, Nexo)
      */
     private ItemStack createSmeltingIconWithSnapshot(Player player, SmeltingRecipe recipe, 
             InventoryUtil.SmeltingSnapshot snapshot) {
-        Material mat;
-        try {
-            mat = Material.valueOf(recipe.getInputMaterial().toUpperCase());
-        } catch (Exception e) {
-            mat = Material.FURNACE;
+        ItemStack item;
+        String materialString = recipe.getIconMaterialString();
+        
+        // Check for item hook (itemsadder-, oraxen-, nexo-)
+        ItemHook hook = plugin.getHookManager().getItemHookByPrefix(materialString);
+        if (hook != null) {
+            String itemId = materialString.substring(hook.getPrefix().length());
+            item = hook.getItem(itemId);
+            if (item == null || item.getType() == Material.STONE) {
+                item = new ItemStack(recipe.getIconMaterial());
+            }
+        } else {
+            Material mat;
+            try {
+                mat = Material.valueOf(recipe.getInputMaterial().toUpperCase());
+            } catch (Exception e) {
+                mat = Material.FURNACE;
+            }
+            item = new ItemStack(mat);
         }
         
-        ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
+        
+        // Apply custom model data if present
+        if (recipe.getIconModelData() > 0) {
+            meta.setCustomModelData(recipe.getIconModelData());
+        }
         
         meta.setDisplayName(MessageUtil.colorize(parseSmeltingPlaceholdersWithSnapshot(player, recipe, recipe.getIconName(), snapshot)));
         
@@ -512,6 +401,14 @@ public class RecipeDetailGUI implements Listener {
     private String parseSmeltingPlaceholdersWithSnapshot(Player player, SmeltingRecipe recipe, String text,
             InventoryUtil.SmeltingSnapshot snapshot) {
         if (text == null) return "";
+
+        // Global Currency Placeholders
+        if (text.contains("%currency_")) {
+             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfig().getString("currency.vault", "Coins")));
+             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfig().getString("currency.playerpoints", "Points")));
+             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfig().getString("currency.exp", "EXP")));
+             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfig().getString("currency.coinengine", "C")));
+        }
         
         // Player info
         text = text.replace("%player_name%", player.getName());
@@ -628,262 +525,4 @@ public class RecipeDetailGUI implements Listener {
         return item;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-        UUID uuid = player.getUniqueId();
-        
-        // Check for recipe menu
-        if (activeRecipeMenus.containsKey(uuid)) {
-            event.setCancelled(true);
-            event.setResult(org.bukkit.event.Event.Result.DENY);
-            
-            String recipeId = activeRecipeMenus.get(uuid);
-            Recipe recipe = plugin.getRecipeManager().getRecipe(recipeId);
-            if (recipe == null) return;
-            
-            int slot = event.getRawSlot();
-            
-            // Craft button (slot 15)
-            if (slot == 15) {
-                activeRecipeMenus.remove(uuid);
-                player.closeInventory();
-                
-                if (recipe.isExchangeRecipe()) {
-                    // Shift + Click = Open chat for custom amount
-                    if (event.isShiftClick()) {
-                        openAmountInputGUI(player, recipe);
-                    }
-                    // Right click = Exchange all
-                    else if (event.isRightClick()) {
-                        // Pass total items, not number of exchanges
-                        Recipe.Ingredient input = recipe.getIngredients().get(0);
-                        int playerHas = countItems(player, input);
-                        plugin.getCraftingExecutor().executeExchange(player, recipe, playerHas);
-                    }
-                    // Left click = Exchange 1 time
-                    else {
-                        Recipe.Ingredient input = recipe.getIngredients().get(0);
-                        int baseAmount = input.getBaseAmount() > 0 ? input.getBaseAmount() : input.getAmount();
-                        plugin.getCraftingExecutor().executeExchange(player, recipe, baseAmount);
-                    }
-                } else {
-                    plugin.getCraftingExecutor().executeCraft(player, recipe);
-                }
-            }
-            // Cancel button (slot 11) - go back to menu with category
-            else if (slot == 11) {
-                activeRecipeMenus.remove(uuid);
-                String sourceMenu = sourceMenus.getOrDefault(uuid, "crafting-menu");
-                String sourceCategory = sourceCategories.get(uuid);
-                sourceMenus.remove(uuid);
-                sourceCategories.remove(uuid);
-                player.closeInventory();
-                // Use scheduler to open menu on next tick to avoid race condition
-                plugin.getScheduler().runLater(() -> {
-                    plugin.getMenuManager().openMenuWithCategory(player, sourceMenu, sourceCategory);
-                }, 1);
-            }
-            
-            return;
-        }
-        
-        // Check for smelting menu
-        if (activeSmeltingMenus.containsKey(uuid)) {
-            event.setCancelled(true);
-            event.setResult(org.bukkit.event.Event.Result.DENY);
-            
-            String smeltingId = activeSmeltingMenus.get(uuid);
-            SmeltingRecipe recipe = plugin.getSmeltingManager().getRecipe(smeltingId);
-            if (recipe == null) return;
-            
-            int slot = event.getRawSlot();
-            
-            // Start button (slot 15) - BATCH SMELTING: 3 click modes
-            if (slot == 15) {
-                activeSmeltingMenus.remove(uuid);
-                player.closeInventory();
-                
-                // Shift + Click = Open chat for custom amount
-                if (event.isShiftClick()) {
-                    openSmeltingAmountInput(player, recipe);
-                }
-                // Right click = Smelt all
-                else if (event.isRightClick()) {
-                    int maxBatch = plugin.getSmeltingManager().getMaxBatchCount(player, recipe);
-                    if (maxBatch > 0) {
-                        plugin.getSmeltingManager().startSmelting(player, recipe, maxBatch);
-                    } else {
-                        plugin.getMessageUtil().send(player, "smelt.missing-materials",
-                            "material", recipe.getInputMaterial(),
-                            "amount", String.valueOf(recipe.getInputAmount()));
-                    }
-                }
-                // Left click = Smelt 1 batch
-                else {
-                    plugin.getSmeltingManager().startSmelting(player, recipe, 1);
-                }
-            }
-            // Cancel button (slot 11) - go back to menu with category
-            else if (slot == 11) {
-                activeSmeltingMenus.remove(uuid);
-                String sourceMenu = sourceMenus.getOrDefault(uuid, "smelting-menu");
-                String sourceCategory = sourceCategories.get(uuid);
-                sourceMenus.remove(uuid);
-                sourceCategories.remove(uuid);
-                player.closeInventory();
-                plugin.getScheduler().runLater(() -> {
-                    plugin.getMenuManager().openMenuWithCategory(player, sourceMenu, sourceCategory);
-                }, 1);
-            }
-        }
-    }
-    
-    /**
-     * BATCH SMELTING: Open chat input for custom smelting amount
-     */
-    private void openSmeltingAmountInput(Player player, SmeltingRecipe recipe) {
-        player.closeInventory();
-        awaitingSmeltingInput.put(player.getUniqueId(), recipe.getId());
-        plugin.getMessageUtil().send(player, "smelt.input-prompt");
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onInventoryDrag(InventoryDragEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-        UUID uuid = player.getUniqueId();
-        
-        if (activeRecipeMenus.containsKey(uuid) || activeSmeltingMenus.containsKey(uuid)) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getPlayer() instanceof Player player) {
-            UUID uuid = player.getUniqueId();
-            activeRecipeMenus.remove(uuid);
-            activeSmeltingMenus.remove(uuid);
-            awaitingChatInput.remove(uuid);
-            awaitingSmeltingInput.remove(uuid);
-            // Don't remove source info here - it's needed for back navigation
-        }
-    }
-    
-    @EventHandler
-    public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
-        UUID uuid = event.getPlayer().getUniqueId();
-        activeRecipeMenus.remove(uuid);
-        activeSmeltingMenus.remove(uuid);
-        awaitingChatInput.remove(uuid);
-        awaitingSmeltingInput.remove(uuid);
-        sourceMenus.remove(uuid);
-        sourceCategories.remove(uuid);
-    }
-
-    /**
-     * Open chat input for custom amount
-     */
-    private void openAmountInputGUI(Player player, Recipe recipe) {
-        player.closeInventory();
-        awaitingChatInput.put(player.getUniqueId(), recipe.getId());
-        plugin.getMessageUtil().send(player, "exchange.input-prompt");
-    }
-    
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerChat(AsyncPlayerChatEvent event) {
-        Player player = event.getPlayer();
-        UUID uuid = player.getUniqueId();
-        
-        // BATCH SMELTING: Handle smelting chat input
-        if (awaitingSmeltingInput.containsKey(uuid)) {
-            if (chatLimiter.getIfPresent(uuid) != null) {
-                event.setCancelled(true);
-                return;
-            }
-            chatLimiter.put(uuid, System.currentTimeMillis());
-            
-            event.setCancelled(true);
-            String smeltingId = awaitingSmeltingInput.remove(uuid);
-            String input = event.getMessage().trim();
-            
-            SmeltingRecipe recipe = plugin.getSmeltingManager().getRecipe(smeltingId);
-            if (recipe == null) return;
-            
-            // Handle "all" keyword
-            if (input.equalsIgnoreCase("all")) {
-                plugin.getScheduler().runSync(() -> {
-                    int maxBatch = plugin.getSmeltingManager().getMaxBatchCount(player, recipe);
-                    if (maxBatch > 0) {
-                        plugin.getSmeltingManager().startSmelting(player, recipe, maxBatch);
-                    } else {
-                        plugin.getMessageUtil().send(player, "smelt.missing-materials",
-                            "material", recipe.getInputMaterial(),
-                            "amount", String.valueOf(recipe.getInputAmount()));
-                    }
-                });
-                return;
-            }
-            
-            // Parse number with k/m support
-            int amount = NumberParser.parse(input);
-            
-            if (amount <= 0) {
-                plugin.getScheduler().runSync(() -> {
-                    plugin.getMessageUtil().send(player, "smelt.input-invalid");
-                });
-                return;
-            }
-            
-            // Execute smelting
-            plugin.getScheduler().runSync(() -> {
-                plugin.getSmeltingManager().startSmelting(player, recipe, amount);
-            });
-            return;
-        }
-        
-        // Crafting/Exchange chat input
-        if (!awaitingChatInput.containsKey(uuid)) return;
-        
-        // ISSUE-008 FIX: Rate limit để tránh spam chat input
-        if (chatLimiter.getIfPresent(uuid) != null) {
-            event.setCancelled(true);
-            return;
-        }
-        chatLimiter.put(uuid, System.currentTimeMillis());
-        
-        event.setCancelled(true);
-        String recipeId = awaitingChatInput.remove(uuid);
-        String input = event.getMessage().trim();
-        
-        Recipe recipe = plugin.getRecipeManager().getRecipe(recipeId);
-        if (recipe == null) return;
-        
-        // Handle "all" keyword
-        if (input.equalsIgnoreCase("all")) {
-            // Get total items player has
-            Recipe.Ingredient ing = recipe.getIngredients().get(0);
-            int playerHas = countItems(player, ing);
-            
-            plugin.getScheduler().runSync(() -> {
-                plugin.getCraftingExecutor().executeExchange(player, recipe, playerHas);
-            });
-            return;
-        }
-        
-        // Parse number with k/m support
-        int amount = NumberParser.parse(input);
-        
-        if (amount <= 0) {
-            plugin.getScheduler().runSync(() -> {
-                plugin.getMessageUtil().send(player, "exchange.input-invalid");
-            });
-            return;
-        }
-        
-        // Execute exchange
-        plugin.getScheduler().runSync(() -> {
-            plugin.getCraftingExecutor().executeExchange(player, recipe, amount);
-        });
-    }
 }

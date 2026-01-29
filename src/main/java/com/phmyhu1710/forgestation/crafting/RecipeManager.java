@@ -16,7 +16,7 @@ import java.util.Map;
 public class RecipeManager {
 
     private final ForgeStationPlugin plugin;
-    private final Map<String, Recipe> recipes = new HashMap<>();
+    private final Map<String, Recipe> recipes = new java.util.LinkedHashMap<>();
 
     public RecipeManager(ForgeStationPlugin plugin) {
         this.plugin = plugin;
@@ -27,13 +27,25 @@ public class RecipeManager {
         
         Map<String, FileConfiguration> recipeConfigs = plugin.getConfigManager().getRecipeConfigs();
         
-        plugin.getLogger().info("[RecipeManager] Loading from " + recipeConfigs.size() + " recipe files: " + recipeConfigs.keySet());
+        plugin.debug("[RecipeManager] Loading from " + recipeConfigs.size() + " recipe files: " + recipeConfigs.keySet());
         
         for (Map.Entry<String, FileConfiguration> entry : recipeConfigs.entrySet()) {
             String fileName = entry.getKey();
             FileConfiguration config = entry.getValue();
             
-            plugin.getLogger().info("[RecipeManager] Processing file: " + fileName);
+            plugin.debug("[RecipeManager] Processing file: " + fileName);
+            
+            // Register custom command(s) if set
+            if (config.isList("open_command")) {
+                for (String cmd : config.getStringList("open_command")) {
+                     plugin.getCustomCommandManager().registerCommand(cmd, fileName.toLowerCase());
+                }
+            } else {
+                String openCommand = config.getString("open_command");
+                if (openCommand != null && !openCommand.isEmpty()) {
+                    plugin.getCustomCommandManager().registerCommand(openCommand, fileName.toLowerCase());
+                }
+            }
             
             ConfigurationSection recipesSection = config.getConfigurationSection("recipes");
             if (recipesSection == null) {
@@ -41,7 +53,7 @@ public class RecipeManager {
                 continue;
             }
             
-            plugin.getLogger().info("[RecipeManager] Found recipes section with keys: " + recipesSection.getKeys(false));
+            plugin.debug("[RecipeManager] Found recipes section with keys: " + recipesSection.getKeys(false));
             
             for (String recipeId : recipesSection.getKeys(false)) {
                 ConfigurationSection recipeConfig = recipesSection.getConfigurationSection(recipeId);
@@ -51,14 +63,14 @@ public class RecipeManager {
                 }
                 
                 if (!recipeConfig.getBoolean("enabled", true)) {
-                    plugin.getLogger().info("[RecipeManager] Recipe disabled: " + recipeId);
+                    plugin.debug("[RecipeManager] Recipe disabled: " + recipeId);
                     continue;
                 }
                 
                 try {
                     Recipe recipe = new Recipe(recipeId, fileName, recipeConfig);
                     recipes.put(recipeId, recipe);
-                    plugin.getLogger().info("[RecipeManager] Loaded recipe: " + recipeId + " from " + fileName);
+                    plugin.debug("[RecipeManager] Loaded recipe: " + recipeId + " from " + fileName);
                 } catch (Exception e) {
                     plugin.getLogger().warning("[RecipeManager] Failed to load recipe " + recipeId + ": " + e.getMessage());
                     e.printStackTrace();
@@ -66,15 +78,18 @@ public class RecipeManager {
             }
         }
         
-        plugin.getLogger().info("Loaded " + recipes.size() + " crafting recipes");
+        plugin.debug("Loaded " + recipes.size() + " crafting recipes");
     }
 
     public Recipe getRecipe(String id) {
         return recipes.get(id);
     }
 
+    /**
+     * ISSUE-004 FIX: Returns unmodifiable view instead of copy to reduce allocations
+     */
     public Map<String, Recipe> getAllRecipes() {
-        return new HashMap<>(recipes);
+        return java.util.Collections.unmodifiableMap(recipes);
     }
 
     public Map<String, Recipe> getRecipesByFolder(String folder) {
@@ -134,24 +149,31 @@ public class RecipeManager {
      * Used for both crafting and exchange recipes
      */
     public int getDuration(Player player, Recipe recipe) {
+        return (int) (getDurationTicks(player, recipe) / 20);
+    }
+    
+    /**
+     * TICK-SUPPORT: Get duration in ticks
+     */
+    public long getDurationTicks(Player player, Recipe recipe) {
         // 1. Get base duration
-        int baseDuration = getBaseDuration(recipe);
+        long baseTicks = getBaseDurationTicks(recipe);
         
         // 2. Get crafting level của player
         PlayerDataManager.PlayerData data = plugin.getPlayerDataManager().getPlayerData(player);
         int craftingLevel = data.getUpgradeLevel("crafting_speed");
         
-        if (craftingLevel <= 0) return baseDuration;
+        if (craftingLevel <= 0) return baseTicks;
         
         // 3. Apply reduction from upgrade config
         var upgrade = plugin.getUpgradeManager().getUpgrade("crafting_speed");
         if (upgrade != null) {
-            return upgrade.applyDurationReduction(baseDuration, craftingLevel);
+            return upgrade.applyDurationReduction(baseTicks, craftingLevel);
         }
         
-        // Fallback: use expression if no upgrade config
+        // Fallback
         Map<String, Double> vars = ExpressionParser.createVariables(craftingLevel, 0, craftingLevel);
-        return ExpressionParser.parseTimeSeconds(recipe.getCooldownExpression(), vars);
+        return ExpressionParser.parseTimeTicks(recipe.getCooldownExpression(), vars);
     }
     
     /**
@@ -165,10 +187,15 @@ public class RecipeManager {
      * Get base duration (without player upgrades)
      */
     public int getBaseDuration(Recipe recipe) {
+        return (int) (getBaseDurationTicks(recipe) / 20);
+    }
+    
+    /**
+     * TICK-SUPPORT: Get base duration in ticks
+     */
+    public long getBaseDurationTicks(Recipe recipe) {
         Map<String, Double> vars = ExpressionParser.createVariables(0, 0, 0);
-        int duration = ExpressionParser.parseTimeSeconds(recipe.getCooldownExpression(), vars);
-        plugin.debug("Recipe " + recipe.getId() + " duration: " + duration + "s");
-        return duration;
+        return ExpressionParser.parseTimeTicks(recipe.getCooldownExpression(), vars);
     }
     
     /**
