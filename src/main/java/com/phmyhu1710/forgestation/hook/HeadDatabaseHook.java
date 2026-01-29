@@ -1,5 +1,6 @@
 package com.phmyhu1710.forgestation.hook;
 
+import com.phmyhu1710.forgestation.util.MissingItemUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -23,10 +24,10 @@ public class HeadDatabaseHook implements ItemHook {
 
     @Override
     public ItemStack getItem(@NotNull String... args) {
-        if (args.length == 0) return new ItemStack(Material.PLAYER_HEAD);
+        if (args.length == 0) return MissingItemUtil.create("HeadDatabase", "None");
         String id = args[0];
         
-        if (api == null || getItemHeadMethod == null) return new ItemStack(Material.PLAYER_HEAD);
+        if (api == null || getItemHeadMethod == null) return MissingItemUtil.create("HeadDatabase", id);
         
         try {
             Object result = getItemHeadMethod.invoke(api, id);
@@ -35,7 +36,7 @@ public class HeadDatabaseHook implements ItemHook {
             }
         } catch (Exception ignored) {}
         
-        return new ItemStack(Material.PLAYER_HEAD);
+        return MissingItemUtil.create("HeadDatabase", id);
     }
     
     @Override

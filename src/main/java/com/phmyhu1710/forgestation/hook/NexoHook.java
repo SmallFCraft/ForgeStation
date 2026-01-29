@@ -1,5 +1,6 @@
 package com.phmyhu1710.forgestation.hook;
 
+import com.phmyhu1710.forgestation.util.MissingItemUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +22,7 @@ public class NexoHook implements ItemHook {
     @Nullable
     public ItemStack getItem(@NotNull final String... arguments) {
         if (arguments.length == 0) {
-            return new ItemStack(Material.STONE);
+            return MissingItemUtil.create("Nexo", "None");
         }
 
         final ItemStack cached = cache.get(arguments[0]);
@@ -36,7 +37,7 @@ public class NexoHook implements ItemHook {
                 .invoke(null, arguments[0]);
 
             if (builder == null) {
-                return new ItemStack(Material.STONE);
+                return MissingItemUtil.create("Nexo", arguments[0]);
             }
 
             // Call build() method on ItemBuilder
@@ -51,7 +52,7 @@ public class NexoHook implements ItemHook {
             // Nexo not available or item not found
         }
 
-        return new ItemStack(Material.STONE);
+        return MissingItemUtil.create("Nexo", arguments[0]);
     }
 
     @Override

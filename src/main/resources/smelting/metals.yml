@@ -1,0 +1,63 @@
+# ═══════════════════════════════════════════════
+#           FORGESTATION METAL SMELTING
+# ═══════════════════════════════════════════════
+
+open_command:
+  - nungkimloai
+  - smeltmetals
+
+smelting:
+  # ─────────────────────────────────────────────
+  # Nung Thép (Ví dụ: Iron Block -> Custom Steel)
+  # ─────────────────────────────────────────────
+  steel_smelting:
+    enabled: true
+    display-name: "&f🔥 Nung Thép Tinh Luyện"
+    permission: "forgestation.smelt.steel"
+
+    icon:
+      material: IRON_BLOCK
+      slot: 11
+      name: "&f🔥 Nung Thép Tinh Luyện"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "&8┃ &7» &fIron Block &8× &e%input_amount% %input_status%"
+        - "&8┃   &7Đang có: &b%owned_input%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNHIÊN LIỆU:"
+        - "&8┃ &7» &fCoal Block &8× &e%fuel_amount% %fuel_status%"
+        - "&8┃   &7Đang có: &b%owned_fuel%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lSẢN PHẨM:"
+        - "&8┃ &7» &fSteel (Item mẫu) &8× &a%output_amount%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - ""
+        - "&7Level nung: &e%smelting_level% &8| &7Giảm: &a-%reduction%s"
+        - "&7Thời gian: &e%duration%s &8| &7Max batch: &e%max_batch%"
+        - ""
+        - "&7Trạng thái: %status%"
+        - ""
+        - "&e▶ Click trái: &fNung 1 lần"
+        - "&e▶ Click phải: &fNung tất cả"
+        - "&e▶ Shift+Click: &fNhập số lượng"
+
+    input:
+      type: EXTRA_STORAGE
+      material: IRON_BLOCK
+      amount: 1
+
+    output:
+      type: EXTRA_STORAGE
+      material: IRON_INGOT
+      # model-data: 12345 (Nếu có custom item)
+      amount: 1
+
+    duration: 30
+
+    fuel:
+      enabled: true
+      type: EXTRA_STORAGE
+      material: COAL_BLOCK
+      amount: 1

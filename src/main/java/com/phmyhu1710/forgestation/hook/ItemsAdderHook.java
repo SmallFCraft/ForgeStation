@@ -2,6 +2,7 @@ package com.phmyhu1710.forgestation.hook;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.phmyhu1710.forgestation.util.MissingItemUtil;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,7 @@ public class ItemsAdderHook implements ItemHook {
     @Nullable
     public ItemStack getItem(@NotNull final String... arguments) {
         if (arguments.length == 0) {
-            return new ItemStack(Material.STONE, 1);
+            return MissingItemUtil.create("ItemsAdder", "None");
         }
 
         final ItemStack cached = cache.getIfPresent(arguments[0]);
@@ -42,7 +43,7 @@ public class ItemsAdderHook implements ItemHook {
                 .invoke(null, arguments[0]);
 
             if (customStack == null) {
-                return new ItemStack(Material.STONE, 1);
+                return MissingItemUtil.create("ItemsAdder", arguments[0]);
             }
 
             ItemStack item = (ItemStack) customStackClass.getMethod("getItemStack")
@@ -57,7 +58,7 @@ public class ItemsAdderHook implements ItemHook {
             // ItemsAdder not available or item not found
         }
 
-        return new ItemStack(Material.STONE, 1);
+        return MissingItemUtil.create("ItemsAdder", arguments[0]);
     }
 
     @Override

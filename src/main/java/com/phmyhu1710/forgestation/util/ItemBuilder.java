@@ -88,8 +88,8 @@ public class ItemBuilder {
      */
     public static ItemStack buildMMOItem(ForgeStationPlugin plugin, String type, String id, int amount) {
         if (!plugin.getHookManager().isMMOItemsEnabled()) {
-            plugin.getLogger().warning("MMOItems not available, returning stone");
-            return new ItemStack(Material.STONE, amount);
+            plugin.getLogger().warning("MMOItems not available, returning missing item");
+            return MissingItemUtil.create("MMOItems", type + ":" + id);
         }
 
         try {
@@ -104,7 +104,7 @@ public class ItemBuilder {
             
             if (typeObj == null) {
                 plugin.getLogger().warning("MMOItems type not found: " + type);
-                return new ItemStack(Material.STONE, amount);
+                return MissingItemUtil.create("MMOItems", type + ":" + id);
             }
 
             // Get Item
@@ -114,7 +114,7 @@ public class ItemBuilder {
 
             if (item == null) {
                 plugin.getLogger().warning("MMOItem not found: " + type + ":" + id);
-                return new ItemStack(Material.STONE, amount);
+                return MissingItemUtil.create("MMOItems", type + ":" + id);
             }
 
             ItemStack result = (ItemStack) item;
@@ -122,8 +122,8 @@ public class ItemBuilder {
             return result;
 
         } catch (Exception e) {
-            plugin.getLogger().warning("Failed to create MMOItem: " + e.getMessage());
-            return new ItemStack(Material.STONE, amount);
+            plugin.getLogger().warning("Failed to create MMOItem (" + type + ":" + id + "): " + e.getMessage());
+            return MissingItemUtil.create("MMOItems", type + ":" + id);
         }
     }
 

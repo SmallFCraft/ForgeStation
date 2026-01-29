@@ -187,7 +187,7 @@ recipes:
 
     input:
       type: EXTRA_STORAGE
-      material: MELON
+      material: HAY_BLOCK
       amount: 128
     result:
       type: MMOITEMS

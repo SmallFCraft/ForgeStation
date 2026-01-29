@@ -65,6 +65,7 @@ public class HookManager {
         // MMOItems
         if (isPluginEnabled("MMOItems") && plugin.getConfigManager().getMainConfig().getBoolean("hooks.mmoitems", true)) {
             mmoItemsEnabled = true;
+            itemHooks.put("mmoitems", new MMOItemsHook(plugin));
             activeHooks.add("MMOItems");
             plugin.debug("Hooked into MMOItems!");
         }

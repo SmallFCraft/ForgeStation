@@ -63,5 +63,10 @@ hooks:
   # Items
   mmoitems: true
   extrastorage: true
+  # Custom Items
+  itemsadder: true
+  oraxen: false
+  nexo: false
+  headdatabase: false
   # Placeholder
   placeholderapi: true
