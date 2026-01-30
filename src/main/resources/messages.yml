@@ -51,6 +51,8 @@ craft:
   success: "%prefix%&a✓ &7Chế tạo &e%item% &7thành công!"
   failed: "%prefix%&c✗ &7Không đủ nguyên liệu!"
   missing-material: "%prefix%&c✗ &7Thiếu nguyên liệu: &e%amount%x %material%&7!"
+  failed-chance: "%prefix%&c✗ &7Chế tạo &e%item% &7thất bại! Tỉ lệ: &e%chance%%"
+  partial-success: "%prefix%&e⚡ &7Thành công &e%success%/%total% &7lần — nhận &e%success%× %item%&7!"
   no-money: "%prefix%&c✗ &7Không đủ &e%currency%&7! Cần: &e%amount%"
   cooldown: "%prefix%&e⏳ &7Vui lòng chờ &e%time%&7!"
   no-space: "%prefix%&c✗ &7Inventory đầy!"

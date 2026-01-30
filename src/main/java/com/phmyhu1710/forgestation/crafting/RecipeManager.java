@@ -204,4 +204,19 @@ public class RecipeManager {
     public int getBaseCooldown(Recipe recipe) {
         return getBaseDuration(recipe);
     }
+    
+    /**
+     * Tỉ lệ thành công hiệu dụng (0-100) = base chance + upgrade success_rate bonus
+     */
+    public double getEffectiveSuccessChance(Player player, Recipe recipe) {
+        double base = recipe.getSuccessChance();
+        if (base >= 100.0) return 100.0;
+        var upgrade = plugin.getUpgradeManager().getUpgrade("success_rate");
+        if (upgrade == null || !"CRAFT_SUCCESS_RATE".equals(upgrade.getEffectType())) {
+            return Math.min(100, base);
+        }
+        int level = plugin.getPlayerDataManager().getPlayerData(player).getUpgradeLevel("success_rate");
+        double bonus = level * upgrade.getPercentPerLevel();
+        return Math.min(100.0, base + bonus);
+    }
 }

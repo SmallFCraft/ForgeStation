@@ -403,12 +403,12 @@ public class MenuManager implements Listener {
         return plugin.getConfigManager().getMainConfig().getString("queue.pending-lore-cancel", "&cClick để hủy");
     }
 
-    private void fillCraftingQueueSlots(Player player, Inventory inv) {
+    private void fillQueueSlots(Player player, Inventory inv, boolean unused) {
         List<Integer> guiSlots = getQueueSlotsFromConfig();
         if (guiSlots.isEmpty()) return;
-        int maxUnlocked = plugin.getCraftingExecutor().getQueueSlotsUnlocked(player);
-        List<com.phmyhu1710.forgestation.crafting.CraftingExecutor.PendingCraftingTask> queue =
-            plugin.getCraftingExecutor().getCraftingQueue(player);
+        int maxUnlocked = plugin.getUpgradeManager().getQueueSlotsUnlocked(player);
+        List<com.phmyhu1710.forgestation.queue.TaskQueueManager.PendingTask> queue =
+            plugin.getTaskQueueManager().getQueue(player);
         Map<String, Integer> invSnapshot = com.phmyhu1710.forgestation.util.InventoryUtil.createInventorySnapshot(player);
         for (int i = 0; i < guiSlots.size(); i++) {
             int guiSlot = guiSlots.get(i);
@@ -416,20 +416,29 @@ public class MenuManager implements Listener {
             ItemStack icon;
             if (i < queue.size()) {
                 var pending = queue.get(i);
-                var recipe = plugin.getRecipeManager().getRecipe(pending.getRecipeId());
-                if (recipe != null) {
-                    icon = createRecipeIcon(player, recipe, invSnapshot);
-                    ItemMeta meta = icon.getItemMeta();
-                    if (meta != null) {
-                        List<String> lore = meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                        lore.add("");
-                        lore.add(MessageUtil.colorize(getQueuePendingLabel(i + 1)));
-                        lore.add(MessageUtil.colorize(getQueuePendingLoreCancel()));
-                        meta.setLore(lore);
-                        icon.setItemMeta(meta);
+                if (pending.getType() == com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.CRAFT) {
+                    var recipe = plugin.getRecipeManager().getRecipe(pending.getRecipeId());
+                    if (recipe != null) {
+                        icon = createRecipeIcon(player, recipe, invSnapshot);
+                    } else {
+                        icon = createItem(Material.BARRIER, "&cCông thức không tồn tại", null, false);
                     }
                 } else {
-                    icon = createItem(Material.BARRIER, "&cCông thức không tồn tại", null, false);
+                    var recipe = plugin.getSmeltingManager().getRecipe(pending.getRecipeId());
+                    if (recipe != null) {
+                        icon = createSmeltingIcon(player, recipe);
+                    } else {
+                        icon = createItem(Material.BARRIER, "&cCông thức không tồn tại", null, false);
+                    }
+                }
+                ItemMeta meta = icon.getItemMeta();
+                if (meta != null) {
+                    List<String> lore = meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+                    lore.add("");
+                    lore.add(MessageUtil.colorize(getQueuePendingLabel(i + 1)));
+                    lore.add(MessageUtil.colorize(getQueuePendingLoreCancel()));
+                    meta.setLore(lore);
+                    icon.setItemMeta(meta);
                 }
             } else if (i < maxUnlocked) {
                 icon = createQueueEmptySlotItem();
@@ -440,40 +449,12 @@ public class MenuManager implements Listener {
         }
     }
 
+    private void fillCraftingQueueSlots(Player player, Inventory inv) {
+        fillQueueSlots(player, inv, true);
+    }
+
     private void fillSmeltingQueueSlots(Player player, Inventory inv) {
-        List<Integer> guiSlots = getQueueSlotsFromConfig();
-        if (guiSlots.isEmpty()) return;
-        int maxUnlocked = plugin.getUpgradeManager().getQueueSlotsUnlocked(player);
-        List<com.phmyhu1710.forgestation.smelting.SmeltingManager.PendingSmeltingTask> queue =
-            plugin.getSmeltingManager().getSmeltingQueue(player);
-        for (int i = 0; i < guiSlots.size(); i++) {
-            int guiSlot = guiSlots.get(i);
-            if (guiSlot < 0 || guiSlot >= inv.getSize()) continue;
-            ItemStack icon;
-            if (i < queue.size()) {
-                var pending = queue.get(i);
-                var recipe = plugin.getSmeltingManager().getRecipe(pending.getRecipeId());
-                if (recipe != null) {
-                    icon = createSmeltingIcon(player, recipe);
-                    ItemMeta meta = icon.getItemMeta();
-                    if (meta != null) {
-                        List<String> lore = meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-                        lore.add("");
-                        lore.add(MessageUtil.colorize(getQueuePendingLabel(i + 1)));
-                        lore.add(MessageUtil.colorize(getQueuePendingLoreCancel()));
-                        meta.setLore(lore);
-                        icon.setItemMeta(meta);
-                    }
-                } else {
-                    icon = createItem(Material.BARRIER, "&cCông thức không tồn tại", null, false);
-                }
-            } else if (i < maxUnlocked) {
-                icon = createQueueEmptySlotItem();
-            } else {
-                icon = createQueueLockedSlotItem();
-            }
-            inv.setItem(guiSlot, icon);
-        }
+        fillQueueSlots(player, inv, false);
     }
 
     private void handleAutoPopulate(Player player, MenuTemplate.AutoPopulateConfig config, Inventory inv, int page) {
@@ -939,6 +920,10 @@ public class MenuManager implements Listener {
                     int duration = plugin.getRecipeManager().getDuration(player, recipe);
                     text = text.replace("%duration%", formatTime(duration));
                     text = text.replace("%cooldown%", formatTime(duration)); // Alias
+                    // Tỉ lệ thành công
+                    double effectiveChance = plugin.getRecipeManager().getEffectiveSuccessChance(player, recipe);
+                    text = text.replace("%chance%", String.format("%.0f", effectiveChance));
+                    text = text.replace("%chance_base%", String.format("%.0f", recipe.getSuccessChance()));
                 } else {
                     plugin.debug("Recipe not found for ID: " + value);
                 }
@@ -958,6 +943,8 @@ public class MenuManager implements Listener {
         text = text.replace("%status%", "");
         text = text.replace("%duration%", "0s");
         text = text.replace("%cooldown%", "0s");
+        text = text.replace("%chance%", "100");
+        text = text.replace("%chance_base%", "100");
         
         return text;
     }
@@ -1148,24 +1135,13 @@ public class MenuManager implements Listener {
         List<Integer> queueSlots = getQueueSlotsFromConfig();
         if (queueSlots.contains(slot)) {
             int index = queueSlots.indexOf(slot);
-            if ("crafting-menu".equals(menuName)) {
-                java.util.List<com.phmyhu1710.forgestation.crafting.CraftingExecutor.PendingCraftingTask> cQueue =
-                    plugin.getCraftingExecutor().getCraftingQueue(player);
-                if (index >= 0 && index < cQueue.size()) {
-                    plugin.getCraftingExecutor().cancelCraftingQueueSlot(player, index);
-                    openMenu(player, menuName, menuPages.getOrDefault(player.getUniqueId(), 0), true);
-                }
-                return; // Click vào ô hàng chờ (có task hay không) → không xử lý action khác
+            var queue = plugin.getTaskQueueManager().getQueue(player);
+            if (index >= 0 && index < queue.size()) {
+                plugin.getTaskQueueManager().removeSlot(player, index);
+                plugin.getMessageUtil().send(player, "craft.queue-slot-cancelled");
+                openMenu(player, menuName, menuPages.getOrDefault(player.getUniqueId(), 0), true);
             }
-            if ("smelting-menu".equals(menuName)) {
-                java.util.List<com.phmyhu1710.forgestation.smelting.SmeltingManager.PendingSmeltingTask> sQueue =
-                    plugin.getSmeltingManager().getSmeltingQueue(player);
-                if (index >= 0 && index < sQueue.size()) {
-                    plugin.getSmeltingManager().cancelSmeltingQueueSlot(player, index);
-                    openMenu(player, menuName, menuPages.getOrDefault(player.getUniqueId(), 0), true);
-                }
-                return; // Click vào ô hàng chờ → không xử lý action khác
-            }
+            return;
         }
 
         // Find clicked item action
@@ -1296,11 +1272,11 @@ public class MenuManager implements Listener {
             case "CANCEL_TASK":
                 activeMenus.remove(uuid);
                 player.closeInventory();
-                if (plugin.getCraftingExecutor().isCrafting(player)) {
-                    plugin.getCraftingExecutor().cancelCrafting(player);
-                } else if (plugin.getSmeltingManager().isSmelting(player)) {
-                    plugin.getSmeltingManager().cancelSmelting(player);
-                } else {
+                boolean hadCraft = plugin.getCraftingExecutor().isCrafting(player);
+                boolean hadSmelt = plugin.getSmeltingManager().isSmelting(player);
+                if (hadCraft) plugin.getCraftingExecutor().cancelCrafting(player);
+                if (hadSmelt) plugin.getSmeltingManager().cancelSmelting(player);
+                if (!hadCraft && !hadSmelt) {
                     plugin.getMessageUtil().send(player, "craft.no-active-task");
                 }
                 break;
@@ -1607,11 +1583,13 @@ public class MenuManager implements Listener {
     
     /**
      * Handle chat input for custom craft/smelt amounts
+     * ISSUE-007 FIX: Dùng AsyncChatEvent thay cho AsyncPlayerChatEvent (deprecated Paper 1.20.5+)
      */
     @EventHandler(priority = org.bukkit.event.EventPriority.LOWEST)
-    public void onPlayerChat(org.bukkit.event.player.AsyncPlayerChatEvent event) {
+    public void onAsyncChat(io.papermc.paper.event.player.AsyncChatEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
+        String input = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(event.message()).trim();
         
         // Handle smelting input
         if (awaitingSmeltInput.containsKey(uuid)) {
@@ -1623,7 +1601,6 @@ public class MenuManager implements Listener {
             
             event.setCancelled(true);
             String smeltingId = awaitingSmeltInput.remove(uuid);
-            String input = event.getMessage().trim();
             
             var recipe = plugin.getSmeltingManager().getRecipe(smeltingId);
             if (recipe == null) return;
@@ -1667,7 +1644,6 @@ public class MenuManager implements Listener {
             
             event.setCancelled(true);
             String recipeId = awaitingCraftInput.remove(uuid);
-            String input = event.getMessage().trim();
             
             var recipe = plugin.getRecipeManager().getRecipe(recipeId);
             if (recipe == null) return;

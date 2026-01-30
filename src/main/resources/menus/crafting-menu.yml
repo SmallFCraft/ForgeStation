@@ -20,6 +20,22 @@ border:
 
 items:
   # ─────────────────────────────────────────────
+  # INFO SECTION (upgrade stats)
+  # ─────────────────────────────────────────────
+  info:
+    slot: 4
+    material: CRAFTING_TABLE
+    glow: true
+    name: "&6&l⚒ Thông Tin Chế Tạo"
+    lore:
+      - ""
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - "&7Level chế tạo: &e%upgrade_level_crafting_speed%"
+      - "&7Thành công: &eLv.%upgrade_level_success_rate% &8| &7Hàng chờ: &e%upgrade_level_queue_slots%"
+      - "&7Song song: &e%upgrade_level_parallel_tasks%"
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  # ─────────────────────────────────────────────
   # NAVIGATION BUTTONS
   # ─────────────────────────────────────────────
   prev_page:

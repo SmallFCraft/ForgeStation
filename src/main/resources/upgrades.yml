@@ -33,15 +33,15 @@ upgrades:
     
     # Chi phí mỗi level (expression với biến 'level')
     cost-per-level:
-      vault: "100000 * level * level"
+      vault: "45000 * level * level"
       exp: "50 * level"
     
     # Hiệu ứng cải tiến - PERCENTAGE based
     effect:
       type: REDUCE_CRAFT_COOLDOWN
       mode: PERCENTAGE  # PERCENTAGE hoặc FIXED
-      percent-per-level: 1.5  
-      min-duration: 0.5 # (Tính theo giây)
+      percent-per-level: 2 
+      min-duration: 1.5 # (Tính theo giây)
     
     # Icon trong menu upgrade
     icon:
@@ -62,14 +62,14 @@ upgrades:
     max-level: 50
     
     cost-per-level:
-      vault: "100000 * level * level"  # Chi phí tăng theo cấp số nhân
-    
+      vault: "45000 * level * level"  # Chi phí tăng theo cấp số nhân
+      exp: "50 * level"
     # Hiệu ứng cải tiến - PERCENTAGE based
     effect:
       type: REDUCE_SMELT_DURATION
       mode: PERCENTAGE
-      percent-per-level: 1.8
-      min-duration: 0.5  # Tính theo giây
+      percent-per-level: 2
+      min-duration: 1.5  # Tính theo giây
     
     icon:
       material: FURNACE
@@ -77,11 +77,63 @@ upgrades:
 
 
   # ─────────────────────────────────────────────
+  # Tỉ lệ thành công chế tạo (cho recipe có chance < 100%)
+  # Mỗi level cộng thêm % vào base chance. VD: recipe 50%, level 10 = 50 + 20 = 70%
+  # ─────────────────────────────────────────────
+  success_rate:
+    display-name: "&a✦ Tỉ Lệ Thành Công"
+    description:
+      - "&7Tăng tỉ lệ thành công khi chế tạo"
+      - "&7công thức có tỉ lệ (luyendan, v.v.)"
+      - ""
+      - "&7Hiệu ứng: &a+2% &7mỗi level"
+      - "&7Max bonus: &a+50%"
+    max-level: 25
+    cost-per-level:
+      vault: "50000 * level"
+      exp: "30 * level"
+    effect:
+      type: CRAFT_SUCCESS_RATE
+      percent-per-level: 2.0
+    icon:
+      material: EMERALD
+      slot: 12
+
+  # ─────────────────────────────────────────────
+  # Chạy song song (1 main + N hàng chờ cùng lúc)
+  # Lv.1 = 2 task, Lv.2 = 3 task, Lv.3 = 4 task...
+  # Chi phí: 100000 EXP/level
+  # ─────────────────────────────────────────────
+  parallel_tasks:
+    display-name: "&b⚡ Chạy Song Song"
+    description:
+      - "&7Nhiều task chế tạo/nung chạy"
+      - "&7cùng lúc thay vì chờ từng cái."
+      - ""
+      - "&7Lv.1: 2 task | Lv.2: 3 task | ..."
+    max-level: 5
+    cost-per-level:
+      exp: "100000"
+    effect:
+      type: PARALLEL_TASKS
+    icon:
+      material: BLAZE_POWDER
+      slot: 14
+
+  # ─────────────────────────────────────────────
   # Slot hàng chờ (mở thêm ô chờ khi chế tạo/nung)
-  # Chi phí lấy từ config.yml queue.unlock-cost-playerpoints (mặc định 5000)
+  # Chi phí: 5000 Nguyên Thạch/level
   # ─────────────────────────────────────────────
   queue_slots:
-    display-name: "Slot hàng chờ"
+    display-name: "&d📥 Slot Hàng Chờ"
+    description:
+      - "&7Mở thêm ô hàng chờ khi chế tạo/nung."
+      - "&7Mỗi slot = thêm 1 công việc chờ xử lý."
+      - ""
+      - "&7Max: &a10 slot &7hàng chờ"
     max-level: 10
     cost-per-level:
       playerpoints: "5000"
+    icon:
+      material: HOPPER
+      slot: 13

@@ -5,15 +5,19 @@ import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Mathematical expression parser using exp4j
+ * ISSUE-008 FIX: Cache parsed Expression để giảm CPU khi evaluate nhiều lần
  */
 public class ExpressionParser {
 
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
+    private static final int CACHE_MAX_SIZE = 512;
+    private static final Map<String, Expression> EXPR_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Evaluate an expression with given variables
@@ -34,34 +38,40 @@ public class ExpressionParser {
         }
         
         try {
-            // Extract variable names from expression
-            Matcher matcher = VARIABLE_PATTERN.matcher(expressionStr);
-            ExpressionBuilder builder = new ExpressionBuilder(expressionStr);
-            
+            Expression expression = getOrBuildExpression(expressionStr);
+            synchronized (expression) {
+                for (Map.Entry<String, Double> entry : variables.entrySet()) {
+                    try {
+                        expression.setVariable(entry.getKey(), entry.getValue());
+                    } catch (IllegalArgumentException ignored) {
+                        // Variable not in expression, ignore
+                    }
+                }
+                return expression.evaluate();
+            }
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
+     * ISSUE-008: Lấy Expression từ cache hoặc build mới
+     */
+    private static Expression getOrBuildExpression(String expressionStr) {
+        return EXPR_CACHE.computeIfAbsent(expressionStr, s -> {
+            if (EXPR_CACHE.size() >= CACHE_MAX_SIZE) {
+                EXPR_CACHE.clear();
+            }
+            Matcher matcher = VARIABLE_PATTERN.matcher(s);
+            ExpressionBuilder builder = new ExpressionBuilder(s);
             while (matcher.find()) {
                 String varName = matcher.group();
-                // Skip math functions
                 if (!isMathFunction(varName)) {
                     builder.variable(varName);
                 }
             }
-            
-            Expression expression = builder.build();
-            
-            // Set variable values
-            for (Map.Entry<String, Double> entry : variables.entrySet()) {
-                try {
-                    expression.setVariable(entry.getKey(), entry.getValue());
-                } catch (IllegalArgumentException ignored) {
-                    // Variable not in expression, ignore
-                }
-            }
-            
-            return expression.evaluate();
-        } catch (Exception e) {
-            // If parsing fails, return 0
-            return 0;
-        }
+            return builder.build();
+        });
     }
 
     /**

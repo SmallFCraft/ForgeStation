@@ -283,6 +283,11 @@ public class RecipeDetailGUI {
         text = text.replace("%cooldown%", formattedTime);
         text = text.replace("%duration%", formattedTime); // Alias cho thống nhất với smelting
         
+        // Tỉ lệ thành công (chance)
+        double effectiveChance = plugin.getRecipeManager().getEffectiveSuccessChance(player, recipe);
+        text = text.replace("%chance%", String.format("%.0f", effectiveChance));
+        text = text.replace("%chance_base%", String.format("%.0f", recipe.getSuccessChance()));
+        
         // PlaceholderAPI
         if (plugin.getHookManager().isPlaceholderAPIEnabled()) {
             text = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, text);

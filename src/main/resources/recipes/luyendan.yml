@@ -6,7 +6,8 @@ recipes:
   linhthao_def:
     enabled: true
     display-name: "&f&lCuộn Phòng Thủ II"
-    duration: 120
+    duration: 3
+    chance: 50
     bulk-exchange: true
     icon:
       material: PAPER
@@ -16,6 +17,7 @@ recipes:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         - "&fTỷ lệ: &b10 &dLinh Thảo &f→ &e1 &fCuộn Phòng Thủ &6✦ II"
+        - "&fTỉ lệ thành công: &e%chance%&f% &7(base &e%chance_base%&7%)"
         - ""
 
         - "&fSẽ nhận: &e%estimated_points% &fCuộn Phòng Thủ &6✦ II"
@@ -41,7 +43,8 @@ recipes:
   linhthao_sucmanh:
     enabled: true
     display-name: "&f&lCuộn Sức Mạnh II"
-    duration: 120
+    duration: 3
+    chance: 50
     bulk-exchange: true
     icon:
       material: PAPER
@@ -51,6 +54,7 @@ recipes:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         - "&fTỷ lệ: &b10 &dLinh Thảo &f→ &e1 &fCuộn Sức Mạnh &6✦ II"
+        - "&fTỉ lệ thành công: &e%chance%&f% &7(base &e%chance_base%&7%)"
         - ""
 
         - "&fSẽ nhận: &e%estimated_points% &fCuộn Sức Mạnh &6✦ II"
@@ -76,7 +80,8 @@ recipes:
   linhthao_daoda:
     enabled: true
     display-name: "&f&lĐan Dược Đào Đá II"
-    duration: 120
+    duration: 3
+    chance: 50
     bulk-exchange: true
     icon:
       material: PAPER
@@ -84,8 +89,9 @@ recipes:
       name: "&fĐan Dược Đào Đá &6✦ II"
       lore:
         - ""
-        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+        - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         - "&fTỷ lệ: &b10 &dLinh Thảo &f→ &e1 &fĐan Dược Đào Đá &6✦ II"
+        - "&fTỉ lệ thành công: &e%chance%&f% &7(base &e%chance_base%&7%)"
         - ""
 
         - "&fSẽ nhận: &e%estimated_points% &fĐan Dược Đào Đá &6✦ II"

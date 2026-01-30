@@ -148,15 +148,13 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
             plugin.getMessageUtil().send(sender, "no-permission");
             return;
         }
-        if (plugin.getCraftingExecutor().isCrafting(player)) {
-            plugin.getCraftingExecutor().cancelCrafting(player);
-            return;
+        boolean hadCraft = plugin.getCraftingExecutor().isCrafting(player);
+        boolean hadSmelt = plugin.getSmeltingManager().isSmelting(player);
+        if (hadCraft) plugin.getCraftingExecutor().cancelCrafting(player);
+        if (hadSmelt) plugin.getSmeltingManager().cancelSmelting(player);
+        if (!hadCraft && !hadSmelt) {
+            plugin.getMessageUtil().send(sender, "craft.no-active-task");
         }
-        if (plugin.getSmeltingManager().isSmelting(player)) {
-            plugin.getSmeltingManager().cancelSmelting(player);
-            return;
-        }
-        plugin.getMessageUtil().send(sender, "craft.no-active-task");
     }
 
     private void handleCategory(CommandSender sender, String[] args) {

@@ -74,12 +74,13 @@ items:
     lore:
       - ""
       - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-      - "&fNâng cấp kỹ năng để"
-      - "&fgiảm thời gian chờ."
+      - "&fNâng cấp kỹ năng: tốc độ, tỉ lệ"
+      - "&fthành công, hàng chờ, chạy song song."
       - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
       - ""
-      - "&6⚒ &fCrafting: &eLv.%crafting_level%"
-      - "&c🔥 &fSmelting: &eLv.%smelting_level%"
+      - "&6⚒ &fChế tạo: &eLv.%upgrade_level_crafting_speed% &8| &c🔥 &fNung: &eLv.%upgrade_level_smelting_speed%"
+      - "&a✦ &fThành công: &eLv.%upgrade_level_success_rate% &8| &d📥 &fHàng chờ: &eLv.%upgrade_level_queue_slots%"
+      - "&b⚡ &fSong song: &eLv.%upgrade_level_parallel_tasks%"
       - ""
       - "&e▶ Click để mở!"
     action:

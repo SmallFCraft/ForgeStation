@@ -30,14 +30,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CraftingExecutor implements Listener {
 
     private final ForgeStationPlugin plugin;
-    private final Map<UUID, CraftingTask> activeTasks = new ConcurrentHashMap<>();
+    /** Mỗi player có List tasks chạy song song. Size <= getMaxParallelTasks(player). */
+    private final Map<UUID, java.util.List<CraftingTask>> activeTasks = new ConcurrentHashMap<>();
 
-    /** Hàng chờ craft: recipeId + batchCount (chưa consume, khi promote mới consume). Cả craft và exchange đều dùng chung. */
-    private final Map<UUID, java.util.List<PendingCraftingTask>> craftingQueue = new ConcurrentHashMap<>();
+    /** Hàng chờ thống nhất (craft + smelt) — lấy từ TaskQueueManager */
 
     // Global timer cho crafting (1 hệ thống: craft + exchange đều là CraftingTask)
     private int globalTimerTaskId = -1;
 
+    /** @deprecated Dùng TaskQueueManager.PendingTask. Giữ để tương thích API. */
+    @Deprecated
     public static final class PendingCraftingTask {
         private final String recipeId;
         private final int batchCount;
@@ -63,23 +65,28 @@ public class CraftingExecutor implements Listener {
      */
     private void startGlobalTimer() {
         globalTimerTaskId = plugin.getScheduler().runTimer(() -> {
-            // Tick crafting tasks (cả craft và exchange đều là CraftingTask)
-            if (!activeTasks.isEmpty()) {
-                java.util.Iterator<java.util.Map.Entry<UUID, CraftingTask>> it = activeTasks.entrySet().iterator();
+            if (activeTasks.isEmpty()) return;
+            java.util.List<CraftingTask> toComplete = new java.util.ArrayList<>();
+            for (java.util.Map.Entry<UUID, java.util.List<CraftingTask>> entry : new java.util.ArrayList<>(activeTasks.entrySet())) {
+                java.util.List<CraftingTask> list = entry.getValue();
+                if (list == null) continue;
+                java.util.Iterator<CraftingTask> it = list.iterator();
                 while (it.hasNext()) {
-                    java.util.Map.Entry<UUID, CraftingTask> entry = it.next();
-                    CraftingTask task = entry.getValue();
+                    CraftingTask task = it.next();
                     if (task == null || task.isCancelled()) {
                         it.remove();
                         continue;
                     }
                     task.tick();
                     if (task.getRemainingTicks() <= 0) {
-                        task.complete();
+                        it.remove();
+                        toComplete.add(task);
                     }
                 }
+                if (list.isEmpty()) activeTasks.remove(entry.getKey());
             }
-        }, 1L, 1L); // Every tick
+            for (CraftingTask task : toComplete) task.complete();
+        }, 1L, 1L);
     }
     
     /**
@@ -114,20 +121,18 @@ public class CraftingExecutor implements Listener {
         batchCount = Math.max(1, batchCount);
 
         UUID uuid = player.getUniqueId();
+        int maxParallel = plugin.getUpgradeManager().getMaxParallelTasks(player);
+        java.util.List<CraftingTask> list = activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>());
 
-        // Đang có task chạy → thêm vào hàng chờ (nếu còn slot). Một hệ thống craft (cả recipe result và rewards).
-        if (activeTasks.containsKey(uuid)) {
-            int maxQueue = plugin.getUpgradeManager().getQueueSlotsUnlocked(player);
-            java.util.List<PendingCraftingTask> queue = craftingQueue.computeIfAbsent(uuid, k -> new java.util.ArrayList<>());
-            if (queue.size() >= maxQueue) {
+        if (list.size() >= maxParallel) {
+            if (!plugin.getTaskQueueManager().addToQueue(player, com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.CRAFT, recipe.getId(), batchCount)) {
                 plugin.getMessageUtil().send(player, "craft.queue-full");
                 return false;
             }
-            queue.add(new PendingCraftingTask(recipe.getId(), batchCount));
             plugin.getMessageUtil().send(player, "craft.added-to-queue",
                 "item", recipe.getDisplayName(),
                 "count", String.valueOf(batchCount),
-                "queue", String.valueOf(queue.size()));
+                "queue", String.valueOf(plugin.getTaskQueueManager().getQueueSize(player)));
             return true;
         }
 
@@ -200,7 +205,7 @@ public class CraftingExecutor implements Listener {
 
         CraftingTask task = new CraftingTask(plugin, player, recipe, totalDurationTicks, batchCount);
         task.setRefundSnapshot(refundItems, refundExtraStorage, vaultCost, ppCost, recipe.getCoinEngineCurrency(), coinEngineCost);
-        activeTasks.put(player.getUniqueId(), task);
+        list.add(task);
         task.initialize();
 
         return true;
@@ -234,8 +239,9 @@ public class CraftingExecutor implements Listener {
         plugin.debug("Player has: " + playerHas + " items");
         plugin.debug("Base amount per exchange: " + baseAmountPerExchange);
 
-        // Đang có task chạy → thêm vào hàng chờ (1 hệ thống craft)
-        if (activeTasks.containsKey(uuid)) {
+        int maxParallelEx = plugin.getUpgradeManager().getMaxParallelTasks(player);
+        java.util.List<CraftingTask> listEx = activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>());
+        if (listEx.size() >= maxParallelEx) {
             if (playerHas < baseAmountPerExchange) {
                 plugin.getMessageUtil().send(player, "exchange.not-enough",
                     "required", String.valueOf(baseAmountPerExchange));
@@ -249,17 +255,14 @@ public class CraftingExecutor implements Listener {
                     "required", String.valueOf(baseAmountPerExchange));
                 return false;
             }
-            int maxQueue = plugin.getUpgradeManager().getQueueSlotsUnlocked(player);
-            java.util.List<PendingCraftingTask> queue = craftingQueue.computeIfAbsent(uuid, k -> new java.util.ArrayList<>());
-            if (queue.size() >= maxQueue) {
+            if (!plugin.getTaskQueueManager().addToQueue(player, com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.CRAFT, recipe.getId(), actualExchanges)) {
                 plugin.getMessageUtil().send(player, "craft.queue-full");
                 return false;
             }
-            queue.add(new PendingCraftingTask(recipe.getId(), actualExchanges));
             plugin.getMessageUtil().send(player, "craft.added-to-queue",
                 "item", recipe.getDisplayName(),
                 "count", String.valueOf(actualExchanges),
-                "queue", String.valueOf(queue.size()));
+                "queue", String.valueOf(plugin.getTaskQueueManager().getQueueSize(player)));
             return true;
         }
 
@@ -347,7 +350,7 @@ public class CraftingExecutor implements Listener {
         CraftingTask task = new CraftingTask(plugin, player, recipe, totalDurationTicks, actualExchanges);
         task.setExchangeMode(multiplier, remainder);
         task.setRefundSnapshot(refundItems, refundExtraStorage, 0, 0, "", 0);
-        activeTasks.put(uuid, task);
+        listEx.add(task);
         task.initialize();
 
         plugin.debug("Craft (exchange) task started with total duration: " + (totalDurationTicks / 20) + "s");
@@ -356,10 +359,22 @@ public class CraftingExecutor implements Listener {
     
     /**
      * Give exchange rewards instantly (when duration = 0)
+     * Áp dụng chance: roll per exchange, chỉ give theo số successes
      */
     private void giveExchangeRewardsInstant(Player player, Recipe recipe, int actualExchanges, double multiplier, int remainder) {
+        double effectiveChance = plugin.getRecipeManager().getEffectiveSuccessChance(player, recipe);
+        int successes = rollSuccesses(actualExchanges, effectiveChance);
+        if (successes <= 0) {
+            plugin.getMessageUtil().send(player, "craft.failed-chance",
+                "item", recipe.getDisplayName(),
+                "chance", String.format("%.1f", effectiveChance));
+            if (remainder > 0) {
+                plugin.getMessageUtil().send(player, "exchange.refund", "amount", String.valueOf(remainder));
+            }
+            return;
+        }
         for (Recipe.Reward reward : recipe.getRewards()) {
-            int baseReward = reward.getBaseAmount() * actualExchanges;
+            int baseReward = reward.getBaseAmount() * successes;
             int finalReward = (int) Math.floor(baseReward * multiplier);
             
             plugin.debug("Reward type: " + reward.getType() + " x" + finalReward);
@@ -381,7 +396,7 @@ public class CraftingExecutor implements Listener {
                     String cmd = reward.getCommand()
                         .replace("%player%", player.getName())
                         .replace("%amount%", String.valueOf(finalReward));
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                    com.phmyhu1710.forgestation.util.CommandUtil.safeDispatchConsole(cmd, "exchange:instant:" + recipe.getId());
                     break;
                 case "EXTRA_STORAGE":
                     String material = reward.getMaterial();
@@ -401,8 +416,22 @@ public class CraftingExecutor implements Listener {
             plugin.getMessageUtil().send(player, "exchange.refund",
                 "amount", String.valueOf(remainder));
         }
-        
+        if (successes < actualExchanges) {
+            plugin.getMessageUtil().send(player, "craft.partial-success",
+                "success", String.valueOf(successes), "total", String.valueOf(actualExchanges), "item", recipe.getDisplayName());
+        }
         plugin.debug("=== EXCHANGE COMPLETE (instant) ===");
+    }
+    
+    private static final java.util.Random RANDOM = new java.util.Random();
+    private int rollSuccesses(int batchCount, double chancePercent) {
+        if (chancePercent >= 100.0) return batchCount;
+        if (chancePercent <= 0.0) return 0;
+        int successes = 0;
+        for (int i = 0; i < batchCount; i++) {
+            if (RANDOM.nextDouble() * 100 < chancePercent) successes++;
+        }
+        return successes;
     }
     
     /**
@@ -418,37 +447,32 @@ public class CraftingExecutor implements Listener {
     // ═══════════════════════════════════════════════════════════════════════
     
     /**
-     * Cancel crafting task for player và hoàn trả nguyên liệu + tiền
+     * Cancel tất cả crafting tasks của player và hoàn trả nguyên liệu + tiền
      */
     public void cancelCrafting(Player player) {
-        CraftingTask task = activeTasks.remove(player.getUniqueId());
-        if (task != null) {
-            task.refund(player);
-            task.cancel();
+        java.util.List<CraftingTask> list = activeTasks.remove(player.getUniqueId());
+        if (list != null && !list.isEmpty()) {
+            for (CraftingTask task : list) {
+                task.refund(player);
+                task.cancel();
+            }
             plugin.getMessageUtil().send(player, "craft.cancelled-refund");
         }
     }
     
     /**
-     * Called when crafting completes. Nếu có hàng chờ thì bắt đầu task tiếp theo.
+     * Called when crafting completes. Promote từ queue chung (chỉ item type CRAFT)
      */
     public void onCraftingComplete(UUID uuid) {
-        activeTasks.remove(uuid);
-        java.util.List<PendingCraftingTask> queue = craftingQueue.get(uuid);
-        if (queue != null && !queue.isEmpty()) {
-            PendingCraftingTask next = queue.remove(0);
-            org.bukkit.entity.Player player = org.bukkit.Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline()) {
-                startCraftFromQueue(player, next.getRecipeId(), next.getBatchCount());
-            }
-        }
+        org.bukkit.entity.Player player = org.bukkit.Bukkit.getPlayer(uuid);
+        if (player == null || !player.isOnline()) return;
+        plugin.getTaskQueueManager().promoteNext(player, com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.CRAFT);
     }
 
     /**
-     * Bắt đầu craft/exchange từ hàng chờ (đã pop queue): kiểm tra nguyên liệu/tiền rồi consume + start.
-     * Nếu recipe là exchange (rewards) thì gọi executeExchange; ngược lại tạo CraftingTask.
+     * Bắt đầu craft/exchange từ hàng chờ. Gọi từ TaskQueueManager khi promote.
      */
-    private boolean startCraftFromQueue(org.bukkit.entity.Player player, String recipeId, int batchCount) {
+    public boolean startFromQueue(org.bukkit.entity.Player player, String recipeId, int batchCount) {
         Recipe recipe = plugin.getRecipeManager().getRecipe(recipeId);
         if (recipe == null) return false;
         if (recipe.isExchangeRecipe() && !recipe.getIngredients().isEmpty()) {
@@ -487,7 +511,7 @@ public class CraftingExecutor implements Listener {
         long totalDurationTicks = durationPerItemTicks * batchCount;
         CraftingTask task = new CraftingTask(plugin, player, recipe, totalDurationTicks, batchCount);
         task.setRefundSnapshot(refundItems, refundExtraStorage, vaultCost, ppCost, recipe.getCoinEngineCurrency(), coinEngineCost);
-        activeTasks.put(player.getUniqueId(), task);
+        activeTasks.computeIfAbsent(player.getUniqueId(), k -> new java.util.ArrayList<>()).add(task);
         task.initialize();
         return true;
     }
@@ -500,35 +524,43 @@ public class CraftingExecutor implements Listener {
     }
 
     /**
-     * Danh sách task trong hàng chờ (để hiển thị GUI). Index = vị trí slot.
+     * Hàng chờ thống nhất — dùng getTaskQueueManager().getQueue()
+     * @deprecated Dùng plugin.getTaskQueueManager().getQueue(player)
      */
+    @Deprecated
     public java.util.List<PendingCraftingTask> getCraftingQueue(org.bukkit.entity.Player player) {
-        java.util.List<PendingCraftingTask> list = craftingQueue.get(player.getUniqueId());
-        return list != null ? new java.util.ArrayList<>(list) : new java.util.ArrayList<>();
+        java.util.List<com.phmyhu1710.forgestation.queue.TaskQueueManager.PendingTask> all = plugin.getTaskQueueManager().getQueue(player);
+        java.util.List<PendingCraftingTask> out = new java.util.ArrayList<>();
+        for (var pt : all) {
+            if (pt.getType() == com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.CRAFT) {
+                out.add(new PendingCraftingTask(pt.getRecipeId(), pt.getBatchCount()));
+            }
+        }
+        return out;
     }
 
     /**
-     * Hủy 1 slot trong hàng chờ (index 0-based).
+     * Hủy 1 slot trong hàng chờ (index 0-based). Queue chung — gọi qua TaskQueueManager.
      */
-    public void cancelCraftingQueueSlot(org.bukkit.entity.Player player, int index) {
-        java.util.List<PendingCraftingTask> queue = craftingQueue.get(player.getUniqueId());
-        if (queue == null || index < 0 || index >= queue.size()) return;
-        queue.remove(index);
+    public void cancelQueueSlot(org.bukkit.entity.Player player, int index) {
+        plugin.getTaskQueueManager().removeSlot(player, index);
         plugin.getMessageUtil().send(player, "craft.queue-slot-cancelled");
     }
 
     /**
-     * Get active crafting task for player
+     * Get active crafting task đầu tiên (để tương thích)
      */
     public CraftingTask getActiveTask(Player player) {
-        return activeTasks.get(player.getUniqueId());
+        java.util.List<CraftingTask> list = activeTasks.get(player.getUniqueId());
+        return (list != null && !list.isEmpty()) ? list.get(0) : null;
     }
     
     /**
      * Check if player is currently crafting
      */
     public boolean isCrafting(Player player) {
-        return activeTasks.containsKey(player.getUniqueId());
+        java.util.List<CraftingTask> list = activeTasks.get(player.getUniqueId());
+        return list != null && !list.isEmpty();
     }
     
     // ═══════════════════════════════════════════════════════════════════════
@@ -543,20 +575,19 @@ public class CraftingExecutor implements Listener {
     public java.util.List<Object[]> saveAllTasksForReload() {
         java.util.List<Object[]> savedTasks = new java.util.ArrayList<>();
         
-        for (Map.Entry<UUID, CraftingTask> entry : activeTasks.entrySet()) {
+        for (Map.Entry<UUID, java.util.List<CraftingTask>> entry : activeTasks.entrySet()) {
             UUID uuid = entry.getKey();
-            CraftingTask task = entry.getValue();
-            
-            savedTasks.add(new Object[] {
-                uuid,
-                task.getRecipe().getId(),
-                (int) task.getRemainingTicks(),
-                (int) task.getTotalTicks(),
-                task.getBatchCount()
-            });
-            
-            // Cancel task (stop timer, remove bossbar)
-            task.cancel();
+            for (CraftingTask task : entry.getValue()) {
+                if (task == null) continue;
+                savedTasks.add(new Object[] {
+                    uuid,
+                    task.getRecipe().getId(),
+                    (int) task.getRemainingTicks(),
+                    (int) task.getTotalTicks(),
+                    task.getBatchCount()
+                });
+                task.cancel();
+            }
         }
         
         activeTasks.clear();
@@ -571,25 +602,23 @@ public class CraftingExecutor implements Listener {
     public void restoreTasksAfterReload(java.util.List<Object[]> savedTasks) {
         if (savedTasks == null || savedTasks.isEmpty()) return;
         
+        var db = getDatabase();
+        java.util.Map<UUID, java.util.List<Object[]>> offlineByUuid = new java.util.HashMap<>();
         int restored = 0;
+        
         for (Object[] data : savedTasks) {
             UUID uuid = (UUID) data[0];
+            org.bukkit.entity.Player player = Bukkit.getPlayer(uuid);
+            if (player == null || !player.isOnline()) {
+                offlineByUuid.computeIfAbsent(uuid, k -> new java.util.ArrayList<>())
+                    .add(new Object[]{(String) data[1], ((Number) data[2]).intValue(), ((Number) data[3]).intValue(), (int) data[4]});
+                continue;
+            }
+            
             String recipeId = (String) data[1];
-            // TICK-SUPPORT: Assume data stored as ticks if new, but here it's from memory so we know it's ticks
             long remainingTicks = ((Number) data[2]).longValue();
             long totalTicks = ((Number) data[3]).longValue();
             int batchCount = (int) data[4];
-            
-            // Tìm player online
-            org.bukkit.entity.Player player = Bukkit.getPlayer(uuid);
-            if (player == null || !player.isOnline()) {
-                // Player offline, lưu vào database để restore khi họ rejoin
-                var db = getDatabase();
-                if (db != null) {
-                    db.saveActiveCraftingTask(uuid, recipeId, (int) remainingTicks, (int) totalTicks, batchCount);
-                }
-                continue;
-            }
             
             // Tìm recipe mới (sau reload)
             Recipe recipe = plugin.getRecipeManager().getRecipe(recipeId);
@@ -601,35 +630,85 @@ public class CraftingExecutor implements Listener {
             // Tạo task mới với recipe reference mới
             CraftingTask task = new CraftingTask(plugin, player, recipe, remainingTicks, batchCount);
             task.setTotalTicks(totalTicks);
-            activeTasks.put(uuid, task);
+            activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>()).add(task);
             task.initialize();
             
             restored++;
             plugin.debug("Restored crafting task for " + player.getName() + ": " + recipeId);
         }
         
+        if (db != null && !offlineByUuid.isEmpty()) {
+            for (java.util.Map.Entry<UUID, java.util.List<Object[]>> e : offlineByUuid.entrySet()) {
+                db.saveAllActiveCraftingTasks(e.getKey(), e.getValue());
+            }
+        }
         if (restored > 0) {
             plugin.getLogger().info("Restored " + restored + " crafting tasks after reload");
         }
     }
     
     /**
+     * Lưu tất cả tasks + queue vào DB (không cancel). Dùng cho periodic save khi server crash.
+     */
+    public void saveAllTasksToDatabase() {
+        var db = getDatabase();
+        if (db == null) return;
+        for (Map.Entry<UUID, java.util.List<CraftingTask>> entry : activeTasks.entrySet()) {
+            java.util.List<CraftingTask> tasks = entry.getValue();
+            if (tasks == null || tasks.isEmpty()) continue;
+            java.util.List<Object[]> entries = new java.util.ArrayList<>();
+            for (CraftingTask t : tasks) {
+                if (t != null) entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+            }
+            if (!entries.isEmpty()) db.saveAllActiveCraftingTasks(entry.getKey(), entries);
+        }
+        var qm = plugin.getTaskQueueManager();
+        for (var eq : qm.getQueueMap().entrySet()) {
+            java.util.List<Object[]> entries = new java.util.ArrayList<>();
+            for (var pt : eq.getValue()) {
+                entries.add(new Object[]{ pt.getType().name(), pt.getRecipeId(), pt.getBatchCount() });
+            }
+            if (!entries.isEmpty()) db.saveUnifiedQueue(eq.getKey(), entries);
+        }
+    }
+
+    /**
      * Cancel all tasks (on plugin disable)
      */
     public void cancelAllTasks() {
         stopGlobalTimer();
-        int savedCount = activeTasks.size();
+        int savedCount = 0;
         var db = getDatabase();
-        for (Map.Entry<UUID, CraftingTask> entry : activeTasks.entrySet()) {
+        for (Map.Entry<UUID, java.util.List<CraftingTask>> entry : activeTasks.entrySet()) {
             UUID uuid = entry.getKey();
-            CraftingTask task = entry.getValue();
-            if (db != null) {
-                db.saveActiveCraftingTask(uuid, task.getRecipe().getId(),
-                    (int) task.getRemainingTicks(), (int) task.getTotalTicks(), task.getBatchCount());
+            java.util.List<CraftingTask> tasks = entry.getValue();
+            if (db != null && tasks != null && !tasks.isEmpty()) {
+                java.util.List<Object[]> entries = new java.util.ArrayList<>();
+                for (CraftingTask t : tasks) {
+                    if (t != null) {
+                        savedCount++;
+                        entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+                    }
+                }
+                if (!entries.isEmpty()) db.saveAllActiveCraftingTasks(uuid, entries);
             }
-            task.cancel();
+            for (CraftingTask task : tasks) {
+                if (task != null) task.cancel();
+            }
         }
         activeTasks.clear();
+        // Lưu hàng chờ thống nhất vào DB (server stop/reload)
+        if (db != null) {
+            var qm = plugin.getTaskQueueManager();
+            for (var eq : qm.getQueueMap().entrySet()) {
+                java.util.List<Object[]> entries = new java.util.ArrayList<>();
+                for (var pt : eq.getValue()) {
+                    entries.add(new Object[]{ pt.getType().name(), pt.getRecipeId(), pt.getBatchCount() });
+                }
+                if (!entries.isEmpty()) db.saveUnifiedQueue(eq.getKey(), entries);
+            }
+            qm.clear();
+        }
         if (savedCount > 0) {
             plugin.getLogger().info("Saved " + savedCount + " crafting tasks");
         }
@@ -643,20 +722,32 @@ public class CraftingExecutor implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         
-        // Handle crafting task
-        CraftingTask craftTask = activeTasks.get(uuid);
-        if (craftTask != null) {
+        java.util.List<CraftingTask> list = activeTasks.remove(uuid);
+        if (list != null && !list.isEmpty()) {
             var db = getDatabase();
             if (db != null) {
-                db.saveActiveCraftingTask(uuid, craftTask.getRecipe().getId(),
-                    (int) craftTask.getRemainingTicks(), (int) craftTask.getTotalTicks(), craftTask.getBatchCount());
+                java.util.List<Object[]> entries = new java.util.ArrayList<>();
+                for (CraftingTask t : list) {
+                    entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+                }
+                db.saveAllActiveCraftingTasks(uuid, entries);
+                plugin.getLogger().info("[ForgeStation] Lưu " + list.size() + " crafting task(s) cho " + event.getPlayer().getName() + " khi thoát");
             }
-            
-            craftTask.cancel();
-            activeTasks.remove(uuid);
-            
-            plugin.debug("Saved crafting task for " + event.getPlayer().getName() + 
-                ": " + craftTask.getRecipe().getId() + " (" + craftTask.getRemainingTicks() + " ticks remaining)");
+            for (CraftingTask task : list) task.cancel();
+            plugin.debug("Saved crafting task for " + event.getPlayer().getName() + " (parallel: " + list.size() + ")");
+        }
+        var qm = plugin.getTaskQueueManager();
+        java.util.List<com.phmyhu1710.forgestation.queue.TaskQueueManager.PendingTask> queue = qm.getQueueMap().remove(uuid);
+        if (queue != null && !queue.isEmpty()) {
+            var db = getDatabase();
+            if (db != null) {
+                java.util.List<Object[]> entries = new java.util.ArrayList<>();
+                for (var pt : queue) {
+                    entries.add(new Object[]{ pt.getType().name(), pt.getRecipeId(), pt.getBatchCount() });
+                }
+                db.saveUnifiedQueue(uuid, entries);
+                plugin.getLogger().info("[ForgeStation] Lưu " + queue.size() + " item(s) hàng chờ cho " + event.getPlayer().getName());
+            }
         }
     }
     
@@ -684,7 +775,10 @@ public class CraftingExecutor implements Listener {
         // 1. Deliver pending outputs
         deliverPendingOutputs(player);
         
-        // 2. Restore active task
+        // 2. Restore hàng chờ thống nhất
+        restoreUnifiedQueue(player);
+        
+        // 3. Restore active task
         return restoreCraftingTask(player);
     }
     
@@ -766,67 +860,86 @@ public class CraftingExecutor implements Listener {
         }
     }
     
+    /** Restore hàng chờ thống nhất từ DB khi player join */
+    private void restoreUnifiedQueue(Player player) {
+        UUID uuid = player.getUniqueId();
+        var db = getDatabase();
+        if (db == null) return;
+        
+        java.util.List<Object[]> entries = db.loadUnifiedQueue(uuid);
+        if (entries.isEmpty()) return;
+        
+        var qm = plugin.getTaskQueueManager();
+        var list = qm.getQueueMap().computeIfAbsent(uuid, k -> new java.util.ArrayList<>());
+        for (Object[] e : entries) {
+            var type = "CRAFT".equals(e[0]) ? com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.CRAFT : com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.SMELT;
+            list.add(new com.phmyhu1710.forgestation.queue.TaskQueueManager.PendingTask(type, (String) e[1], (Integer) e[2]));
+        }
+        db.clearUnifiedQueue(uuid);
+        plugin.getLogger().info("[ForgeStation] Khôi phục " + list.size() + " item(s) hàng chờ cho " + player.getName());
+    }
+    
     /**
-     * Restore crafting task when player rejoins
-     * @return true nếu có task được restore
+     * Restore tất cả crafting tasks khi player rejoins (hỗ trợ song song)
+     * @return true nếu có ít nhất 1 task được restore
      */
     private boolean restoreCraftingTask(Player player) {
         UUID uuid = player.getUniqueId();
         var db = getDatabase();
         if (db == null) return false;
         
-        String[] taskData = db.loadActiveCraftingTask(uuid);
-        if (taskData == null) return false;
-        
-        String recipeId = taskData[0];
-        // TICK-SUPPORT: Assume DB stores ticks now
-        long remainingTicks = Long.parseLong(taskData[1]);
-        long totalTicks = Long.parseLong(taskData[2]);
-        long startedAt = Long.parseLong(taskData[3]);
-        int batchCount = taskData.length > 4 ? Integer.parseInt(taskData[4]) : 1;
-        
-        // Check if offline progress is enabled
-        boolean offlineProgress = plugin.getConfigManager().getMainConfig().getBoolean("offline-progress", true);
-        
-        long actualRemainingTicks;
-        if (offlineProgress) {
-            long offlineSeconds = (System.currentTimeMillis() - startedAt) / 1000;
-            long offlineTicks = offlineSeconds * 20;
-            actualRemainingTicks = remainingTicks - offlineTicks;
-        } else {
-            actualRemainingTicks = remainingTicks;
-        }
-        
-        Recipe recipe = plugin.getRecipeManager().getRecipe(recipeId);
-        if (recipe == null) {
-            plugin.getLogger().warning("Cannot restore crafting task: recipe " + recipeId + " not found");
-            db.clearActiveCraftingTask(uuid);
-            return false;
-        }
+        java.util.List<Object[]> allTasks = db.loadAllActiveCraftingTasks(uuid);
+        if (allTasks.isEmpty()) return false;
         
         db.clearActiveCraftingTask(uuid);
+        boolean offlineProgress = plugin.getConfigManager().getMainConfig().getBoolean("offline-progress", true);
+        int restored = 0;
         
-        // If task completed while offline
-        if (offlineProgress && actualRemainingTicks <= 0) {
-            giveCraftingOutputDirect(player, recipe, batchCount);
-            plugin.getMessageUtil().send(player, "craft.complete-while-offline",
-                "item", recipe.getDisplayName(), "count", String.valueOf(batchCount));
-            return true;
+        for (Object[] taskData : allTasks) {
+            String recipeId = (String) taskData[0];
+            long remainingTicks = ((Number) taskData[1]).longValue();
+            long totalTicks = ((Number) taskData[2]).longValue();
+            long startedAt = ((Number) taskData[3]).longValue();
+            int batchCount = ((Number) taskData[4]).intValue();
+            
+            long actualRemainingTicks;
+            if (offlineProgress) {
+                long offlineSeconds = (System.currentTimeMillis() - startedAt) / 1000;
+                actualRemainingTicks = remainingTicks - offlineSeconds * 20;
+            } else {
+                actualRemainingTicks = remainingTicks;
+            }
+            
+            Recipe recipe = plugin.getRecipeManager().getRecipe(recipeId);
+            if (recipe == null) {
+                plugin.getLogger().warning("Cannot restore crafting task: recipe " + recipeId + " not found");
+                continue;
+            }
+            
+            if (offlineProgress && actualRemainingTicks <= 0) {
+                giveCraftingOutputDirect(player, recipe, batchCount);
+                plugin.getMessageUtil().send(player, "craft.complete-while-offline",
+                    "item", recipe.getDisplayName(), "count", String.valueOf(batchCount));
+                restored++;
+                continue;
+            }
+            
+            CraftingTask task = new CraftingTask(plugin, player, recipe, Math.max(1, actualRemainingTicks), batchCount);
+            task.setTotalTicks(totalTicks);
+            activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>()).add(task);
+            task.initialize();
+            restored++;
+            plugin.getMessageUtil().send(player, "craft.restored",
+                "item", recipe.getDisplayName(),
+                "time", com.phmyhu1710.forgestation.util.TimeUtil.formatTicks(actualRemainingTicks));
         }
         
-        // Restore the task
-        CraftingTask task = new CraftingTask(plugin, player, recipe, Math.max(1, actualRemainingTicks), batchCount);
-        task.setTotalTicks(totalTicks);
-        activeTasks.put(uuid, task);
-        task.initialize();
-        
-        plugin.getMessageUtil().send(player, "craft.restored",
-            "item", recipe.getDisplayName(),
-            "time", com.phmyhu1710.forgestation.util.TimeUtil.formatTicks(actualRemainingTicks));
-        
-        return true;
+        if (restored > 0) {
+            plugin.getLogger().info("[ForgeStation] Khôi phục " + restored + " crafting task(s) cho " + player.getName());
+        }
+        return restored > 0;
     }
-    
+
     /**
      * Give crafting output directly (when task completed offline)
      */

@@ -60,10 +60,10 @@ items:
       - ""
       - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
       - "&7Level nung: &e%smelting_level%"
+      - "&7Song song: &e%upgrade_level_parallel_tasks% &8| &7Hàng chờ: &e%upgrade_level_queue_slots%"
       - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
       - ""
-      - "&7Chọn công thức bên dưới"
-      - "&7để bắt đầu nung đồ!"
+      - "&7Chọn công thức bên dưới để bắt đầu nung đồ!"
 
   # ─────────────────────────────────────────────
   # NAVIGATION BUTTONS

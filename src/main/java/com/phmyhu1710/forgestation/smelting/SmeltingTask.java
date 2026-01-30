@@ -163,7 +163,7 @@ public class SmeltingTask {
         String timeStr = TimeUtil.formatTicksCompact(remainingTicks);
         String base = String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
         Player p = getPlayer();
-        int queueSize = (p != null) ? plugin.getSmeltingManager().getSmeltingQueue(p).size() : 0;
+        int queueSize = (p != null) ? plugin.getTaskQueueManager().getQueueSize(p) : 0;
         if (queueSize > 0) {
             base += " &8| &7Hàng chờ: &e" + queueSize;
         }

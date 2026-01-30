@@ -30,10 +30,10 @@ public class SmeltingManager implements Listener {
 
     private final ForgeStationPlugin plugin;
     private final Map<String, SmeltingRecipe> smeltingRecipes = new java.util.LinkedHashMap<>();
-    private final Map<UUID, SmeltingTask> activeTasks = new ConcurrentHashMap<>();
+    /** Mỗi player có List tasks chạy song song. Size <= getMaxParallelTasks(player). */
+    private final Map<UUID, java.util.List<SmeltingTask>> activeTasks = new ConcurrentHashMap<>();
 
-    /** Hàng chờ nung: recipeId + batchCount (chưa consume) */
-    private final Map<UUID, java.util.List<PendingSmeltingTask>> smeltingQueue = new ConcurrentHashMap<>();
+    /** Hàng chờ thống nhất — dùng TaskQueueManager */
 
     // PERFORMANCE FIX: Single global timer cho tất cả smelting tasks
     private int globalTimerTaskId = -1;
@@ -65,27 +65,27 @@ public class SmeltingManager implements Listener {
     private void startGlobalTimer() {
         globalTimerTaskId = plugin.getScheduler().runTimer(() -> {
             if (activeTasks.isEmpty()) return;
-            
-            // OPTIMIZED: Direct iteration với Iterator, không tạo ArrayList snapshot
-            java.util.Iterator<java.util.Map.Entry<UUID, SmeltingTask>> iterator = activeTasks.entrySet().iterator();
-            while (iterator.hasNext()) {
-                java.util.Map.Entry<UUID, SmeltingTask> entry = iterator.next();
-                SmeltingTask task = entry.getValue();
-                
-                if (task == null || task.isCancelled()) {
-                    iterator.remove();
-                    continue;
+            java.util.List<SmeltingTask> toComplete = new java.util.ArrayList<>();
+            for (java.util.Map.Entry<UUID, java.util.List<SmeltingTask>> entry : new java.util.ArrayList<>(activeTasks.entrySet())) {
+                java.util.List<SmeltingTask> list = entry.getValue();
+                if (list == null) continue;
+                java.util.Iterator<SmeltingTask> it = list.iterator();
+                while (it.hasNext()) {
+                    SmeltingTask task = it.next();
+                    if (task == null || task.isCancelled()) {
+                        it.remove();
+                        continue;
+                    }
+                    task.tick();
+                    if (task.getRemainingTicks() <= 0) {
+                        it.remove();
+                        toComplete.add(task);
+                    }
                 }
-                
-                // Tick task (giảm thời gian, update BossBar)
-                task.tick();
-                
-                // Check completion
-                if (task.getRemainingTicks() <= 0) {
-                    task.complete();
-                }
+                if (list.isEmpty()) activeTasks.remove(entry.getKey());
             }
-        }, 1L, 1L); // Every tick for smoother progress
+            for (SmeltingTask task : toComplete) task.complete();
+        }, 1L, 1L);
     }
     
     /**
@@ -221,20 +221,18 @@ public class SmeltingManager implements Listener {
     public boolean startSmelting(Player player, SmeltingRecipe recipe, int batchCount) {
         UUID uuid = player.getUniqueId();
         batchCount = Math.max(1, batchCount);
+        int maxParallel = plugin.getUpgradeManager().getMaxParallelTasks(player);
+        java.util.List<SmeltingTask> list = activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>());
 
-        // Đang có task chạy → thêm vào hàng chờ
-        if (activeTasks.containsKey(uuid)) {
-            int maxQueue = plugin.getUpgradeManager().getQueueSlotsUnlocked(player);
-            java.util.List<PendingSmeltingTask> queue = smeltingQueue.computeIfAbsent(uuid, k -> new java.util.ArrayList<>());
-            if (queue.size() >= maxQueue) {
+        if (list.size() >= maxParallel) {
+            if (!plugin.getTaskQueueManager().addToQueue(player, com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.SMELT, recipe.getId(), batchCount)) {
                 plugin.getMessageUtil().send(player, "smelt.queue-full");
                 return false;
             }
-            queue.add(new PendingSmeltingTask(recipe.getId(), batchCount));
             plugin.getMessageUtil().send(player, "smelt.added-to-queue",
                 "item", recipe.getDisplayName(),
                 "count", String.valueOf(batchCount),
-                "queue", String.valueOf(queue.size()));
+                "queue", String.valueOf(plugin.getTaskQueueManager().getQueueSize(player)));
             return true;
         }
 
@@ -315,7 +313,7 @@ public class SmeltingManager implements Listener {
 
         SmeltingTask task = new SmeltingTask(plugin, player, recipe, totalDurationTicks, batchCount);
         task.setRefundSnapshot(refundInput, refundFuel, refundInputES, refundFuelES);
-        activeTasks.put(uuid, task);
+        list.add(task);
 
         task.initialize();
 
@@ -543,33 +541,29 @@ public class SmeltingManager implements Listener {
      * Cancel smelting task for player và hoàn trả nguyên liệu + nhiên liệu
      */
     public void cancelSmelting(Player player) {
-        SmeltingTask task = activeTasks.remove(player.getUniqueId());
-        if (task != null) {
-            task.refund(player);
-            task.cancel();
+        java.util.List<SmeltingTask> list = activeTasks.remove(player.getUniqueId());
+        if (list != null && !list.isEmpty()) {
+            for (SmeltingTask task : list) {
+                task.refund(player);
+                task.cancel();
+            }
             plugin.getMessageUtil().send(player, "smelt.cancelled-refund");
         }
     }
 
     /**
-     * Called when smelting completes. Nếu có hàng chờ thì bắt đầu task tiếp theo.
+     * Called when smelting completes. Promote từ queue chung (chỉ item type SMELT)
      */
     public void onSmeltingComplete(UUID uuid) {
-        activeTasks.remove(uuid);
-        java.util.List<PendingSmeltingTask> queue = smeltingQueue.get(uuid);
-        if (queue != null && !queue.isEmpty()) {
-            PendingSmeltingTask next = queue.remove(0);
-            Player player = org.bukkit.Bukkit.getPlayer(uuid);
-            if (player != null && player.isOnline()) {
-                startSmeltFromQueue(player, next.getRecipeId(), next.getBatchCount());
-            }
-        }
+        Player player = org.bukkit.Bukkit.getPlayer(uuid);
+        if (player == null || !player.isOnline()) return;
+        plugin.getTaskQueueManager().promoteNext(player, com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.SMELT);
     }
 
     /**
-     * Bắt đầu nung từ hàng chờ (đã pop queue).
+     * Bắt đầu nung từ hàng chờ. Gọi từ TaskQueueManager khi promote.
      */
-    private boolean startSmeltFromQueue(Player player, String recipeId, int batchCount) {
+    public boolean startFromQueue(Player player, String recipeId, int batchCount) {
         SmeltingRecipe recipe = smeltingRecipes.get(recipeId);
         if (recipe == null) return false;
         int requiredInput = recipe.getInputAmount() * batchCount;
@@ -590,20 +584,26 @@ public class SmeltingManager implements Listener {
         long totalDurationTicks = durationPerItemTicks * batchCount;
         SmeltingTask task = new SmeltingTask(plugin, player, recipe, totalDurationTicks, batchCount);
         task.setRefundSnapshot(refundInput, refundFuel, refundInputES, refundFuelES);
-        activeTasks.put(player.getUniqueId(), task);
+        activeTasks.computeIfAbsent(player.getUniqueId(), k -> new java.util.ArrayList<>()).add(task);
         task.initialize();
         return true;
     }
 
+    /** @deprecated Dùng getTaskQueueManager().getQueue(player) */
+    @Deprecated
     public java.util.List<PendingSmeltingTask> getSmeltingQueue(Player player) {
-        java.util.List<PendingSmeltingTask> list = smeltingQueue.get(player.getUniqueId());
-        return list != null ? new java.util.ArrayList<>(list) : new java.util.ArrayList<>();
+        java.util.List<com.phmyhu1710.forgestation.queue.TaskQueueManager.PendingTask> all = plugin.getTaskQueueManager().getQueue(player);
+        java.util.List<PendingSmeltingTask> out = new java.util.ArrayList<>();
+        for (var pt : all) {
+            if (pt.getType() == com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.SMELT) {
+                out.add(new PendingSmeltingTask(pt.getRecipeId(), pt.getBatchCount()));
+            }
+        }
+        return out;
     }
 
-    public void cancelSmeltingQueueSlot(Player player, int index) {
-        java.util.List<PendingSmeltingTask> queue = smeltingQueue.get(player.getUniqueId());
-        if (queue == null || index < 0 || index >= queue.size()) return;
-        queue.remove(index);
+    public void cancelQueueSlot(Player player, int index) {
+        plugin.getTaskQueueManager().removeSlot(player, index);
         plugin.getMessageUtil().send(player, "smelt.queue-slot-cancelled");
     }
 
@@ -611,14 +611,16 @@ public class SmeltingManager implements Listener {
      * Get active smelting task for player
      */
     public SmeltingTask getActiveTask(Player player) {
-        return activeTasks.get(player.getUniqueId());
+        java.util.List<SmeltingTask> list = activeTasks.get(player.getUniqueId());
+        return (list != null && !list.isEmpty()) ? list.get(0) : null;
     }
 
     /**
      * Check if player is currently smelting
      */
     public boolean isSmelting(Player player) {
-        return activeTasks.containsKey(player.getUniqueId());
+        java.util.List<SmeltingTask> list = activeTasks.get(player.getUniqueId());
+        return list != null && !list.isEmpty();
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -633,20 +635,19 @@ public class SmeltingManager implements Listener {
     public java.util.List<Object[]> saveAllTasksForReload() {
         java.util.List<Object[]> savedTasks = new java.util.ArrayList<>();
         
-        for (Map.Entry<UUID, SmeltingTask> entry : activeTasks.entrySet()) {
+        for (Map.Entry<UUID, java.util.List<SmeltingTask>> entry : activeTasks.entrySet()) {
             UUID uuid = entry.getKey();
-            SmeltingTask task = entry.getValue();
-            
-            savedTasks.add(new Object[] {
-                uuid,
-                task.getRecipe().getId(),
-                task.getRemainingTime(),
-                task.getTotalDuration(),
-                task.getBatchCount()
-            });
-            
-            // Cancel task (stop timer, remove bossbar)
-            task.cancel();
+            for (SmeltingTask task : entry.getValue()) {
+                if (task == null) continue;
+                savedTasks.add(new Object[] {
+                    uuid,
+                    task.getRecipe().getId(),
+                    (int) task.getRemainingTicks(),
+                    (int) task.getTotalTicks(),
+                    task.getBatchCount()
+                });
+                task.cancel();
+            }
         }
         
         activeTasks.clear();
@@ -656,29 +657,28 @@ public class SmeltingManager implements Listener {
     
     /**
      * RELOAD PERSISTENCE: Restore tasks sau khi reload với recipe references mới
-     * @param savedTasks List of [uuid, recipeId, remainingTime, totalDuration, batchCount]
+     * @param savedTasks List of [uuid, recipeId, remainingTicks, totalTicks, batchCount]
      */
     public void restoreTasksAfterReload(java.util.List<Object[]> savedTasks) {
         if (savedTasks == null || savedTasks.isEmpty()) return;
         
+        var db = getDatabase();
+        java.util.Map<UUID, java.util.List<Object[]>> offlineByUuid = new java.util.HashMap<>();
         int restored = 0;
+        
         for (Object[] data : savedTasks) {
             UUID uuid = (UUID) data[0];
-            String recipeId = (String) data[1];
-            int remainingTime = (int) data[2];
-            int totalDuration = (int) data[3];
-            int batchCount = (int) data[4];
-            
-            // Tìm player online
             org.bukkit.entity.Player player = Bukkit.getPlayer(uuid);
             if (player == null || !player.isOnline()) {
-                // Player offline, lưu vào database để restore khi họ rejoin
-                var db = getDatabase();
-                if (db != null) {
-                    db.saveActiveSmeltingTask(uuid, recipeId, remainingTime, totalDuration, batchCount);
-                }
+                offlineByUuid.computeIfAbsent(uuid, k -> new java.util.ArrayList<>())
+                    .add(new Object[]{(String) data[1], ((Number) data[2]).intValue(), ((Number) data[3]).intValue(), (int) data[4]});
                 continue;
             }
+            
+            String recipeId = (String) data[1];
+            long remainingTicks = ((Number) data[2]).longValue();
+            long totalTicks = ((Number) data[3]).longValue();
+            int batchCount = (int) data[4];
             
             // Tìm recipe mới (sau reload)
             SmeltingRecipe recipe = getRecipe(recipeId);
@@ -687,21 +687,43 @@ public class SmeltingManager implements Listener {
                 continue;
             }
             
-            // Tạo task mới với recipe reference mới
-            SmeltingTask task = new SmeltingTask(plugin, player, recipe, remainingTime, batchCount);
-            task.setTotalDuration(totalDuration);
-            activeTasks.put(uuid, task);
+            // Tạo task mới với recipe reference mới (ticks)
+            SmeltingTask task = new SmeltingTask(plugin, player, recipe, Math.max(1, remainingTicks), batchCount);
+            task.setTotalTicks(totalTicks);
+            activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>()).add(task);
             task.initialize();
             
             restored++;
             plugin.debug("Restored smelting task for " + player.getName() + ": " + recipeId);
         }
         
+        if (db != null && !offlineByUuid.isEmpty()) {
+            for (java.util.Map.Entry<UUID, java.util.List<Object[]>> e : offlineByUuid.entrySet()) {
+                db.saveAllActiveSmeltingTasks(e.getKey(), e.getValue());
+            }
+        }
         if (restored > 0) {
             plugin.getLogger().info("Restored " + restored + " smelting tasks after reload");
         }
     }
     
+    /**
+     * Lưu tất cả tasks + queue vào DB (không cancel). Dùng cho periodic save khi server crash.
+     */
+    public void saveAllTasksToDatabase() {
+        var db = getDatabase();
+        if (db == null) return;
+        for (Map.Entry<UUID, java.util.List<SmeltingTask>> entry : activeTasks.entrySet()) {
+            java.util.List<SmeltingTask> tasks = entry.getValue();
+            if (tasks == null || tasks.isEmpty()) continue;
+            java.util.List<Object[]> entries = new java.util.ArrayList<>();
+            for (SmeltingTask t : tasks) {
+                if (t != null) entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+            }
+            if (!entries.isEmpty()) db.saveAllActiveSmeltingTasks(entry.getKey(), entries);
+        }
+    }
+
     /**
      * Cancel all tasks (on plugin disable)
      * SMELTING PERSISTENCE FIX: Lưu tasks trước khi cancel
@@ -711,25 +733,27 @@ public class SmeltingManager implements Listener {
         // PERFORMANCE FIX: Dừng global timer trước
         stopGlobalTimer();
         
-        int savedCount = activeTasks.size();
+        int savedCount = 0;
         var db = getDatabase();
         
-        // Save all active tasks before cancelling
-        for (Map.Entry<UUID, SmeltingTask> entry : activeTasks.entrySet()) {
+        for (Map.Entry<UUID, java.util.List<SmeltingTask>> entry : activeTasks.entrySet()) {
             UUID uuid = entry.getKey();
-            SmeltingTask task = entry.getValue();
-            
-            // Ghi trực tiếp vào DB (không qua queue vì queue có thể đã dừng)
-            // BATCH FIX: Lưu cả batchCount. TICK-SUPPORT: Save ticks
-            if (db != null) {
-                db.saveActiveSmeltingTask(uuid, task.getRecipe().getId(), 
-                    (int)(task.getRemainingTicks()), (int)(task.getTotalTicks()), task.getBatchCount());
+            java.util.List<SmeltingTask> tasks = entry.getValue();
+            if (db != null && tasks != null && !tasks.isEmpty()) {
+                java.util.List<Object[]> entries = new java.util.ArrayList<>();
+                for (SmeltingTask t : tasks) {
+                    if (t != null) {
+                        savedCount++;
+                        entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+                    }
+                }
+                if (!entries.isEmpty()) db.saveAllActiveSmeltingTasks(uuid, entries);
             }
-            
-            task.cancel();
+            for (SmeltingTask task : tasks) {
+                if (task != null) task.cancel();
+            }
         }
         activeTasks.clear();
-        
         if (savedCount > 0) {
             plugin.getLogger().info("Saved " + savedCount + " smelting tasks for server restart");
         }
@@ -742,24 +766,21 @@ public class SmeltingManager implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        SmeltingTask task = activeTasks.get(uuid);
+        java.util.List<SmeltingTask> list = activeTasks.remove(uuid);
         
-        if (task != null) {
-            // Save current progress to database
-            // BATCH FIX: Lưu cả batchCount. TICK-SUPPORT: Save ticks
+        if (list != null && !list.isEmpty()) {
             var db = getDatabase();
             if (db != null) {
-                db.saveActiveSmeltingTask(uuid, task.getRecipe().getId(),
-                    (int)(task.getRemainingTicks()), (int)(task.getTotalTicks()), task.getBatchCount());
+                java.util.List<Object[]> entries = new java.util.ArrayList<>();
+                for (SmeltingTask t : list) {
+                    entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+                }
+                db.saveAllActiveSmeltingTasks(uuid, entries);
+                plugin.getLogger().info("[ForgeStation] Lưu " + list.size() + " smelting task(s) cho " + event.getPlayer().getName() + " khi thoát");
             }
-            
-            // Cancel the task (timer will stop)
-            task.cancel();
-            activeTasks.remove(uuid);
-            
-            plugin.debug("Saved smelting task for " + event.getPlayer().getName() + 
-                ": " + task.getRecipe().getId() + " (" + task.getRemainingTime() + "s remaining)");
+            for (SmeltingTask task : list) task.cancel();
         }
+        // Hàng chờ thống nhất được lưu trong CraftingExecutor.onPlayerQuit (plugin disable gọi crafting sau smelting nên queue đã clear — thực ra order là smelting rồi crafting; queue clear trong crafting.cancelAllTasks)
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
@@ -787,7 +808,8 @@ public class SmeltingManager implements Listener {
         // 1. Giao pending outputs trước
         deliverPendingOutputs(player);
         
-        // 2. Restore active task nếu có
+        // 2. Hàng chờ thống nhất — restore trong CraftingExecutor.restoreTaskForPlayer
+        // 3. Restore active task nếu có
         return restoreSmeltingTask(player);
     }
     
@@ -833,79 +855,63 @@ public class SmeltingManager implements Listener {
     }
     
     /**
-     * SMELTING PERSISTENCE FIX: Khôi phục smelting task khi player rejoin
-     * BATCH FIX: Khôi phục cả batchCount
-     * CONFIG: Hỗ trợ bật/tắt offline progress
-     * @return true nếu có task được restore
+     * Khôi phục tất cả smelting tasks khi player rejoin (hỗ trợ song song)
      */
     private boolean restoreSmeltingTask(Player player) {
         UUID uuid = player.getUniqueId();
         var db = getDatabase();
         if (db == null) return false;
         
-        String[] taskData = db.loadActiveSmeltingTask(uuid);
-        if (taskData == null) return false;
+        java.util.List<Object[]> allTasks = db.loadAllActiveSmeltingTasks(uuid);
+        if (allTasks.isEmpty()) return false;
         
-        String recipeId = taskData[0];
-        // TICK-SUPPORT: Assume ticks if loading new data, or seconds if old?
-        // Let's assume the DB values are now ticks. 
-        // Note: For backward compatibility, if value is small (< 100000) and it was seconds, 
-        // translating 30s as 30 ticks is bad. But usually seconds stored.
-        // Transition: For now, let's treat stored values as TICKS.
-        // User should clear DB or we migrate. Or simpler:
-        // We just store as ticks.
-        long remainingTicks = Long.parseLong(taskData[1]);
-        long totalTicks = Long.parseLong(taskData[2]);
-        long startedAt = Long.parseLong(taskData[3]);
-        // BATCH FIX: Đọc batchCount từ database
-        int batchCount = taskData.length > 4 ? Integer.parseInt(taskData[4]) : 1;
-        
-        // CONFIG: Check if offline progress is enabled (unified config)
-        boolean offlineProgress = plugin.getConfigManager().getMainConfig().getBoolean("offline-progress", true);
-        
-        long actualRemainingTicks;
-        if (offlineProgress) {
-            // Tính thời gian offline và trừ đi
-            long offlineSeconds = (System.currentTimeMillis() - startedAt) / 1000;
-            long offlineTicks = offlineSeconds * 20;
-            actualRemainingTicks = remainingTicks - offlineTicks;
-        } else {
-            // Không tính offline time - giữ nguyên remaining time
-            actualRemainingTicks = remainingTicks;
-        }
-        
-        SmeltingRecipe recipe = getRecipe(recipeId);
-        if (recipe == null) {
-            plugin.getLogger().warning("Cannot restore smelting task: recipe " + recipeId + " not found");
-            db.clearActiveSmeltingTask(uuid);
-            return false;
-        }
-        
-        // Clear saved task
         db.clearActiveSmeltingTask(uuid);
+        boolean offlineProgress = plugin.getConfigManager().getMainConfig().getBoolean("offline-progress", true);
+        int restored = 0;
         
-        // If task should have completed while offline (only if offline progress enabled)
-        // BATCH FIX: Truyền batchCount để give đúng số lượng
-        if (offlineProgress && actualRemainingTicks <= 0) {
-            giveSmeltingOutputDirect(player, recipe, batchCount);
-            plugin.getMessageUtil().send(player, "smelt.complete-while-offline",
-                "item", recipe.getDisplayName(), "count", String.valueOf(batchCount));
-            return true; // Task was completed offline
+        for (Object[] taskData : allTasks) {
+            String recipeId = (String) taskData[0];
+            long remainingTicks = ((Number) taskData[1]).longValue();
+            long totalTicks = ((Number) taskData[2]).longValue();
+            long startedAt = ((Number) taskData[3]).longValue();
+            int batchCount = ((Number) taskData[4]).intValue();
+            
+            long actualRemainingTicks;
+            if (offlineProgress) {
+                long offlineSeconds = (System.currentTimeMillis() - startedAt) / 1000;
+                actualRemainingTicks = remainingTicks - offlineSeconds * 20;
+            } else {
+                actualRemainingTicks = remainingTicks;
+            }
+            
+            SmeltingRecipe recipe = getRecipe(recipeId);
+            if (recipe == null) {
+                plugin.getLogger().warning("Cannot restore smelting task: recipe " + recipeId + " not found");
+                continue;
+            }
+            
+            if (offlineProgress && actualRemainingTicks <= 0) {
+                giveSmeltingOutputDirect(player, recipe, batchCount);
+                plugin.getMessageUtil().send(player, "smelt.complete-while-offline",
+                    "item", recipe.getDisplayName(), "count", String.valueOf(batchCount));
+                restored++;
+                continue;
+            }
+            
+            SmeltingTask task = new SmeltingTask(plugin, player, recipe, Math.max(1, actualRemainingTicks), batchCount);
+            task.setTotalTicks(totalTicks);
+            activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>()).add(task);
+            task.initialize();
+            restored++;
+            plugin.getMessageUtil().send(player, "smelt.restored",
+                "item", recipe.getDisplayName(),
+                "time", com.phmyhu1710.forgestation.util.TimeUtil.formatTicks(actualRemainingTicks));
         }
         
-        // Otherwise restore the task with adjusted time
-        // BATCH FIX: Sử dụng constructor có batchCount
-        SmeltingTask task = new SmeltingTask(plugin, player, recipe, Math.max(1, actualRemainingTicks), batchCount);
-        task.setTotalTicks(totalTicks); // Keep original total for progress display
-        activeTasks.put(uuid, task);
-        // PERFORMANCE FIX: Chỉ khởi tạo, global timer sẽ tick
-        task.initialize();
-        
-        plugin.getMessageUtil().send(player, "smelt.restored",
-            "item", recipe.getDisplayName(),
-            "time", com.phmyhu1710.forgestation.util.TimeUtil.formatTicks(actualRemainingTicks));
-        
-        return true;
+        if (restored > 0) {
+            plugin.getLogger().info("[ForgeStation] Khôi phục " + restored + " smelting task(s) cho " + player.getName());
+        }
+        return restored > 0;
     }
     
     /**

@@ -9,7 +9,7 @@ recipes:
   block_coal:
     enabled: true
     display-name: "&f&lChế Tạo Khối Than"
-    duration: 10
+    duration: 3
     # Cho phép đổi nhiều lần một lúc
     bulk-exchange: true
     # Icon trong menu
@@ -49,7 +49,7 @@ recipes:
       particles: VILLAGER_HAPPY
   block_iron:
     enabled: true
-    duration: 10
+    duration: 3
     display-name: "&f&lChế Tạo Khối Sắt"
     # Cho phép đổi nhiều lần một lúc
     bulk-exchange: true
@@ -94,7 +94,7 @@ recipes:
   # ─────────────────────────────────────────────
   block_gold:
     enabled: true
-    duration: 10
+    duration: 3
     display-name: "&6&lChế Tạo Khối Vàng"
     bulk-exchange: true
     icon:
@@ -132,7 +132,7 @@ recipes:
   # ─────────────────────────────────────────────
   block_redstone:
     enabled: true
-    duration: 10
+    duration: 3
     display-name: "&c&lChế Tạo Khối Đá Đỏ"
     bulk-exchange: true
     icon:
@@ -170,7 +170,7 @@ recipes:
   # ─────────────────────────────────────────────
   block_lapis:
     enabled: true
-    duration: 10
+    duration: 3
     display-name: "&9&lChế Tạo Khối Lưu Ly"
     bulk-exchange: true
     icon:
@@ -208,7 +208,7 @@ recipes:
   # ─────────────────────────────────────────────
   block_emerald:
     enabled: true
-    duration: 10
+    duration: 3
     display-name: "&a&lChế Tạo Khối Lục Bảo"
     bulk-exchange: true
     icon:
@@ -246,7 +246,7 @@ recipes:
   # ─────────────────────────────────────────────
   block_diamond:
     enabled: true
-    duration: 10
+    duration: 3
     display-name: "&b&lChế Tạo Khối Kim Cương"
     bulk-exchange: true
     icon:
@@ -281,7 +281,7 @@ recipes:
   block_melon:
     enabled: true
     display-name: "&f&lChế Tạo Khối Dưa"
-    duration: 10
+    duration: 3
     bulk-exchange: true
     icon:
       material: MELON

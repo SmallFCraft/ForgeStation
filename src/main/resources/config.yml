@@ -34,6 +34,15 @@ output:
 offline-progress: true
 
 # ─────────────────────────────────────────────
+# Persistence (Chống mất data khi server crash)
+# ─────────────────────────────────────────────
+# Lưu tasks + hàng chờ vào DB mỗi N giây.
+# Khi server crash/kill, dữ liệu lần lưu gần nhất sẽ được restore khi player join.
+# 0 = tắt; 30 = mỗi 30s (khuyến nghị)
+persistence:
+  save-interval-seconds: 30
+
+# ─────────────────────────────────────────────
 # Queue (Hàng chờ) - Crafting & Smelting
 # ─────────────────────────────────────────────
 # Slot hàng chờ: nâng cấp trong upgrade-menu. Chi phí mở 1 slot → config trong upgrades.yml (queue_slots).

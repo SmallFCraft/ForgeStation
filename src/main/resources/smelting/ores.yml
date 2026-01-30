@@ -71,7 +71,7 @@ smelting:
       material: IRON_INGOT
       amount: 1
 
-    duration: 15
+    duration: 3
 
     fuel:
       enabled: true
@@ -125,7 +125,7 @@ smelting:
       material: GOLD_INGOT
       amount: 1
 
-    duration: 15
+    duration: 3
 
     fuel:
       enabled: true
@@ -179,7 +179,7 @@ smelting:
       material: COPPER_INGOT
       amount: 1
 
-    duration: 15
+    duration: 3
 
     fuel:
       enabled: true

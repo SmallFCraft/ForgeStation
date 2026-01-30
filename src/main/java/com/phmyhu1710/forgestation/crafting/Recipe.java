@@ -19,6 +19,8 @@ public class Recipe {
     private final String permission;
     private final String cooldownExpression;
     private final boolean useRankMultiplier;
+    /** Tỉ lệ thành công 0-100. Mặc định 100 = chắc chắn. Dùng cho luyendan v.v. */
+    private final double successChance;
     private final boolean bulkExchange;
     
     // Icon
@@ -62,6 +64,12 @@ public class Recipe {
         this.cooldownExpression = durationObj != null ? String.valueOf(durationObj) : "0";
         this.useRankMultiplier = config.getBoolean("use-rank-multiplier", false);
         this.bulkExchange = config.getBoolean("bulk-exchange", false);
+        Object chanceObj = config.get("chance");
+        if (chanceObj != null) {
+            this.successChance = chanceObj instanceof Number ? ((Number) chanceObj).doubleValue() : 100.0;
+        } else {
+            this.successChance = 100.0;
+        }
         
         // Icon
         ConfigurationSection iconSection = config.getConfigurationSection("icon");
@@ -159,6 +167,8 @@ public class Recipe {
     public String getCooldownExpression() { return cooldownExpression; }
     public boolean usesRankMultiplier() { return useRankMultiplier; }
     public boolean isBulkExchange() { return bulkExchange; }
+    /** Tỉ lệ thành công base (0-100). 100 = chắc chắn. */
+    public double getSuccessChance() { return successChance; }
     
     public Material getIconMaterial() { return iconMaterial; }
     public String getIconMaterialString() { return iconMaterialString; }

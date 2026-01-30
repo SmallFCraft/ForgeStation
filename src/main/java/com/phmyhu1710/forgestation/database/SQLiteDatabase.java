@@ -134,16 +134,43 @@ public class SQLiteDatabase {
                 "started_at BIGINT NOT NULL)"
             );
 
+            // Active tasks multi — hỗ trợ NHIỀU task song song per player (uuid+task_index)
+            stmt.execute(
+                "CREATE TABLE IF NOT EXISTS active_crafting_tasks_multi (" +
+                "uuid TEXT NOT NULL, task_index INTEGER NOT NULL, recipe_id TEXT NOT NULL, " +
+                "remaining_time INTEGER NOT NULL, total_duration INTEGER NOT NULL, batch_count INTEGER NOT NULL, started_at BIGINT NOT NULL, " +
+                "PRIMARY KEY (uuid, task_index))"
+            );
+            stmt.execute(
+                "CREATE TABLE IF NOT EXISTS active_smelting_tasks_multi (" +
+                "uuid TEXT NOT NULL, task_index INTEGER NOT NULL, recipe_id TEXT NOT NULL, " +
+                "remaining_time INTEGER NOT NULL, total_duration INTEGER NOT NULL, batch_count INTEGER NOT NULL, started_at BIGINT NOT NULL, " +
+                "PRIMARY KEY (uuid, task_index))"
+            );
+
+            // Hàng chờ thống nhất (craft + smelt chung)
+            stmt.execute(
+                "CREATE TABLE IF NOT EXISTS task_queue (" +
+                "uuid TEXT NOT NULL, slot_index INTEGER NOT NULL, task_type TEXT NOT NULL, recipe_id TEXT NOT NULL, batch_count INTEGER NOT NULL, " +
+                "PRIMARY KEY (uuid, slot_index))"
+            );
+
             // Create indexes
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_cooldowns_expiry ON player_cooldowns(expiry_time)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_pending_smelting_uuid ON pending_smelting_outputs(uuid)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_pending_crafting_uuid ON pending_crafting_outputs(uuid)");
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_task_queue_uuid ON task_queue(uuid)");
         }
     }
 
     public void disconnect() {
         try {
             if (connection != null && !connection.isClosed()) {
+                // PLUGMAN FIX: Force SQLite flush/checkpoint trước khi đóng
+                // Đảm bảo dữ liệu được ghi ra disk khi reload plugin (PlugMan)
+                try (Statement stmt = connection.createStatement()) {
+                    stmt.execute("PRAGMA wal_checkpoint(TRUNCATE)");
+                } catch (SQLException ignored) { /* WAL có thể không bật */ }
                 connection.close();
                 plugin.debug("SQLite database disconnected");
             }
@@ -321,74 +348,106 @@ public class SQLiteDatabase {
     // SMELTING PERSISTENCE FIX: Active tasks persistence
     // ═══════════════════════════════════════════════════════════════════════
     
-    /**
-     * Save active smelting task (when player quits or server stops)
-     * BATCH FIX: Thêm batchCount parameter
-     */
-    public void saveActiveSmeltingTask(UUID uuid, String recipeId, int remainingTime, int totalDuration, int batchCount) {
-        String sql = "INSERT OR REPLACE INTO active_smelting_tasks (uuid, recipe_id, remaining_time, total_duration, batch_count, started_at) VALUES (?, ?, ?, ?, ?, ?)";
-        
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, uuid.toString());
-            stmt.setString(2, recipeId);
-            stmt.setInt(3, remainingTime);
-            stmt.setInt(4, totalDuration);
-            stmt.setInt(5, batchCount);
-            stmt.setLong(6, System.currentTimeMillis());
-            stmt.executeUpdate();
-            plugin.debug("Saved active smelting task for " + uuid + ": " + recipeId + " x" + batchCount + " (" + remainingTime + "s remaining)");
-        } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to save active smelting task: " + e.getMessage());
-        }
-    }
-    
-    /**
-     * Load active smelting task for player
-     * BATCH FIX: Returns [recipeId, remainingTime, totalDuration, startedAt, batchCount] or null if none
-     */
-    public String[] loadActiveSmeltingTask(UUID uuid) {
-        String sql = "SELECT recipe_id, remaining_time, total_duration, started_at, batch_count FROM active_smelting_tasks WHERE uuid = ?";
-        
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, uuid.toString());
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new String[]{
-                        rs.getString("recipe_id"),
-                        String.valueOf(rs.getInt("remaining_time")),
-                        String.valueOf(rs.getInt("total_duration")),
-                        String.valueOf(rs.getLong("started_at")),
-                        String.valueOf(rs.getInt("batch_count"))
-                    };
+    /** Lưu NHIỀU active smelting tasks. entries: List of [recipeId, remainingTicks, totalTicks, batchCount] */
+    public void saveAllActiveSmeltingTasks(UUID uuid, java.util.List<Object[]> entries) {
+        String del = "DELETE FROM active_smelting_tasks_multi WHERE uuid = ?";
+        String ins = "INSERT INTO active_smelting_tasks_multi (uuid, task_index, recipe_id, remaining_time, total_duration, batch_count, started_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try {
+            try (PreparedStatement stmt = connection.prepareStatement(del)) {
+                stmt.setString(1, uuid.toString());
+                stmt.executeUpdate();
+            }
+            if (entries != null && !entries.isEmpty()) {
+                long now = System.currentTimeMillis();
+                try (PreparedStatement stmt = connection.prepareStatement(ins)) {
+                    for (int i = 0; i < entries.size(); i++) {
+                        Object[] e = entries.get(i);
+                        stmt.setString(1, uuid.toString());
+                        stmt.setInt(2, i);
+                        stmt.setString(3, (String) e[0]);
+                        stmt.setInt(4, ((Number) e[1]).intValue());
+                        stmt.setInt(5, ((Number) e[2]).intValue());
+                        stmt.setInt(6, (Integer) e[3]);
+                        stmt.setLong(7, now);
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to load active smelting task for " + uuid + ": " + e.getMessage());
+            plugin.getLogger().severe("Failed to save smelting tasks: " + e.getMessage());
         }
-        
-        return null;
     }
-    
-    /**
-     * Clear active smelting task (when restored or completed)
-     */
-    public void clearActiveSmeltingTask(UUID uuid) {
-        String sql = "DELETE FROM active_smelting_tasks WHERE uuid = ?";
-        
+
+    public java.util.List<Object[]> loadAllActiveSmeltingTasks(UUID uuid) {
+        java.util.List<Object[]> out = new java.util.ArrayList<>();
+        String sql = "SELECT recipe_id, remaining_time, total_duration, started_at, batch_count FROM active_smelting_tasks_multi WHERE uuid = ? ORDER BY task_index";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    out.add(new Object[]{rs.getString(1), rs.getInt(2), rs.getInt(3), rs.getLong(4), rs.getInt(5)});
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to load smelting tasks: " + e.getMessage());
+        }
+        return out;
+    }
+
+    public void clearAllActiveSmeltingTasks(UUID uuid) {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM active_smelting_tasks_multi WHERE uuid = ?")) {
             stmt.setString(1, uuid.toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to clear active smelting task: " + e.getMessage());
+            plugin.getLogger().severe("Failed to clear smelting tasks: " + e.getMessage());
         }
+    }
+
+    public void saveActiveSmeltingTask(UUID uuid, String recipeId, int remainingTime, int totalDuration, int batchCount) {
+        saveAllActiveSmeltingTasks(uuid, java.util.Collections.singletonList(new Object[]{recipeId, remainingTime, totalDuration, batchCount}));
+    }
+    
+    public String[] loadActiveSmeltingTask(UUID uuid) {
+        java.util.List<Object[]> all = loadAllActiveSmeltingTasks(uuid);
+        if (all.isEmpty()) {
+            String[] leg = loadActiveSmeltingTaskLegacy(uuid);
+            if (leg != null) {
+                saveAllActiveSmeltingTasks(uuid, java.util.Collections.singletonList(new Object[]{leg[0], Integer.parseInt(leg[1]), Integer.parseInt(leg[2]), Integer.parseInt(leg[4])}));
+                return leg;
+            }
+            return null;
+        }
+        Object[] first = all.get(0);
+        return new String[]{(String)first[0], String.valueOf(first[1]), String.valueOf(first[2]), String.valueOf(first[3]), String.valueOf(first[4])};
+    }
+    
+    private String[] loadActiveSmeltingTaskLegacy(UUID uuid) {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT recipe_id, remaining_time, total_duration, started_at, batch_count FROM active_smelting_tasks WHERE uuid = ?")) {
+            stmt.setString(1, uuid.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new String[]{rs.getString(1), String.valueOf(rs.getInt(2)), String.valueOf(rs.getInt(3)), String.valueOf(rs.getLong(4)), String.valueOf(rs.getInt(5))};
+                }
+            }
+        } catch (SQLException e) { }
+        return null;
+    }
+    
+    public void clearActiveSmeltingTask(UUID uuid) {
+        clearAllActiveSmeltingTasks(uuid);
     }
     
     /**
      * Get all active smelting tasks (for server shutdown handling)
      */
+    /**
+     * Load all active smelting tasks (for server shutdown/recovery).
+     * Returns map: UUID -> [recipeId, remainingTime, totalDuration, startedAt, batchCount]
+     */
     public java.util.Map<UUID, String[]> loadAllActiveSmeltingTasks() {
         java.util.Map<UUID, String[]> tasks = new HashMap<>();
-        String sql = "SELECT uuid, recipe_id, remaining_time, total_duration, started_at FROM active_smelting_tasks";
+        String sql = "SELECT uuid, recipe_id, remaining_time, total_duration, started_at, batch_count FROM active_smelting_tasks";
         
         try (PreparedStatement stmt = connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -398,14 +457,39 @@ public class SQLiteDatabase {
                     rs.getString("recipe_id"),
                     String.valueOf(rs.getInt("remaining_time")),
                     String.valueOf(rs.getInt("total_duration")),
-                    String.valueOf(rs.getLong("started_at"))
+                    String.valueOf(rs.getLong("started_at")),
+                    String.valueOf(rs.getInt("batch_count"))
                 });
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to load all active smelting tasks: " + e.getMessage());
+            if (e.getMessage() != null && e.getMessage().contains("batch_count")) {
+                plugin.debug("Falling back to loadAllActiveSmeltingTasks without batch_count (old DB)");
+                loadAllActiveSmeltingTasksLegacy(tasks);
+            } else {
+                plugin.getLogger().severe("Failed to load all active smelting tasks: " + e.getMessage());
+            }
         }
         
         return tasks;
+    }
+    
+    private void loadAllActiveSmeltingTasksLegacy(java.util.Map<UUID, String[]> tasks) {
+        String sql = "SELECT uuid, recipe_id, remaining_time, total_duration, started_at FROM active_smelting_tasks";
+        try (PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+                tasks.put(uuid, new String[]{
+                    rs.getString("recipe_id"),
+                    String.valueOf(rs.getInt("remaining_time")),
+                    String.valueOf(rs.getInt("total_duration")),
+                    String.valueOf(rs.getLong("started_at")),
+                    "1"
+                });
+            }
+        } catch (SQLException ex) {
+            plugin.getLogger().severe("Failed to load active smelting tasks (legacy): " + ex.getMessage());
+        }
     }
     
     /**
@@ -487,69 +571,289 @@ public class SQLiteDatabase {
     }
     
     /**
-     * Save active crafting task (when player quits or server stops)
+     * Lưu NHIỀU active crafting tasks (hỗ trợ song song). entries: List of [recipeId, remainingTicks, totalTicks, batchCount]
      */
-    public void saveActiveCraftingTask(UUID uuid, String recipeId, int remainingTime, int totalDuration, int batchCount) {
-        String sql = "INSERT OR REPLACE INTO active_crafting_tasks (uuid, recipe_id, remaining_time, total_duration, batch_count, started_at) VALUES (?, ?, ?, ?, ?, ?)";
-        
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, uuid.toString());
-            stmt.setString(2, recipeId);
-            stmt.setInt(3, remainingTime);
-            stmt.setInt(4, totalDuration);
-            stmt.setInt(5, batchCount);
-            stmt.setLong(6, System.currentTimeMillis());
-            stmt.executeUpdate();
-            plugin.debug("Saved active crafting task for " + uuid + ": " + recipeId + " x" + batchCount + " (" + remainingTime + "s remaining)");
-        } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to save active crafting task: " + e.getMessage());
-        }
-    }
-    
-    /**
-     * Load active crafting task for player
-     * Returns [recipeId, remainingTime, totalDuration, startedAt, batchCount] or null if none
-     */
-    public String[] loadActiveCraftingTask(UUID uuid) {
-        String sql = "SELECT recipe_id, remaining_time, total_duration, started_at, batch_count FROM active_crafting_tasks WHERE uuid = ?";
-        
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, uuid.toString());
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return new String[]{
-                        rs.getString("recipe_id"),
-                        String.valueOf(rs.getInt("remaining_time")),
-                        String.valueOf(rs.getInt("total_duration")),
-                        String.valueOf(rs.getLong("started_at")),
-                        String.valueOf(rs.getInt("batch_count"))
-                    };
+    public void saveAllActiveCraftingTasks(UUID uuid, java.util.List<Object[]> entries) {
+        String del = "DELETE FROM active_crafting_tasks_multi WHERE uuid = ?";
+        String ins = "INSERT INTO active_crafting_tasks_multi (uuid, task_index, recipe_id, remaining_time, total_duration, batch_count, started_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try {
+            try (PreparedStatement stmt = connection.prepareStatement(del)) {
+                stmt.setString(1, uuid.toString());
+                stmt.executeUpdate();
+            }
+            if (entries != null && !entries.isEmpty()) {
+                long now = System.currentTimeMillis();
+                try (PreparedStatement stmt = connection.prepareStatement(ins)) {
+                    for (int i = 0; i < entries.size(); i++) {
+                        Object[] e = entries.get(i);
+                        stmt.setString(1, uuid.toString());
+                        stmt.setInt(2, i);
+                        stmt.setString(3, (String) e[0]);
+                        stmt.setInt(4, ((Number) e[1]).intValue());
+                        stmt.setInt(5, ((Number) e[2]).intValue());
+                        stmt.setInt(6, (Integer) e[3]);
+                        stmt.setLong(7, now);
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
                 }
             }
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to load active crafting task for " + uuid + ": " + e.getMessage());
+            plugin.getLogger().severe("Failed to save crafting tasks: " + e.getMessage());
         }
-        
-        return null;
     }
-    
+
     /**
-     * Clear active crafting task (when restored or completed)
+     * Load tất cả active crafting tasks. Returns List of [recipeId, remainingTime, totalDuration, startedAt, batchCount]
      */
-    public void clearActiveCraftingTask(UUID uuid) {
-        String sql = "DELETE FROM active_crafting_tasks WHERE uuid = ?";
-        
+    public java.util.List<Object[]> loadAllActiveCraftingTasks(UUID uuid) {
+        java.util.List<Object[]> out = new java.util.ArrayList<>();
+        String sql = "SELECT recipe_id, remaining_time, total_duration, started_at, batch_count FROM active_crafting_tasks_multi WHERE uuid = ? ORDER BY task_index";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    out.add(new Object[]{
+                        rs.getString("recipe_id"),
+                        rs.getInt("remaining_time"),
+                        rs.getInt("total_duration"),
+                        rs.getLong("started_at"),
+                        rs.getInt("batch_count")
+                    });
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to load crafting tasks: " + e.getMessage());
+        }
+        return out;
+    }
+
+    public void clearAllActiveCraftingTasks(UUID uuid) {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM active_crafting_tasks_multi WHERE uuid = ?")) {
             stmt.setString(1, uuid.toString());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to clear active crafting task: " + e.getMessage());
+            plugin.getLogger().severe("Failed to clear crafting tasks: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Save active crafting task (legacy - chỉ 1 task, dùng cho restore offline)
+     */
+    public void saveActiveCraftingTask(UUID uuid, String recipeId, int remainingTime, int totalDuration, int batchCount) {
+        saveAllActiveCraftingTasks(uuid, java.util.Collections.singletonList(new Object[]{recipeId, remainingTime, totalDuration, batchCount}));
+    }
+    
+    /** Load task đầu tiên — tương thích. Dùng loadAllActiveCraftingTasks để lấy tất cả. */
+    public String[] loadActiveCraftingTask(UUID uuid) {
+        java.util.List<Object[]> all = loadAllActiveCraftingTasks(uuid);
+        if (all.isEmpty()) {
+            Object[] leg = loadActiveCraftingTaskLegacy(uuid);
+            if (leg != null) {
+                saveAllActiveCraftingTasks(uuid, java.util.Collections.singletonList(new Object[]{leg[0], Integer.parseInt((String)leg[1]), Integer.parseInt((String)leg[2]), Integer.parseInt((String)leg[4])}));
+                return (String[]) leg;
+            }
+            return null;
+        }
+        Object[] first = all.get(0);
+        return new String[]{(String)first[0], String.valueOf(first[1]), String.valueOf(first[2]), String.valueOf(first[3]), String.valueOf(first[4])};
+    }
+    
+    private String[] loadActiveCraftingTaskLegacy(UUID uuid) {
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT recipe_id, remaining_time, total_duration, started_at, batch_count FROM active_crafting_tasks WHERE uuid = ?")) {
+            stmt.setString(1, uuid.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new String[]{rs.getString(1), String.valueOf(rs.getInt(2)), String.valueOf(rs.getInt(3)), String.valueOf(rs.getLong(4)), String.valueOf(rs.getInt(5))};
+                }
+            }
+        } catch (SQLException e) { /* old table có thể không tồn tại */ }
+        return null;
+    }
+    
+    public void clearActiveCraftingTask(UUID uuid) {
+        clearAllActiveCraftingTasks(uuid);
+    }
+    
+    /** Lưu hàng chờ craft khi player quit. entries: List of [recipeId, batchCount] */
+    public void saveCraftingQueue(UUID uuid, java.util.List<Object[]> entries) {
+        String del = "DELETE FROM crafting_queue WHERE uuid = ?";
+        String ins = "INSERT INTO crafting_queue (uuid, slot_index, recipe_id, batch_count) VALUES (?, ?, ?, ?)";
+        try {
+            try (PreparedStatement stmt = connection.prepareStatement(del)) {
+                stmt.setString(1, uuid.toString());
+                stmt.executeUpdate();
+            }
+            if (entries != null && !entries.isEmpty()) {
+                try (PreparedStatement stmt = connection.prepareStatement(ins)) {
+                    for (int i = 0; i < entries.size(); i++) {
+                        Object[] e = entries.get(i);
+                        stmt.setString(1, uuid.toString());
+                        stmt.setInt(2, i);
+                        stmt.setString(3, (String) e[0]);
+                        stmt.setInt(4, (Integer) e[1]);
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to save crafting queue: " + e.getMessage());
         }
     }
     
+    /** Lưu hàng chờ thống nhất. entries: List of [type, recipeId, batchCount] */
+    public void saveUnifiedQueue(UUID uuid, java.util.List<Object[]> entries) {
+        String del = "DELETE FROM task_queue WHERE uuid = ?";
+        String ins = "INSERT INTO task_queue (uuid, slot_index, task_type, recipe_id, batch_count) VALUES (?, ?, ?, ?, ?)";
+        try {
+            try (PreparedStatement stmt = connection.prepareStatement(del)) {
+                stmt.setString(1, uuid.toString());
+                stmt.executeUpdate();
+            }
+            if (entries != null && !entries.isEmpty()) {
+                try (PreparedStatement stmt = connection.prepareStatement(ins)) {
+                    for (int i = 0; i < entries.size(); i++) {
+                        Object[] e = entries.get(i);
+                        stmt.setString(1, uuid.toString());
+                        stmt.setInt(2, i);
+                        stmt.setString(3, (String) e[0]);
+                        stmt.setString(4, (String) e[1]);
+                        stmt.setInt(5, (Integer) e[2]);
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to save task queue: " + e.getMessage());
+        }
+    }
+
+    /** Load hàng chờ thống nhất. Returns List of [type, recipeId, batchCount]. Migrate từ crafting_queue+smelting_queue nếu task_queue rỗng. */
+    public java.util.List<Object[]> loadUnifiedQueue(UUID uuid) {
+        java.util.List<Object[]> out = new java.util.ArrayList<>();
+        String sql = "SELECT task_type, recipe_id, batch_count FROM task_queue WHERE uuid = ? ORDER BY slot_index";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    out.add(new Object[]{ rs.getString("task_type"), rs.getString("recipe_id"), rs.getInt("batch_count") });
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to load task queue: " + e.getMessage());
+        }
+        if (out.isEmpty()) migrateOldQueuesToUnified(uuid, out);
+        return out;
+    }
+
+    private void migrateOldQueuesToUnified(UUID uuid, java.util.List<Object[]> out) {
+        try {
+            try (PreparedStatement st = connection.prepareStatement("SELECT recipe_id, batch_count FROM crafting_queue WHERE uuid = ? ORDER BY slot_index")) {
+                st.setString(1, uuid.toString());
+                try (ResultSet rs = st.executeQuery()) {
+                    while (rs.next()) out.add(new Object[]{ "CRAFT", rs.getString("recipe_id"), rs.getInt("batch_count") });
+                }
+            }
+            try (PreparedStatement st = connection.prepareStatement("SELECT recipe_id, batch_count FROM smelting_queue WHERE uuid = ? ORDER BY slot_index")) {
+                st.setString(1, uuid.toString());
+                try (ResultSet rs = st.executeQuery()) {
+                    while (rs.next()) out.add(new Object[]{ "SMELT", rs.getString("recipe_id"), rs.getInt("batch_count") });
+                }
+            }
+            if (!out.isEmpty()) {
+                saveUnifiedQueue(uuid, out);
+                try (PreparedStatement del1 = connection.prepareStatement("DELETE FROM crafting_queue WHERE uuid = ?");
+                     PreparedStatement del2 = connection.prepareStatement("DELETE FROM smelting_queue WHERE uuid = ?")) {
+                    del1.setString(1, uuid.toString());
+                    del2.setString(1, uuid.toString());
+                    del1.executeUpdate();
+                    del2.executeUpdate();
+                } catch (SQLException ignored) {}
+            }
+        } catch (SQLException ignored) {}
+    }
+
+    public void clearUnifiedQueue(UUID uuid) {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM task_queue WHERE uuid = ?")) {
+            stmt.setString(1, uuid.toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to clear task queue: " + e.getMessage());
+        }
+    }
+    
+    /** @deprecated Dùng loadUnifiedQueue, filter CRAFT */
+    public java.util.List<Object[]> loadCraftingQueue(UUID uuid) {
+        java.util.List<Object[]> all = loadUnifiedQueue(uuid);
+        java.util.List<Object[]> out = new java.util.ArrayList<>();
+        for (Object[] e : all) {
+            if ("CRAFT".equals(e[0])) out.add(new Object[]{ e[1], e[2] });
+        }
+        return out;
+    }
+    
+    /** Lưu hàng chờ smelt khi player quit. entries: List of [recipeId, batchCount] */
+    public void saveSmeltingQueue(UUID uuid, java.util.List<Object[]> entries) {
+        String del = "DELETE FROM smelting_queue WHERE uuid = ?";
+        String ins = "INSERT INTO smelting_queue (uuid, slot_index, recipe_id, batch_count) VALUES (?, ?, ?, ?)";
+        try {
+            try (PreparedStatement stmt = connection.prepareStatement(del)) {
+                stmt.setString(1, uuid.toString());
+                stmt.executeUpdate();
+            }
+            if (entries != null && !entries.isEmpty()) {
+                try (PreparedStatement stmt = connection.prepareStatement(ins)) {
+                    for (int i = 0; i < entries.size(); i++) {
+                        Object[] e = entries.get(i);
+                        stmt.setString(1, uuid.toString());
+                        stmt.setInt(2, i);
+                        stmt.setString(3, (String) e[0]);
+                        stmt.setInt(4, (Integer) e[1]);
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to save smelting queue: " + e.getMessage());
+        }
+    }
+    
+    /** Xóa hàng chờ smelt khỏi DB (sau khi đã restore vào memory) */
+    public void clearSmeltingQueue(UUID uuid) {
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM smelting_queue WHERE uuid = ?")) {
+            stmt.setString(1, uuid.toString());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to clear smelting queue: " + e.getMessage());
+        }
+    }
+    
+    /** Load hàng chờ smelt. Returns List of [recipeId, batchCount] theo thứ tự. */
+    public java.util.List<Object[]> loadSmeltingQueue(UUID uuid) {
+        java.util.List<Object[]> out = new java.util.ArrayList<>();
+        String sql = "SELECT recipe_id, batch_count FROM smelting_queue WHERE uuid = ? ORDER BY slot_index";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    out.add(new Object[]{ rs.getString("recipe_id"), rs.getInt("batch_count") });
+                }
+            }
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Failed to load smelting queue: " + e.getMessage());
+        }
+        return out;
+    }
+    
     /**
-     * Get database connection (for SmeltingManager direct access)
+     * ISSUE-004 FIX: Deprecated - không expose connection thô để tránh resource leak.
+     * Sử dụng các method public của SQLiteDatabase thay thế.
+     * @deprecated Sẽ bị xóa trong phiên bản tương lai
      */
+    @Deprecated(since = "1.0.0", forRemoval = true)
     public Connection getConnection() {
         return connection;
     }

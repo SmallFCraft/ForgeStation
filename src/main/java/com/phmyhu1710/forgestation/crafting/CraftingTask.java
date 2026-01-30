@@ -1,6 +1,7 @@
 package com.phmyhu1710.forgestation.crafting;
 
 import com.phmyhu1710.forgestation.ForgeStationPlugin;
+import com.phmyhu1710.forgestation.util.CommandUtil;
 import com.phmyhu1710.forgestation.util.MessageUtil;
 import com.phmyhu1710.forgestation.util.ItemBuilder;
 import com.phmyhu1710.forgestation.util.TimeUtil;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -47,6 +49,7 @@ public class CraftingTask {
     // BOSSBAR PROGRESS - Unified format với SmeltingTask
     private BossBar bossBar;
     private static final String BOSSBAR_FORMAT = "&b⚒ &f%s &8| &e%s &8| &a%d%%";
+    private static final Random RANDOM = new Random();
 
     public CraftingTask(ForgeStationPlugin plugin, Player player, Recipe recipe, long durationTicks) {
         this(plugin, player, recipe, durationTicks, 1);
@@ -154,7 +157,7 @@ public class CraftingTask {
         String timeStr = TimeUtil.formatTicksCompact(remainingTicks);
         String base = String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
         Player p = getPlayer();
-        int queueSize = (p != null) ? plugin.getCraftingExecutor().getCraftingQueue(p).size() : 0;
+        int queueSize = (p != null) ? plugin.getTaskQueueManager().getQueueSize(p) : 0;
         if (queueSize > 0) {
             base += " &8| &7Hàng chờ: &e" + queueSize;
         }
@@ -190,20 +193,34 @@ public class CraftingTask {
                 return;
             }
 
-            if (exchangeMode) {
-                giveExchangeRewards(player);
-                if (exchangeRemainder > 0) {
-                    plugin.getMessageUtil().send(player, "exchange.refund", "amount", String.valueOf(exchangeRemainder));
-                }
+            double effectiveChance = plugin.getRecipeManager().getEffectiveSuccessChance(player, recipe);
+            int successes = rollSuccesses(batchCount, effectiveChance);
+            
+            if (successes <= 0) {
+                plugin.getMessageUtil().send(player, "craft.failed-chance",
+                    "item", recipe.getDisplayName(),
+                    "chance", String.format("%.1f", effectiveChance));
             } else {
-                giveOutputSafe(player);
-                for (String cmd : recipe.getCommandsOnSuccess()) {
-                    String parsed = cmd.replace("%player%", player.getName());
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsed);
+                if (exchangeMode) {
+                    giveExchangeRewards(player, successes);
+                    if (exchangeRemainder > 0) {
+                        plugin.getMessageUtil().send(player, "exchange.refund", "amount", String.valueOf(exchangeRemainder));
+                    }
+                } else {
+                    giveOutputSafe(player, successes);
+                    for (String cmd : recipe.getCommandsOnSuccess()) {
+                        String parsed = cmd.replace("%player%", player.getName());
+                        CommandUtil.safeDispatchConsole(parsed, "craft:commandsOnSuccess:" + recipe.getId());
+                    }
+                }
+                if (successes < batchCount) {
+                    plugin.getMessageUtil().send(player, "craft.partial-success",
+                        "success", String.valueOf(successes), "total", String.valueOf(batchCount), "item", recipe.getDisplayName());
+                } else {
+                    plugin.getMessageUtil().send(player, "craft.complete",
+                        "item", recipe.getDisplayName(), "count", String.valueOf(successes));
                 }
             }
-
-            plugin.getMessageUtil().send(player, "craft.complete", "item", recipe.getDisplayName(), "count", String.valueOf(batchCount));
         } catch (Exception e) {
             plugin.getLogger().warning("Craft complete failed for recipe=" + recipe.getId() + ": " + e.getMessage());
             if (exchangeMode) {
@@ -217,11 +234,25 @@ public class CraftingTask {
     }
 
     /**
-     * Trả thưởng cho recipe dạng exchange (rewards). Dùng chung message craft.complete.
+     * Roll số lần thành công trong batchCount với chance % (0-100)
      */
-    private void giveExchangeRewards(Player player) {
+    private int rollSuccesses(int batchCount, double chancePercent) {
+        if (chancePercent >= 100.0) return batchCount;
+        if (chancePercent <= 0.0) return 0;
+        int successes = 0;
+        for (int i = 0; i < batchCount; i++) {
+            if (RANDOM.nextDouble() * 100 < chancePercent) successes++;
+        }
+        return successes;
+    }
+
+    /**
+     * Trả thưởng cho recipe dạng exchange (rewards). successes = số lần thành công sau roll.
+     */
+    private void giveExchangeRewards(Player player, int successes) {
+        if (successes <= 0) return;
         for (Recipe.Reward reward : recipe.getRewards()) {
-            int baseReward = reward.getBaseAmount() * batchCount;
+            int baseReward = reward.getBaseAmount() * successes;
             int finalReward = (int) Math.floor(baseReward * exchangeMultiplier);
             if (finalReward <= 0) continue;
             switch (reward.getType().toUpperCase()) {
@@ -235,7 +266,7 @@ public class CraftingTask {
                     String cmd = reward.getCommand()
                         .replace("%player%", player.getName())
                         .replace("%amount%", String.valueOf(finalReward));
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                    CommandUtil.safeDispatchConsole(cmd, "craft:exchange:" + recipe.getId());
                     break;
                 case "EXTRA_STORAGE":
                     String material = reward.getMaterial();
@@ -250,17 +281,17 @@ public class CraftingTask {
     }
 
     /**
-     * Give crafting output to player
-     * FIX: MMOITEMS case giờ đã give item đúng cách
+     * Give crafting output to player. successes = số lần thành công sau roll chance.
      */
-    private void giveOutputSafe(Player player) {
+    private void giveOutputSafe(Player player, int successes) {
+        if (successes <= 0) return;
         Recipe.RecipeResult result = recipe.getResult();
         if (result == null) {
             plugin.getLogger().warning("Recipe " + recipe.getId() + " has no result configured!");
             return;
         }
         
-        int totalAmount = result.getAmount() * batchCount;
+        int totalAmount = result.getAmount() * successes;
         
         switch (result.getType().toUpperCase()) {
             case "MMOITEMS":

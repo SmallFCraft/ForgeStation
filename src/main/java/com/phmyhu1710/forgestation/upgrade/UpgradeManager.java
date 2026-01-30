@@ -62,6 +62,14 @@ public class UpgradeManager {
         return Math.min(10, Math.max(0, getPlayerLevel(player, "queue_slots")));
     }
 
+    /**
+     * Số task chạy song song tối đa (1 + level). Lv.0=1, Lv.1=2, Lv.2=3...
+     */
+    public int getMaxParallelTasks(Player player) {
+        int level = getPlayerLevel(player, "parallel_tasks");
+        return Math.max(1, 1 + level);
+    }
+
     public Upgrade getUpgrade(String id) {
         return upgrades.get(id);
     }

@@ -36,6 +36,7 @@ public class ForgeStationPlugin extends JavaPlugin {
     private RecipeManager recipeManager;
     private CraftingExecutor craftingExecutor;
     private SmeltingManager smeltingManager;
+    private com.phmyhu1710.forgestation.queue.TaskQueueManager taskQueueManager;
     private UpgradeManager upgradeManager;
     private PlayerDataManager playerDataManager;
     private MenuManager menuManager;
@@ -43,6 +44,7 @@ public class ForgeStationPlugin extends JavaPlugin {
     private SchedulerAdapter scheduler;
     // ISSUE-014 FIX: Output router for configurable item delivery
     private OutputRouter outputRouter;
+    private int persistenceTaskId = -1;
     private com.phmyhu1710.forgestation.command.CustomCommandManager customCommandManager;
     
     @Override
@@ -89,6 +91,8 @@ public class ForgeStationPlugin extends JavaPlugin {
         // ISSUE-014 FIX: Initialize output router
         outputRouter = new OutputRouter(this);
         
+        taskQueueManager = new com.phmyhu1710.forgestation.queue.TaskQueueManager(this);
+        
         // Initialize crafting executor
         craftingExecutor = new CraftingExecutor(this);
         
@@ -114,7 +118,19 @@ public class ForgeStationPlugin extends JavaPlugin {
         
         // EXTERNAL RELOAD FIX: Restore tasks cho online players sau khi khởi tạo xong
         // Điều này cần thiết khi plugin được reload bởi PlugMan/PlugManX
-        scheduler.runLater(() -> restoreTasksForOnlinePlayers(), 20L);
+        // PLUGMAN FIX: 40 ticks delay để DB/PlugMan ổn định; runAtEntity cho Folia
+        scheduler.runLater(() -> restoreTasksForOnlinePlayers(), 40L);
+        
+        // CRASH PROTECTION: Lưu tasks+queue định kỳ vào DB (khi server crash vẫn restore được)
+        int intervalSec = configManager.getMainConfig().getInt("persistence.save-interval-seconds", 30);
+        if (intervalSec > 0) {
+            long intervalTicks = intervalSec * 20L;
+            persistenceTaskId = scheduler.runTimer(() -> {
+                if (craftingExecutor != null) craftingExecutor.saveAllTasksToDatabase();
+                if (smeltingManager != null) smeltingManager.saveAllTasksToDatabase();
+            }, intervalTicks, intervalTicks);
+            debug("Persistence save every " + intervalSec + "s enabled (crash protection)");
+        }
         
         long took = System.currentTimeMillis() - start;
         printStartupSummary(took);
@@ -129,6 +145,11 @@ public class ForgeStationPlugin extends JavaPlugin {
             }
 
             // ⚠️ CRITICAL ORDER: Phải lưu tasks TRƯỚC KHI đóng database!
+            
+            if (persistenceTaskId != -1) {
+                scheduler.cancelTask(persistenceTaskId);
+                persistenceTaskId = -1;
+            }
             
             // 1. Cancel và lưu tất cả smelting tasks vào database
             if (smeltingManager != null) {
@@ -210,34 +231,41 @@ public class ForgeStationPlugin extends JavaPlugin {
     /**
      * EXTERNAL RELOAD FIX: Restore tasks cho tất cả online players
      * Được gọi khi plugin enable (sau khi reload bởi PlugMan)
+     * PLUGMAN FIX: runAtEntity cho từng player — trên Folia phải chạy trên entity region
      */
     private void restoreTasksForOnlinePlayers() {
         int onlinePlayers = Bukkit.getOnlinePlayers().size();
-        debug("Attempting to restore tasks for " + onlinePlayers + " online players...");
+        debug("Attempting to restore tasks for " + onlinePlayers + " online players (PlugMan reload)...");
         
-        int smeltingRestored = 0;
-        int craftingRestored = 0;
+        if (onlinePlayers == 0) return;
+        
+        java.util.concurrent.atomic.AtomicInteger smeltingRestored = new java.util.concurrent.atomic.AtomicInteger(0);
+        java.util.concurrent.atomic.AtomicInteger craftingRestored = new java.util.concurrent.atomic.AtomicInteger(0);
+        java.util.concurrent.atomic.AtomicInteger pending = new java.util.concurrent.atomic.AtomicInteger(onlinePlayers);
         
         for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
-            debug("Checking saved tasks for player: " + player.getName());
-            
-            // Restore smelting tasks
-            if (smeltingManager.restoreTaskForPlayer(player)) {
-                smeltingRestored++;
-                debug("Restored smelting task for " + player.getName());
-            }
-            
-            // Restore crafting tasks
-            if (craftingExecutor.restoreTaskForPlayer(player)) {
-                craftingRestored++;
-                debug("Restored crafting task for " + player.getName());
-            }
-        }
-        
-        if (smeltingRestored > 0 || craftingRestored > 0) {
-            getLogger().info("Restored " + smeltingRestored + " smelting and " + craftingRestored + " crafting tasks for online players");
-        } else if (onlinePlayers > 0) {
-            debug("No saved tasks found to restore");
+            scheduler.runAtEntity(player, () -> {
+                try {
+                    if (smeltingManager.restoreTaskForPlayer(player)) {
+                        smeltingRestored.incrementAndGet();
+                        debug("Restored smelting task for " + player.getName());
+                    }
+                    if (craftingExecutor.restoreTaskForPlayer(player)) {
+                        craftingRestored.incrementAndGet();
+                        debug("Restored crafting task for " + player.getName());
+                    }
+                } finally {
+                    if (pending.decrementAndGet() == 0) {
+                        int s = smeltingRestored.get();
+                        int c = craftingRestored.get();
+                        if (s > 0 || c > 0) {
+                            getLogger().info("Restored " + s + " smelting and " + c + " crafting tasks for online players (PlugMan reload)");
+                        } else {
+                            debug("No saved tasks found to restore");
+                        }
+                    }
+                }
+            });
         }
     }
     
@@ -303,6 +331,10 @@ public class ForgeStationPlugin extends JavaPlugin {
     
     public SmeltingManager getSmeltingManager() {
         return smeltingManager;
+    }
+    
+    public com.phmyhu1710.forgestation.queue.TaskQueueManager getTaskQueueManager() {
+        return taskQueueManager;
     }
     
     public UpgradeManager getUpgradeManager() {

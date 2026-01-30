@@ -158,6 +158,10 @@ public class PlayerDataManager implements Listener {
         
 
         dbWorkerRunning.set(false);
+        // ISSUE-003 FIX: Interrupt worker thread để thoát poll() ngay lập tức
+        if (dbWorkerThread != null && dbWorkerThread.isAlive()) {
+            dbWorkerThread.interrupt();
+        }
         
         // Wait for queue to drain (max 5 seconds)
         long start = System.currentTimeMillis();
