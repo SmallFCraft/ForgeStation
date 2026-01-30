@@ -12,6 +12,9 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -27,7 +30,20 @@ public class CraftingTask {
     private long remainingTicks;
     private boolean cancelled = false;
     private int batchCount = 1;
-    
+
+    /** Snapshot để hoàn trả khi hủy: nguyên liệu + tiền */
+    private List<ItemStack> refundItems = new ArrayList<>();
+    private Map<String, Integer> refundExtraStorage = new java.util.HashMap<>();
+    private double refundVault;
+    private int refundPP;
+    private String refundCoinEngineCurrency = "";
+    private double refundCoinEngine;
+
+    /** Chế độ "exchange" (recipe có rewards): dùng batchCount = số lần đổi, multiplier + remainder cho phần thừa. */
+    private boolean exchangeMode = false;
+    private double exchangeMultiplier = 1.0;
+    private int exchangeRemainder = 0;
+
     // BOSSBAR PROGRESS - Unified format với SmeltingTask
     private BossBar bossBar;
     private static final String BOSSBAR_FORMAT = "&b⚒ &f%s &8| &e%s &8| &a%d%%";
@@ -36,12 +52,15 @@ public class CraftingTask {
         this(plugin, player, recipe, durationTicks, 1);
     }
     
-    public CraftingTask(ForgeStationPlugin plugin, Player player, Recipe recipe, long durationTicks, int batchCount) {
+    /**
+     * @param totalDurationTicks Total time in ticks = (duration per item) * batchCount (cộng dồn như smelting).
+     */
+    public CraftingTask(ForgeStationPlugin plugin, Player player, Recipe recipe, long totalDurationTicks, int batchCount) {
         this.plugin = plugin;
         this.playerUuid = player.getUniqueId();
         this.recipe = recipe;
-        this.totalTicks = durationTicks;
-        this.remainingTicks = durationTicks;
+        this.totalTicks = totalDurationTicks;
+        this.remainingTicks = totalDurationTicks;
         this.batchCount = Math.max(1, batchCount);
     }
 
@@ -124,7 +143,8 @@ public class CraftingTask {
     }
     
     /**
-     * UNIFIED: Sử dụng TimeUtil.formatTicksCompact để hiển thị thời gian
+     * UNIFIED: Sử dụng TimeUtil.formatTicksCompact để hiển thị thời gian.
+     * BossBar optimization: 1 bar + hiển thị số hàng chờ trong title (tránh nhiều bar).
      */
     private String formatBossBarTitle() {
         String itemName = recipe.getDisplayName();
@@ -132,7 +152,13 @@ public class CraftingTask {
             itemName = batchCount + "× " + itemName;
         }
         String timeStr = TimeUtil.formatTicksCompact(remainingTicks);
-        return String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
+        String base = String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
+        Player p = getPlayer();
+        int queueSize = (p != null) ? plugin.getCraftingExecutor().getCraftingQueue(p).size() : 0;
+        if (queueSize > 0) {
+            base += " &8| &7Hàng chờ: &e" + queueSize;
+        }
+        return base;
     }
     
     private void removeBossBar() {
@@ -144,37 +170,82 @@ public class CraftingTask {
     }
 
     /**
-     * Complete crafting - give output to player
+     * Complete crafting - give output hoặc rewards (exchange mode) cho player.
+     * Một hệ thống: craft và exchange đều là "chế tạo", chỉ khác cách trả thưởng.
      */
     public void complete() {
         cancelled = true;
         removeBossBar();
-        
+
         try {
             Player player = getPlayer();
-            
-            // Nếu player offline, lưu pending output
+
             if (player == null || !player.isOnline()) {
-                plugin.getCraftingExecutor().savePendingOutput(playerUuid, recipe, batchCount);
-                plugin.debug("Player offline, saved pending crafting output for " + playerUuid);
+                if (exchangeMode) {
+                    plugin.getCraftingExecutor().savePendingExchangeOutput(playerUuid, recipe, batchCount, exchangeMultiplier);
+                } else {
+                    plugin.getCraftingExecutor().savePendingOutput(playerUuid, recipe, batchCount);
+                }
+                plugin.debug("Player offline, saved pending output for " + playerUuid);
                 return;
             }
-            
-            // Give output
-            giveOutputSafe(player);
-            
-            // Execute commands
-            for (String cmd : recipe.getCommandsOnSuccess()) {
-                String parsed = cmd.replace("%player%", player.getName());
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsed);
+
+            if (exchangeMode) {
+                giveExchangeRewards(player);
+                if (exchangeRemainder > 0) {
+                    plugin.getMessageUtil().send(player, "exchange.refund", "amount", String.valueOf(exchangeRemainder));
+                }
+            } else {
+                giveOutputSafe(player);
+                for (String cmd : recipe.getCommandsOnSuccess()) {
+                    String parsed = cmd.replace("%player%", player.getName());
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsed);
+                }
             }
-            
-            plugin.getMessageUtil().send(player, "craft.complete", "item", recipe.getDisplayName());
+
+            plugin.getMessageUtil().send(player, "craft.complete", "item", recipe.getDisplayName(), "count", String.valueOf(batchCount));
         } catch (Exception e) {
             plugin.getLogger().warning("Craft complete failed for recipe=" + recipe.getId() + ": " + e.getMessage());
-            plugin.getCraftingExecutor().savePendingOutput(playerUuid, recipe, batchCount);
+            if (exchangeMode) {
+                plugin.getCraftingExecutor().savePendingExchangeOutput(playerUuid, recipe, batchCount, exchangeMultiplier);
+            } else {
+                plugin.getCraftingExecutor().savePendingOutput(playerUuid, recipe, batchCount);
+            }
         } finally {
             plugin.getCraftingExecutor().onCraftingComplete(playerUuid);
+        }
+    }
+
+    /**
+     * Trả thưởng cho recipe dạng exchange (rewards). Dùng chung message craft.complete.
+     */
+    private void giveExchangeRewards(Player player) {
+        for (Recipe.Reward reward : recipe.getRewards()) {
+            int baseReward = reward.getBaseAmount() * batchCount;
+            int finalReward = (int) Math.floor(baseReward * exchangeMultiplier);
+            if (finalReward <= 0) continue;
+            switch (reward.getType().toUpperCase()) {
+                case "PLAYER_POINTS":
+                    plugin.getEconomyManager().givePlayerPoints(player, finalReward);
+                    break;
+                case "VAULT":
+                    plugin.getEconomyManager().depositVault(player, finalReward);
+                    break;
+                case "COMMAND":
+                    String cmd = reward.getCommand()
+                        .replace("%player%", player.getName())
+                        .replace("%amount%", String.valueOf(finalReward));
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                    break;
+                case "EXTRA_STORAGE":
+                    String material = reward.getMaterial();
+                    if (material != null && !material.isEmpty()) {
+                        plugin.getExtraStorageHook().addItems(player, material, finalReward);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -234,6 +305,50 @@ public class CraftingTask {
                     plugin.debug("Gave " + totalAmount + "x " + result.getMaterial() + " in batches to " + player.getName());
                 }
                 break;
+        }
+    }
+
+    /**
+     * Set snapshot để hoàn trả khi hủy (gọi từ CraftingExecutor sau khi đã remove ingredients + withdraw).
+     */
+    public void setRefundSnapshot(List<ItemStack> items, Map<String, Integer> extraStorage,
+                                  double vault, int playerPoints, String coinEngineCurrency, double coinEngine) {
+        if (items != null) this.refundItems = new ArrayList<>(items);
+        if (extraStorage != null) this.refundExtraStorage = new java.util.HashMap<>(extraStorage);
+        this.refundVault = vault;
+        this.refundPP = playerPoints;
+        this.refundCoinEngineCurrency = coinEngineCurrency != null ? coinEngineCurrency : "";
+        this.refundCoinEngine = coinEngine;
+    }
+
+    /**
+     * Bật chế độ exchange (recipe có rewards). batchCount = số lần đổi; multiplier/remainder cho phần thừa.
+     */
+    public void setExchangeMode(double multiplier, int remainder) {
+        this.exchangeMode = true;
+        this.exchangeMultiplier = multiplier;
+        this.exchangeRemainder = remainder;
+    }
+
+    /**
+     * Hoàn trả nguyên liệu + tiền cho player (khi hủy task).
+     */
+    public void refund(Player player) {
+        if (player == null || !player.isOnline()) return;
+        for (ItemStack item : refundItems) {
+            if (item != null && item.getType() != Material.AIR && item.getAmount() > 0) {
+                plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+            }
+        }
+        refundExtraStorage.forEach((storageId, amount) -> {
+            if (amount > 0 && plugin.getExtraStorageHook().isAvailable()) {
+                plugin.getExtraStorageHook().addItems(player, storageId, amount);
+            }
+        });
+        if (refundVault > 0) plugin.getEconomyManager().depositVault(player, refundVault);
+        if (refundPP > 0) plugin.getEconomyManager().givePlayerPoints(player, refundPP);
+        if (refundCoinEngine > 0 && !refundCoinEngineCurrency.isEmpty()) {
+            plugin.getEconomyManager().depositCoinEngine(player, refundCoinEngineCurrency, refundCoinEngine);
         }
     }
 

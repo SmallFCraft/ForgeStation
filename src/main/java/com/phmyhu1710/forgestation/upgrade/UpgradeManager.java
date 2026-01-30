@@ -6,9 +6,12 @@ import com.phmyhu1710.forgestation.player.PlayerDataManager;
 import com.phmyhu1710.forgestation.util.MessageUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,8 +41,25 @@ public class UpgradeManager {
             
             upgrades.put(upgradeId, new Upgrade(upgradeId, upgradeConfig));
         }
-        
+
+        // Fallback: thêm queue_slots nếu upgrades.yml không có (chi phí lấy từ upgrades.yml khi có file mặc định)
+        if (!upgrades.containsKey("queue_slots")) {
+            YamlConfiguration def = new YamlConfiguration();
+            def.set("display-name", "Slot hàng chờ");
+            def.set("max-level", 10);
+            def.set("cost-per-level.playerpoints", "5000");
+            upgrades.put("queue_slots", new Upgrade("queue_slots", def));
+            plugin.debug("Loaded default upgrade: queue_slots (fallback)");
+        }
+
         plugin.debug("Loaded " + upgrades.size() + " upgrades");
+    }
+
+    /**
+     * Số slot hàng chờ đã mở (0-10). Dùng cho crafting/smelting queue.
+     */
+    public int getQueueSlotsUnlocked(Player player) {
+        return Math.min(10, Math.max(0, getPlayerLevel(player, "queue_slots")));
     }
 
     public Upgrade getUpgrade(String id) {
@@ -161,7 +181,44 @@ public class UpgradeManager {
         plugin.debug("  Exp: " + playerExp);
         plugin.debug("  CoinEngine: " + playerCE);
         
-        // Check if can afford
+        // Check each currency individually and build detailed message
+        List<String> insufficientList = new ArrayList<>();
+        
+        if (vaultCost > 0 && playerVault < vaultCost) {
+            double needed = vaultCost - playerVault;
+            String currencyName = MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.vault", "Coins"));
+            insufficientList.add(String.format("&8┃ &6💰 &7Thiếu &e%s %s &8(&7Có: &e%s&8)",
+                MessageUtil.formatNumber(needed), currencyName, MessageUtil.formatNumber(playerVault)));
+        }
+        
+        if (ppCost > 0 && playerPP < ppCost) {
+            int needed = ppCost - playerPP;
+            String currencyName = MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.playerpoints", "Points"));
+            insufficientList.add(String.format("&8┃ &b⬤ &7Thiếu &e%s %s &8(&7Có: &e%s&8)",
+                MessageUtil.formatNumber(needed), currencyName, MessageUtil.formatNumber(playerPP)));
+        }
+        
+        if (expCost > 0 && playerExp < expCost) {
+            int needed = expCost - playerExp;
+            String currencyName = MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.exp", "EXP"));
+            insufficientList.add(String.format("&8┃ &a✦ &7Thiếu &e%s %s &8(&7Có: &e%s&8)",
+                MessageUtil.formatNumber(needed), currencyName, MessageUtil.formatNumber(playerExp)));
+        }
+        
+        if (coinEngineCost > 0 && !upgrade.getCoinEngineCurrency().isEmpty() && playerCE < coinEngineCost) {
+            double needed = coinEngineCost - playerCE;
+            insufficientList.add(String.format("&8┃ &e⛃ &7Thiếu &e%s %s &8(&7Có: &e%s&8)",
+                MessageUtil.formatNumber(needed), upgrade.getCoinEngineCurrency(), MessageUtil.formatNumber(playerCE)));
+        }
+        
+        // If insufficient, send detailed message
+        if (!insufficientList.isEmpty()) {
+            plugin.getMessageUtil().send(player, "upgrade.insufficient",
+                "details", String.join("\n", insufficientList));
+            return false;
+        }
+        
+        // Double check with canAfford (should always pass if above checks passed)
         boolean canAfford = plugin.getEconomyManager().canAfford(player, vaultCost, ppCost, expCost,
                 upgrade.getCoinEngineCurrency(), coinEngineCost);
         
@@ -202,15 +259,15 @@ public class UpgradeManager {
     private String formatCost(double vault, int pp, int exp, double coinEngine, String currency) {
         StringBuilder sb = new StringBuilder();
         if (vault > 0) {
-            sb.append("§6").append(MessageUtil.formatNumber(vault)).append(" ").append(MessageUtil.colorize(plugin.getConfig().getString("currency.vault", "Coins")));
+            sb.append("§6").append(MessageUtil.formatNumber(vault)).append(" ").append(MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.vault", "Coins")));
         }
         if (pp > 0) {
             if (!sb.isEmpty()) sb.append(" §7+ ");
-            sb.append("§b").append(MessageUtil.formatNumber(pp)).append(" ").append(MessageUtil.colorize(plugin.getConfig().getString("currency.playerpoints", "Points")));
+            sb.append("§b").append(MessageUtil.formatNumber(pp)).append(" ").append(MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.playerpoints", "Points")));
         }
         if (exp > 0) {
             if (!sb.isEmpty()) sb.append(" §7+ ");
-            sb.append("§a").append(MessageUtil.formatNumber(exp)).append(" ").append(MessageUtil.colorize(plugin.getConfig().getString("currency.exp", "EXP")));
+            sb.append("§a").append(MessageUtil.formatNumber(exp)).append(" ").append(MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.exp", "EXP")));
         }
         if (coinEngine > 0 && !currency.isEmpty()) {
             if (!sb.isEmpty()) sb.append(" §7+ ");

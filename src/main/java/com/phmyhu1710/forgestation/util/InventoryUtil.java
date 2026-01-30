@@ -7,7 +7,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -192,22 +194,26 @@ public class InventoryUtil {
     }
 
     /**
-     * Remove items from player inventory
+     * Remove items from player inventory and collect clones for refund.
+     * For VANILLA/MMOITEMS returns cloned stacks; for EXTRA_STORAGE returns empty (refund via addItems separately).
      */
-    public static void removeItems(ForgeStationPlugin plugin, Player player, Recipe.Ingredient ing, int amount) {
+    public static List<ItemStack> removeItemsAndCollect(ForgeStationPlugin plugin, Player player, Recipe.Ingredient ing, int amount) {
+        List<ItemStack> collected = new ArrayList<>();
         int remaining = amount;
-        
+
         switch (ing.getType()) {
             case "VANILLA":
-                // ISSUE-009 FIX: Sử dụng parseMatSafe thay vì Material.valueOf trực tiếp
                 Material mat = parseMatSafe(ing.getMaterial());
                 if (mat == null) {
                     plugin.debug("Invalid material '" + ing.getMaterial() + "' in ingredient, cannot remove items");
-                    return;
+                    return collected;
                 }
                 for (ItemStack item : player.getInventory().getContents()) {
                     if (item != null && item.getType() == mat && remaining > 0) {
                         int take = Math.min(item.getAmount(), remaining);
+                        ItemStack clone = item.clone();
+                        clone.setAmount(take);
+                        collected.add(clone);
                         item.setAmount(item.getAmount() - take);
                         remaining -= take;
                     }
@@ -215,9 +221,12 @@ public class InventoryUtil {
                 break;
             case "MMOITEMS":
                 for (ItemStack item : player.getInventory().getContents()) {
-                    if (item != null && remaining > 0 && ItemBuilder.matchesMMOItem(plugin, item, 
+                    if (item != null && remaining > 0 && ItemBuilder.matchesMMOItem(plugin, item,
                             ing.getMmoitemsType(), ing.getMmoitemsId())) {
                         int take = Math.min(item.getAmount(), remaining);
+                        ItemStack clone = item.clone();
+                        clone.setAmount(take);
+                        collected.add(clone);
                         item.setAmount(item.getAmount() - take);
                         remaining -= take;
                     }
@@ -228,6 +237,14 @@ public class InventoryUtil {
                 plugin.getExtraStorageHook().removeItems(player, esKey, amount);
                 break;
         }
+        return collected;
+    }
+
+    /**
+     * Remove items from player inventory
+     */
+    public static void removeItems(ForgeStationPlugin plugin, Player player, Recipe.Ingredient ing, int amount) {
+        removeItemsAndCollect(plugin, player, ing, amount);
     }
     /**
      * Check if player has space for items

@@ -45,6 +45,33 @@ items:
     sound: ENTITY_PLAYER_LEVELUP
 
   # ─────────────────────────────────────────────
+  # Queue Slots Upgrade (Slot hàng chờ - 5k Nguyên thạch/slot)
+  # ─────────────────────────────────────────────
+  queue_slots:
+    slot: 13
+    material: HOPPER
+    glow: true
+    name: "&d&l📥 Slot Hàng Chờ"
+    lore:
+      - ""
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - "&7Mở thêm ô hàng chờ khi chế tạo/nung."
+      - "&7Mỗi slot = thêm 1 công việc chờ xử lý."
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - ""
+      - "&fLevel hiện tại: &e%upgrade_level_queue_slots%&7/&e%upgrade_max_level_queue_slots%"
+      - ""
+      - "&f&lChi phí nâng cấp:"
+      - "%upgrade_cost_display_queue_slots%"
+      - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - ""
+      - "&a▶ Click để nâng cấp!"
+    action:
+      type: UPGRADE
+      upgrade-id: queue_slots
+    sound: ENTITY_PLAYER_LEVELUP
+
+  # ─────────────────────────────────────────────
   # Smelting Speed Upgrade
   # ─────────────────────────────────────────────
   smelting_speed:

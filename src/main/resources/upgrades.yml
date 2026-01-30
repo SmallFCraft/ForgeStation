@@ -74,3 +74,14 @@ upgrades:
     icon:
       material: FURNACE
       slot: 15
+
+
+  # ─────────────────────────────────────────────
+  # Slot hàng chờ (mở thêm ô chờ khi chế tạo/nung)
+  # Chi phí lấy từ config.yml queue.unlock-cost-playerpoints (mặc định 5000)
+  # ─────────────────────────────────────────────
+  queue_slots:
+    display-name: "Slot hàng chờ"
+    max-level: 10
+    cost-per-level:
+      playerpoints: "5000"

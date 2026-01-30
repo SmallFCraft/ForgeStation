@@ -24,11 +24,15 @@ commands:
     description: Main command for ForgeStation crafting system
     aliases: [fs, forge, loren, crafting]
     usage: |
-      /<command> - Mở menu chính
+      /<command> - Mở menu chính (cần forgestation.use)
+      /<command> menu - Mở menu chính
+      /<command> menu recipes - Mở menu chế tạo
+      /<command> menu upgrades - Mở menu nâng cấp
+      /<command> menu smelting - Mở menu nung
+      /<command> cat <id> - Mở menu theo category (blocks, exchange, ores...)
       /<command> help - Xem hướng dẫn
-      /<command> reload - Reload plugin
-      /<command> recipes <id> - Xem công thức
-      /<command> smelting <id> - Xem công thức nung
+      /<command> reload - Reload plugin (cần forgestation.reload)
+      /<command> cancel - Hủy task đang chạy
 
 permissions:
   forgestation.admin:
@@ -44,7 +48,7 @@ permissions:
     description: Reload ForgeStation configurations
     default: op
   forgestation.use:
-    description: Access ForgeStation main menu
+    description: Mở menu (/fs, /fs menu, /fs cat <id>) và lệnh custom (craftnhanh, nungquang...). OP có sẵn; không OP cần grant qua permission plugin.
     default: op
   forgestation.craft.*:
     description: Access all crafting recipes

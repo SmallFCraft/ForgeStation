@@ -31,9 +31,23 @@ public class SmeltingManager implements Listener {
     private final ForgeStationPlugin plugin;
     private final Map<String, SmeltingRecipe> smeltingRecipes = new java.util.LinkedHashMap<>();
     private final Map<UUID, SmeltingTask> activeTasks = new ConcurrentHashMap<>();
-    
+
+    /** Hàng chờ nung: recipeId + batchCount (chưa consume) */
+    private final Map<UUID, java.util.List<PendingSmeltingTask>> smeltingQueue = new ConcurrentHashMap<>();
+
     // PERFORMANCE FIX: Single global timer cho tất cả smelting tasks
     private int globalTimerTaskId = -1;
+
+    public static final class PendingSmeltingTask {
+        private final String recipeId;
+        private final int batchCount;
+        public PendingSmeltingTask(String recipeId, int batchCount) {
+            this.recipeId = recipeId;
+            this.batchCount = Math.max(1, batchCount);
+        }
+        public String getRecipeId() { return recipeId; }
+        public int getBatchCount() { return batchCount; }
+    }
 
     public SmeltingManager(ForgeStationPlugin plugin) {
         this.plugin = plugin;
@@ -206,16 +220,24 @@ public class SmeltingManager implements Listener {
      */
     public boolean startSmelting(Player player, SmeltingRecipe recipe, int batchCount) {
         UUID uuid = player.getUniqueId();
-        
-        // Validate batch count
         batchCount = Math.max(1, batchCount);
-        
-        // Check if already smelting
+
+        // Đang có task chạy → thêm vào hàng chờ
         if (activeTasks.containsKey(uuid)) {
-            plugin.getMessageUtil().send(player, "smelt.already-smelting");
-            return false;
+            int maxQueue = plugin.getUpgradeManager().getQueueSlotsUnlocked(player);
+            java.util.List<PendingSmeltingTask> queue = smeltingQueue.computeIfAbsent(uuid, k -> new java.util.ArrayList<>());
+            if (queue.size() >= maxQueue) {
+                plugin.getMessageUtil().send(player, "smelt.queue-full");
+                return false;
+            }
+            queue.add(new PendingSmeltingTask(recipe.getId(), batchCount));
+            plugin.getMessageUtil().send(player, "smelt.added-to-queue",
+                "item", recipe.getDisplayName(),
+                "count", String.valueOf(batchCount),
+                "queue", String.valueOf(queue.size()));
+            return true;
         }
-        
+
         // Check permission
         if (!recipe.getPermission().isEmpty() && !player.hasPermission(recipe.getPermission())) {
             plugin.getMessageUtil().send(player, "smelt.no-permission");
@@ -281,27 +303,22 @@ public class SmeltingManager implements Listener {
             }
         }
         
-        // Consume input materials BEFORE starting (batch amount)
-        consumeSmeltingMaterials(player, recipe, batchCount);
-        
-        // Consume fuel if required (batch amount)
-        if (recipe.isFuelRequired()) {
-            consumeFuel(player, recipe, batchCount);
-        }
-        
-        // BATCH SMELTING FIX: Thời gian nung = duration per item * batch count
-        // Ví dụ: 1 raw iron (30s) → 30s, 2 raw iron → 60s, 10 raw iron → 300s
-        // BATCH SMELTING FIX: Thời gian nung = duration per item * batch count
+        // Thu thập snapshot hoàn trả trước khi consume (để hủy thì hoàn tác)
+        java.util.Map<String, Integer> refundInputES = new java.util.HashMap<>();
+        java.util.List<ItemStack> refundInput = consumeSmeltingMaterialsAndCollect(player, recipe, batchCount, refundInputES);
+        java.util.Map<String, Integer> refundFuelES = new java.util.HashMap<>();
+        java.util.List<ItemStack> refundFuel = recipe.isFuelRequired()
+            ? consumeFuelAndCollect(player, recipe, batchCount, refundFuelES) : new java.util.ArrayList<>();
+
         long durationPerItemTicks = getDurationTicks(player, recipe);
         long totalDurationTicks = durationPerItemTicks * batchCount;
-        
+
         SmeltingTask task = new SmeltingTask(plugin, player, recipe, totalDurationTicks, batchCount);
+        task.setRefundSnapshot(refundInput, refundFuel, refundInputES, refundFuelES);
         activeTasks.put(uuid, task);
-        
-        // PERFORMANCE FIX: Chỉ khởi tạo task (tạo BossBar, gửi message)
-        // Global timer sẽ tick task thay vì task tự có timer riêng
+
         task.initialize();
-        
+
         return true;
     }
     
@@ -382,11 +399,21 @@ public class SmeltingManager implements Listener {
     }
     
     /**
-     * BATCH SMELTING: Consume smelting input materials with batch multiplier
+     * BATCH SMELTING: Consume input materials and collect clones for refund.
+     * Returns list of cloned items taken; for EXTRA_STORAGE, add (material, amount) to outRefundES.
      */
-    public void consumeSmeltingMaterials(Player player, SmeltingRecipe recipe, int batchCount) {
-        int remaining = recipe.getInputAmount() * batchCount;
-        
+    public java.util.List<ItemStack> consumeSmeltingMaterialsAndCollect(Player player, SmeltingRecipe recipe, int batchCount,
+                                                                        java.util.Map<String, Integer> outRefundES) {
+        java.util.List<ItemStack> collected = new java.util.ArrayList<>();
+        int totalNeed = recipe.getInputAmount() * batchCount;
+
+        if ("EXTRA_STORAGE".equals(recipe.getInputType())) {
+            if (outRefundES != null) outRefundES.put(recipe.getInputMaterial(), totalNeed);
+            plugin.getExtraStorageHook().removeItems(player, recipe.getInputMaterial(), totalNeed);
+            return collected;
+        }
+
+        int remaining = totalNeed;
         switch (recipe.getInputType()) {
             case "VANILLA":
                 try {
@@ -394,6 +421,9 @@ public class SmeltingManager implements Listener {
                     for (org.bukkit.inventory.ItemStack item : player.getInventory().getContents()) {
                         if (item != null && item.getType() == mat && remaining > 0) {
                             int take = Math.min(item.getAmount(), remaining);
+                            ItemStack clone = item.clone();
+                            clone.setAmount(take);
+                            collected.add(clone);
                             item.setAmount(item.getAmount() - take);
                             remaining -= take;
                         }
@@ -404,18 +434,26 @@ public class SmeltingManager implements Listener {
                 break;
             case "MMOITEMS":
                 for (org.bukkit.inventory.ItemStack item : player.getInventory().getContents()) {
-                    if (item != null && remaining > 0 && com.phmyhu1710.forgestation.util.ItemBuilder.matchesMMOItem(plugin, item, 
+                    if (item != null && remaining > 0 && com.phmyhu1710.forgestation.util.ItemBuilder.matchesMMOItem(plugin, item,
                             recipe.getInputMmoitemsType(), recipe.getInputMmoitemsId())) {
                         int take = Math.min(item.getAmount(), remaining);
+                        ItemStack clone = item.clone();
+                        clone.setAmount(take);
+                        collected.add(clone);
                         item.setAmount(item.getAmount() - take);
                         remaining -= take;
                     }
                 }
                 break;
-            case "EXTRA_STORAGE":
-                plugin.getExtraStorageHook().removeItems(player, recipe.getInputMaterial(), recipe.getInputAmount() * batchCount);
-                break;
         }
+        return collected;
+    }
+
+    /**
+     * BATCH SMELTING: Consume smelting input materials with batch multiplier
+     */
+    public void consumeSmeltingMaterials(Player player, SmeltingRecipe recipe, int batchCount) {
+        consumeSmeltingMaterialsAndCollect(player, recipe, batchCount, null);
     }
     
     /**
@@ -460,48 +498,113 @@ public class SmeltingManager implements Listener {
     }
     
     /**
-     * BATCH SMELTING: Consume fuel with batch multiplier
+     * BATCH SMELTING: Consume fuel and collect clones for refund.
      */
-    public void consumeFuel(Player player, SmeltingRecipe recipe, int batchCount) {
-        int remaining = recipe.getFuelAmount() * batchCount;
-        
-        switch (recipe.getFuelType()) {
-            case "VANILLA":
-                try {
-                    org.bukkit.Material mat = org.bukkit.Material.valueOf(recipe.getFuelMaterial().toUpperCase());
-                    for (org.bukkit.inventory.ItemStack item : player.getInventory().getContents()) {
-                        if (item != null && item.getType() == mat && remaining > 0) {
-                            int take = Math.min(item.getAmount(), remaining);
-                            item.setAmount(item.getAmount() - take);
-                            remaining -= take;
-                        }
-                    }
-                } catch (Exception e) {
-                    plugin.getLogger().warning("Failed to consume fuel: " + e.getMessage());
-                }
-                break;
-            case "EXTRA_STORAGE":
-                plugin.getExtraStorageHook().removeItems(player, recipe.getFuelMaterial(), recipe.getFuelAmount() * batchCount);
-                break;
+    public java.util.List<ItemStack> consumeFuelAndCollect(Player player, SmeltingRecipe recipe, int batchCount,
+                                                           java.util.Map<String, Integer> outRefundES) {
+        java.util.List<ItemStack> collected = new java.util.ArrayList<>();
+        int totalNeed = recipe.getFuelAmount() * batchCount;
+
+        if ("EXTRA_STORAGE".equals(recipe.getFuelType())) {
+            if (outRefundES != null) outRefundES.put(recipe.getFuelMaterial(), totalNeed);
+            plugin.getExtraStorageHook().removeItems(player, recipe.getFuelMaterial(), totalNeed);
+            return collected;
         }
+
+        int remaining = totalNeed;
+        if ("VANILLA".equals(recipe.getFuelType())) {
+            try {
+                org.bukkit.Material mat = org.bukkit.Material.valueOf(recipe.getFuelMaterial().toUpperCase());
+                for (org.bukkit.inventory.ItemStack item : player.getInventory().getContents()) {
+                    if (item != null && item.getType() == mat && remaining > 0) {
+                        int take = Math.min(item.getAmount(), remaining);
+                        ItemStack clone = item.clone();
+                        clone.setAmount(take);
+                        collected.add(clone);
+                        item.setAmount(item.getAmount() - take);
+                        remaining -= take;
+                    }
+                }
+            } catch (Exception e) {
+                plugin.getLogger().warning("Failed to consume fuel: " + e.getMessage());
+            }
+        }
+        return collected;
     }
 
     /**
-     * Cancel smelting task for player
+     * BATCH SMELTING: Consume fuel with batch multiplier
+     */
+    public void consumeFuel(Player player, SmeltingRecipe recipe, int batchCount) {
+        consumeFuelAndCollect(player, recipe, batchCount, null);
+    }
+
+    /**
+     * Cancel smelting task for player và hoàn trả nguyên liệu + nhiên liệu
      */
     public void cancelSmelting(Player player) {
         SmeltingTask task = activeTasks.remove(player.getUniqueId());
         if (task != null) {
+            task.refund(player);
             task.cancel();
-            plugin.getMessageUtil().send(player, "smelt.cancelled");
+            plugin.getMessageUtil().send(player, "smelt.cancelled-refund");
         }
     }
 
     /**
-     * Called when smelting completes
+     * Called when smelting completes. Nếu có hàng chờ thì bắt đầu task tiếp theo.
      */
     public void onSmeltingComplete(UUID uuid) {
         activeTasks.remove(uuid);
+        java.util.List<PendingSmeltingTask> queue = smeltingQueue.get(uuid);
+        if (queue != null && !queue.isEmpty()) {
+            PendingSmeltingTask next = queue.remove(0);
+            Player player = org.bukkit.Bukkit.getPlayer(uuid);
+            if (player != null && player.isOnline()) {
+                startSmeltFromQueue(player, next.getRecipeId(), next.getBatchCount());
+            }
+        }
+    }
+
+    /**
+     * Bắt đầu nung từ hàng chờ (đã pop queue).
+     */
+    private boolean startSmeltFromQueue(Player player, String recipeId, int batchCount) {
+        SmeltingRecipe recipe = smeltingRecipes.get(recipeId);
+        if (recipe == null) return false;
+        int requiredInput = recipe.getInputAmount() * batchCount;
+        int requiredFuel = recipe.getFuelAmount() * batchCount;
+        if (countSmeltingMaterial(player, recipe) < requiredInput) {
+            plugin.getMessageUtil().send(player, "smelt.missing-materials", "material", recipe.getInputMaterial(), "amount", String.valueOf(requiredInput));
+            return false;
+        }
+        if (recipe.isFuelRequired() && countFuel(player, recipe) < requiredFuel) {
+            plugin.getMessageUtil().send(player, "smelt.missing-fuel", "fuel", recipe.getFuelMaterial(), "amount", String.valueOf(requiredFuel));
+            return false;
+        }
+        java.util.Map<String, Integer> refundInputES = new java.util.HashMap<>();
+        java.util.List<ItemStack> refundInput = consumeSmeltingMaterialsAndCollect(player, recipe, batchCount, refundInputES);
+        java.util.Map<String, Integer> refundFuelES = new java.util.HashMap<>();
+        java.util.List<ItemStack> refundFuel = recipe.isFuelRequired() ? consumeFuelAndCollect(player, recipe, batchCount, refundFuelES) : new java.util.ArrayList<>();
+        long durationPerItemTicks = getDurationTicks(player, recipe);
+        long totalDurationTicks = durationPerItemTicks * batchCount;
+        SmeltingTask task = new SmeltingTask(plugin, player, recipe, totalDurationTicks, batchCount);
+        task.setRefundSnapshot(refundInput, refundFuel, refundInputES, refundFuelES);
+        activeTasks.put(player.getUniqueId(), task);
+        task.initialize();
+        return true;
+    }
+
+    public java.util.List<PendingSmeltingTask> getSmeltingQueue(Player player) {
+        java.util.List<PendingSmeltingTask> list = smeltingQueue.get(player.getUniqueId());
+        return list != null ? new java.util.ArrayList<>(list) : new java.util.ArrayList<>();
+    }
+
+    public void cancelSmeltingQueueSlot(Player player, int index) {
+        java.util.List<PendingSmeltingTask> queue = smeltingQueue.get(player.getUniqueId());
+        if (queue == null || index < 0 || index >= queue.size()) return;
+        queue.remove(index);
+        plugin.getMessageUtil().send(player, "smelt.queue-slot-cancelled");
     }
 
     /**
@@ -758,7 +861,7 @@ public class SmeltingManager implements Listener {
         int batchCount = taskData.length > 4 ? Integer.parseInt(taskData[4]) : 1;
         
         // CONFIG: Check if offline progress is enabled (unified config)
-        boolean offlineProgress = plugin.getConfig().getBoolean("offline-progress", true);
+        boolean offlineProgress = plugin.getConfigManager().getMainConfig().getBoolean("offline-progress", true);
         
         long actualRemainingTicks;
         if (offlineProgress) {
@@ -785,8 +888,8 @@ public class SmeltingManager implements Listener {
         // BATCH FIX: Truyền batchCount để give đúng số lượng
         if (offlineProgress && actualRemainingTicks <= 0) {
             giveSmeltingOutputDirect(player, recipe, batchCount);
-            plugin.getMessageUtil().send(player, "smelt.complete-while-offline", 
-                "item", recipe.getDisplayName());
+            plugin.getMessageUtil().send(player, "smelt.complete-while-offline",
+                "item", recipe.getDisplayName(), "count", String.valueOf(batchCount));
             return true; // Task was completed offline
         }
         

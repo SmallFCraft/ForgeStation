@@ -58,13 +58,18 @@ craft:
   # Timer mode messages (khi bật crafting.use-timer: true)
   started: "%prefix%&b⚒ &7Bắt đầu chế tạo &e%item%&7..."
   started-batch: "%prefix%&b⚒ &7Bắt đầu chế tạo &e%count%× %item%&7..."
-  complete: "%prefix%&a✓ &7Đã chế tạo xong &e%item%&7!"
+  complete: "%prefix%&a✓ &7Đã chế tạo xong &e%count%× %item%&7!"
   cancelled: "%prefix%&c✗ &7Đã hủy quá trình chế tạo!"
+  cancelled-refund: "%prefix%&a✓ &7Đã hủy và hoàn trả nguyên liệu + tiền!"
   already-crafting: "%prefix%&c✗ &7Bạn đang có quá trình chế tạo khác!"
+  no-active-task: "%prefix%&7Bạn không có quá trình chế tạo/nung nào để hủy."
+  added-to-queue: "%prefix%&a✓ &7Đã thêm &e%count%× %item% &7vào hàng chờ &8(&7vị trí &e%queue%&8)&7!"
+  queue-full: "%prefix%&c✗ &7Hàng chờ đã đầy! Nâng cấp slot trong menu Nâng cấp."
+  queue-slot-cancelled: "%prefix%&7Đã hủy 1 slot trong hàng chờ."
   no-space: "%prefix%&c✗ &7Kho đồ của bạn đã đầy! Vui lòng dọn trống trước khi chế tạo."
   # Persistence messages
   pending-delivered: "%prefix%&a📦 &7Bạn nhận được &e%count% &7items từ quá trình chế tạo khi offline!"
-  complete-while-offline: "%prefix%&a✓ &7Quá trình chế tạo &e%item% &7đã hoàn tất khi bạn offline!"
+  complete-while-offline: "%prefix%&a✓ &7Quá trình chế tạo &e%count%× %item% &7đã hoàn tất khi bạn offline!"
   restored: "%prefix%&b⚒ &7Tiếp tục chế tạo &e%item%&7... Còn &e%time%&7!"
   # Batch input
   input-prompt: "%prefix%&e✎ &7Nhập số lượng muốn chế tạo &8(Ví dụ: &f10&8, &f5k&8, &fall&8)"
@@ -77,8 +82,9 @@ smelt:
   started: "%prefix%&6🔥 &7Bắt đầu nung &e%item%&7..."
   started-batch: "%prefix%&6🔥 &7Bắt đầu nung &e%count%× %item%&7..."
   progress: "%prefix%&7Tiến độ: &e%progress%&7%"
-  complete: "%prefix%&a✓ &7Đã nung xong &e%item%&7!"
+  complete: "%prefix%&a✓ &7Đã nung xong &e%count%× %item%&7!"
   cancelled: "%prefix%&c✗ &7Đã hủy quá trình nung!"
+  cancelled-refund: "%prefix%&a✓ &7Đã hủy và hoàn trả nguyên liệu!"
   already-smelting: "%prefix%&c✗ &7Bạn đang có quá trình nung khác!"
   no-space: "%prefix%&c✗ &7Kho đồ của bạn đã đầy! Vui lòng dọn trống trước khi nung."
   no-fuel: "%prefix%&c✗ &7Không đủ nhiên liệu!"
@@ -88,9 +94,12 @@ smelt:
   # BATCH SMELTING: Chat input prompt
   input-prompt: "%prefix%&e✎ &7Nhập số lượng muốn nung &8(Ví dụ: &f10&8, &f5k&8, &fall&8)"
   input-invalid: "%prefix%&c✗ &7Số lượng không hợp lệ!"
+  added-to-queue: "%prefix%&a✓ &7Đã thêm &e%count%× %item% &7vào hàng chờ &8(&7vị trí &e%queue%&8)&7!"
+  queue-full: "%prefix%&c✗ &7Hàng chờ đã đầy! Nâng cấp slot trong menu Nâng cấp."
+  queue-slot-cancelled: "%prefix%&7Đã hủy 1 slot trong hàng chờ."
   # SMELTING PERSISTENCE: Messages cho persistence system
   pending-delivered: "%prefix%&a📦 &7Bạn nhận được &e%count% &7items từ quá trình nung khi offline!"
-  complete-while-offline: "%prefix%&a✓ &7Quá trình nung &e%item% &7đã hoàn tất khi bạn offline!"
+  complete-while-offline: "%prefix%&a✓ &7Quá trình nung &e%count%× %item% &7đã hoàn tất khi bạn offline!"
   restored: "%prefix%&6🔥 &7Tiếp tục nung &e%item%&7... Còn &e%time%&7!"
 
 # ─────────────────────────────────────────────
@@ -100,6 +109,8 @@ upgrade:
   success: "%prefix%&a⬆ &7Nâng cấp &e%upgrade% &7lên level &6%level%&7!"
   max-level: "%prefix%&c✗ &7Đã đạt level tối đa &8(&e%max%&8)&7!"
   no-money: "%prefix%&c✗ &7Không đủ tiền nâng cấp! Cần: &e%cost%"
+  # Chi tiết thiếu từng loại currency
+  insufficient: "%prefix%&c✗ &7Không đủ tiền nâng cấp!\n%details%"
 
 # ─────────────────────────────────────────────
 # Menu
@@ -107,3 +118,4 @@ upgrade:
 menu:
   loading: "&7⌛ Đang tải..."
   rate-limited: "%prefix%&e⏳ &7Vui lòng chờ một chút!"
+  category-not-found: "%prefix%&c✗ &7Không tìm thấy danh mục: &e%category%&7!"

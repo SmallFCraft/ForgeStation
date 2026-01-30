@@ -187,10 +187,10 @@ public class RecipeDetailGUI {
         
         // Global Currency Placeholders
         if (text.contains("%currency_")) {
-             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfig().getString("currency.vault", "Coins")));
-             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfig().getString("currency.playerpoints", "Points")));
-             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfig().getString("currency.exp", "EXP")));
-             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfig().getString("currency.coinengine", "C")));
+             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.vault", "Coins")));
+             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.playerpoints", "Points")));
+             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.exp", "EXP")));
+             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.coinengine", "C")));
         }
         
         // Player info
@@ -404,10 +404,10 @@ public class RecipeDetailGUI {
 
         // Global Currency Placeholders
         if (text.contains("%currency_")) {
-             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfig().getString("currency.vault", "Coins")));
-             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfig().getString("currency.playerpoints", "Points")));
-             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfig().getString("currency.exp", "EXP")));
-             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfig().getString("currency.coinengine", "C")));
+             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.vault", "Coins")));
+             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.playerpoints", "Points")));
+             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.exp", "EXP")));
+             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.coinengine", "C")));
         }
         
         // Player info

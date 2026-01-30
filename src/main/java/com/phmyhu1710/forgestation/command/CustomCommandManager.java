@@ -106,8 +106,8 @@ public class CustomCommandManager {
             this.categoryName = categoryName;
             this.setDescription("Open " + categoryName + " menu");
             this.setUsage("/" + name);
-            // Permissions could be "forgestation.command." + name ?
-            this.setPermission("forgestation.command." + name); 
+            // Dùng chung forgestation.use (cùng /fs) — permission trong plugin.yml default: op
+            this.setPermission("forgestation.use"); 
         }
 
         @Override

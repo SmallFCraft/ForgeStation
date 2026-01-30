@@ -11,202 +11,169 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
- * Manages all configuration files
+ * Manages all configuration files for ForgeStation.
+ * - Single loadFolderConfigs() for menus/recipes/smelting (DRY, merge defaults).
+ * - saveConfig() for persisting config changes.
+ * - getMenuConfig(name) for direct menu lookup.
  */
 public class ConfigManager {
 
+    private static final String[] DEFAULT_MENUS = {
+        "main-menu.yml", "crafting-menu.yml", "smelting-menu.yml", "upgrade-menu.yml"
+    };
+    private static final String[] DEFAULT_RECIPES = {
+        "blocks.yml", "event_tet.yml", "exchange.yml", "luyendan.yml", "weapons.yml"
+    };
+    private static final String[] DEFAULT_SMELTING = { "metals.yml", "ores.yml" };
+
     private final ForgeStationPlugin plugin;
-    
-    // Cached configurations
+
     private FileConfiguration mainConfig;
-    private FileConfiguration messagesConfig;
-    private FileConfiguration rankMultipliersConfig;
-    private FileConfiguration upgradesConfig;
-    
-    // Recipe configs (from recipes/ folder)
-    private final Map<String, FileConfiguration> recipeConfigs = new HashMap<>();
-    
-    // Smelting configs (from smelting/ folder)
-    private final Map<String, FileConfiguration> smeltingConfigs = new HashMap<>();
-    
-    // Menu configs (from menus/ folder)
     private final Map<String, FileConfiguration> menuConfigs = new HashMap<>();
+    private final Map<String, FileConfiguration> recipeConfigs = new HashMap<>();
+    private final Map<String, FileConfiguration> smeltingConfigs = new HashMap<>();
+    private FileConfiguration upgradesConfig;
+    private FileConfiguration rankMultipliersConfig;
+    private FileConfiguration messagesConfig;
 
     public ConfigManager(ForgeStationPlugin plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * Load all configuration files
+     */
     public void loadAll() {
-        // Save defaults
         plugin.saveDefaultConfig();
-        saveDefaultResource("messages.yml");
-        saveDefaultResource("rank-multipliers.yml");
-        saveDefaultResource("upgrades.yml");
-        
-        // Save recipe defaults
-        saveDefaultResource("recipes/exchange.yml");
-        saveDefaultResource("recipes/weapons.yml");
-        saveDefaultResource("recipes/blocks.yml");
-        
-        // Save smelting defaults
-        saveDefaultResource("smelting/ores.yml");
-        
-        // Save menu defaults
-        saveDefaultResource("menus/main-menu.yml");
-        saveDefaultResource("menus/crafting-menu.yml");
-        saveDefaultResource("menus/smelting-menu.yml");
-        saveDefaultResource("menus/upgrade-menu.yml");
-        
-        // Load main configs
         plugin.reloadConfig();
         mainConfig = plugin.getConfig();
-        messagesConfig = loadConfig("messages.yml");
-        rankMultipliersConfig = loadConfig("rank-multipliers.yml");
-        upgradesConfig = loadConfig("upgrades.yml");
-        
-        // Load recipe folder
-        loadFolder("recipes", recipeConfigs);
-        
-        // Load smelting folder
-        loadFolder("smelting", smeltingConfigs);
-        
-        // Load menus folder
-        loadFolder("menus", menuConfigs);
-        
-        plugin.debug("Loaded configurations:");
-        plugin.debug("  - " + recipeConfigs.size() + " recipe files");
-        plugin.debug("  - " + smeltingConfigs.size() + " smelting files");
-        plugin.debug("  - " + menuConfigs.size() + " menu files");
+
+        loadFolderConfigs("menus", DEFAULT_MENUS, menuConfigs);
+        loadFolderConfigs("recipes", DEFAULT_RECIPES, recipeConfigs);
+        loadFolderConfigs("smelting", DEFAULT_SMELTING, smeltingConfigs);
+
+        loadUpgradesConfig();
+        loadRankMultipliersConfig();
+        loadMessagesConfig();
     }
 
-    private void saveDefaultResource(String resourcePath) {
-        File file = new File(plugin.getDataFolder(), resourcePath);
-        if (!file.exists()) {
-            file.getParentFile().mkdirs();
-            plugin.saveResource(resourcePath, false);
-        }
-    }
-
-    private FileConfiguration loadConfig(String fileName) {
-        File file = new File(plugin.getDataFolder(), fileName);
-        if (!file.exists()) {
-            saveDefaultResource(fileName);
-        }
-        return YamlConfiguration.loadConfiguration(file);
-    }
-
-    private void loadFolder(String folderName, Map<String, FileConfiguration> target) {
+    /**
+     * Load all YAML configs from a folder: save defaults if missing, then load each file
+     * with defaults merged from JAR. Used for menus, recipes, smelting.
+     */
+    private void loadFolderConfigs(String folderName, String[] defaultFiles,
+                                   Map<String, FileConfiguration> target) {
         target.clear();
         File folder = new File(plugin.getDataFolder(), folderName);
-        plugin.debug("Loading folder: " + folder.getAbsolutePath());
-        
         if (!folder.exists()) {
             folder.mkdirs();
-            plugin.debug("Created folder: " + folderName);
         }
-        
-        // Auto-extract all files from JAR if they don't exist in data folder
-        extractFolderFromJar(folderName, folder);
-        
+
+        // Ensure default files exist (saveResource from JAR)
+        for (String fileName : defaultFiles) {
+            File file = new File(folder, fileName);
+            if (!file.exists()) {
+                plugin.saveResource(folderName + "/" + fileName, false);
+            }
+        }
+
+        // Load all .yml in folder (defaults + any extra added by user)
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".yml"));
         if (files == null) {
-            plugin.getLogger().warning("No files found in folder: " + folderName);
+            plugin.debug("ConfigManager: no yml files in " + folderName);
             return;
         }
-        
-        plugin.debug("Found " + files.length + " yml files in " + folderName);
-        
+
         for (File file : files) {
             String name = file.getName().replace(".yml", "");
-            plugin.debug("Loading file: " + file.getName());
-            
-            try {
-                FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-                
-                // Apply defaults from jar if exists
-                InputStream defStream = plugin.getResource(folderName + "/" + file.getName());
+            FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+            // Merge defaults from JAR so missing keys are filled from default
+            String resourcePath = folderName + "/" + file.getName();
+            try (InputStream defStream = plugin.getResource(resourcePath)) {
                 if (defStream != null) {
                     YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
                         new InputStreamReader(defStream, StandardCharsets.UTF_8));
                     config.setDefaults(defConfig);
+                    config.options().copyDefaults(true);
                 }
-                
-                target.put(name, config);
-                plugin.debug("Successfully loaded: " + name);
-            } catch (Exception e) {
-                plugin.getLogger().severe("Failed to load " + file.getName() + ": " + e.getMessage());
-                e.printStackTrace();
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING, "Could not load defaults for " + resourcePath, e);
             }
+            target.put(name, config);
         }
+        plugin.debug("ConfigManager: loaded " + target.size() + " configs from " + folderName);
     }
-    
-    /**
-     * Extract all files from JAR folder to data folder if they don't exist
-     */
-    private void extractFolderFromJar(String folderName, File targetFolder) {
-        try {
-            // Try to get all resources from the folder in JAR
-            java.util.jar.JarFile jarFile = new java.util.jar.JarFile(
-                new File(plugin.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
-            
-            java.util.Enumeration<java.util.jar.JarEntry> entries = jarFile.entries();
-            while (entries.hasMoreElements()) {
-                java.util.jar.JarEntry entry = entries.nextElement();
-                String entryName = entry.getName();
-                
-                // Check if entry is in our target folder and is a YAML file
-                if (entryName.startsWith(folderName + "/") && entryName.endsWith(".yml") && !entry.isDirectory()) {
-                    String fileName = entryName.substring(folderName.length() + 1);
-                    File targetFile = new File(targetFolder, fileName);
-                    
-                    // Only extract if file doesn't exist
-                    if (!targetFile.exists()) {
-                        plugin.getLogger().info("Extracting " + fileName + " from JAR to " + targetFolder.getName() + "/");
-                        try (InputStream is = jarFile.getInputStream(entry);
-                             java.io.FileOutputStream fos = new java.io.FileOutputStream(targetFile)) {
-                            
-                            byte[] buffer = new byte[8192];
-                            int bytesRead;
-                            while ((bytesRead = is.read(buffer)) != -1) {
-                                fos.write(buffer, 0, bytesRead);
-                            }
-                        }
-                    }
-                }
-            }
-            jarFile.close();
-        } catch (Exception e) {
-            // Fallback: If JarFile approach fails (e.g., running from IDE or classpath),
-            // files will be loaded from data folder if they exist, or admin can manually copy them
-            plugin.debug("Could not extract folder using JarFile (this is normal when running from IDE): " + e.getMessage());
+
+    private void loadUpgradesConfig() {
+        saveDefaultResource("upgrades.yml");
+        File file = new File(plugin.getDataFolder(), "upgrades.yml");
+        upgradesConfig = YamlConfiguration.loadConfiguration(file);
+    }
+
+    private void loadRankMultipliersConfig() {
+        saveDefaultResource("rank-multipliers.yml");
+        File file = new File(plugin.getDataFolder(), "rank-multipliers.yml");
+        rankMultipliersConfig = YamlConfiguration.loadConfiguration(file);
+        mergeDefaultsFromResource("rank-multipliers.yml", rankMultipliersConfig);
+    }
+
+    private void loadMessagesConfig() {
+        saveDefaultResource("messages.yml");
+        File file = new File(plugin.getDataFolder(), "messages.yml");
+        messagesConfig = YamlConfiguration.loadConfiguration(file);
+        mergeDefaultsFromResource("messages.yml", messagesConfig);
+    }
+
+    private void saveDefaultResource(String path) {
+        File file = new File(plugin.getDataFolder(), path);
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            plugin.saveResource(path, false);
         }
     }
 
+    private void mergeDefaultsFromResource(String resourcePath, FileConfiguration config) {
+        try (InputStream defStream = plugin.getResource(resourcePath)) {
+            if (defStream != null) {
+                YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(
+                    new InputStreamReader(defStream, StandardCharsets.UTF_8));
+                config.setDefaults(defConfig);
+                config.options().copyDefaults(true);
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Could not merge defaults for " + resourcePath, e);
+        }
+    }
+
+    /**
+     * Save a config to a file in the plugin data folder (e.g. "messages.yml", "upgrades.yml").
+     */
     public void saveConfig(String fileName, FileConfiguration config) {
         try {
             config.save(new File(plugin.getDataFolder(), fileName));
         } catch (IOException e) {
-            plugin.getLogger().severe("Could not save " + fileName + ": " + e.getMessage());
+            plugin.getLogger().log(Level.SEVERE, "Could not save " + fileName + ": " + e.getMessage());
         }
     }
 
-    // Getters
+    // --- Getters ---
+
     public FileConfiguration getMainConfig() {
         return mainConfig;
     }
 
-    public FileConfiguration getMessagesConfig() {
-        return messagesConfig;
+    public Map<String, FileConfiguration> getMenuConfigs() {
+        return menuConfigs;
     }
 
-    public FileConfiguration getRankMultipliersConfig() {
-        return rankMultipliersConfig;
-    }
-
-    public FileConfiguration getUpgradesConfig() {
-        return upgradesConfig;
+    /**
+     * Get a single menu config by name (with or without .yml).
+     */
+    public FileConfiguration getMenuConfig(String menuName) {
+        return menuConfigs.get(menuName == null ? null : menuName.replace(".yml", ""));
     }
 
     public Map<String, FileConfiguration> getRecipeConfigs() {
@@ -217,11 +184,15 @@ public class ConfigManager {
         return smeltingConfigs;
     }
 
-    public Map<String, FileConfiguration> getMenuConfigs() {
-        return menuConfigs;
+    public FileConfiguration getUpgradesConfig() {
+        return upgradesConfig;
     }
-    
-    public FileConfiguration getMenuConfig(String menuName) {
-        return menuConfigs.get(menuName.replace(".yml", ""));
+
+    public FileConfiguration getRankMultipliersConfig() {
+        return rankMultipliersConfig;
+    }
+
+    public FileConfiguration getMessagesConfig() {
+        return messagesConfig;
     }
 }

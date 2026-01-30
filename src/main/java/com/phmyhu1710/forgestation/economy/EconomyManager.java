@@ -105,6 +105,24 @@ public class EconomyManager {
     }
 
     /**
+     * Deposit to CoinsEngine (for refund)
+     */
+    public boolean depositCoinEngine(Player player, String currency, double amount) {
+        if (!plugin.getHookManager().isCoinEngineEnabled() || amount <= 0 || currency == null || currency.isEmpty()) return false;
+        try {
+            Class<?> coinsEngineAPI = Class.forName("su.nightexpress.coinsengine.api.CoinsEngineAPI");
+            Object currencyObj = coinsEngineAPI.getMethod("getCurrency", String.class).invoke(null, currency);
+            if (currencyObj == null) return false;
+            coinsEngineAPI.getMethod("addBalance", Player.class, currencyObj.getClass().getInterfaces()[0], double.class)
+                .invoke(null, player, currencyObj, amount);
+            return true;
+        } catch (Exception e) {
+            plugin.debug("CoinsEngine deposit failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Get player's total EXP
      */
     public int getExp(Player player) {

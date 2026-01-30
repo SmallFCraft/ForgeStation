@@ -43,16 +43,16 @@ items:
   # ─────────────────────────────────────────────
   # BACK BUTTON
   # ─────────────────────────────────────────────
-  back:
-    slot: 49
-    material: OAK_DOOR
-    name: "&c&l◀ Quay Lại"
-    lore:
-      - "&7Về menu chính"
-    action:
-      type: OPEN_MENU
-      menu: main-menu
-    sound: UI_BUTTON_CLICK
+  # back:
+  #   slot: 49
+  #   material: OAK_DOOR
+  #   name: "&c&l◀ Quay Lại"
+  #   lore:
+  #     - "&7Về menu chính"
+  #   action:
+  #     type: OPEN_MENU
+  #     menu: main-menu
+  #   sound: UI_BUTTON_CLICK
 
 # Auto Populate with Category Support
 auto-populate:
@@ -63,7 +63,7 @@ auto-populate:
   # Slots to display recipes in recipe mode
   slots: ["10-16", "19-25", "28-34"]
   recipe-type: "recipe"
-  
+
   # Category definitions with icons
   categories:
     weapons:

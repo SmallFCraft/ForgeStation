@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class ForgeStationCommand implements CommandExecutor, TabCompleter {
 
     private final ForgeStationPlugin plugin;
-    private final List<String> subCommands = Arrays.asList("reload", "help", "category");
+    private final List<String> subCommands = Arrays.asList("reload", "help", "menu", "category", "cancel");
 
     public ForgeStationCommand(ForgeStationPlugin plugin) {
         this.plugin = plugin;
@@ -57,12 +57,18 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
             case "help":
                 handleHelp(sender);
                 break;
+            case "menu":
+                handleMenu(sender, args);
+                break;
             case "category":
             case "cat":
                 handleCategory(sender, args);
                 break;
+            case "cancel":
+                handleCancel(sender);
+                break;
             default:
-                plugin.getMessageUtil().send(sender, "invalid-args", "usage", "/fs [reload|help|category]");
+                plugin.getMessageUtil().send(sender, "invalid-args", "usage", "/fs [reload|help|menu|category|cancel]");
                 break;
         }
         
@@ -90,13 +96,67 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("");
         sender.sendMessage("§8┌───────────────────────────────────┐");
         sender.sendMessage("§8│ §e/fs           §8- §7Mở menu chính               §8│");
+        sender.sendMessage("§8│ §e/fs menu [recipes|upgrades|smelting] §8- §7Mở menu  §8│");
         sender.sendMessage("§8│ §e/fs reload    §8- §7Reload configs               §8│");
         sender.sendMessage("§8│ §e/fs help      §8- §7Hiện trợ giúp                §8│");
-        sender.sendMessage("§8│ §e/fs category  §8- §7Mở category                  §8│");
+        sender.sendMessage("§8│ §e/fs cat <id>  §8- §7Mở menu theo category       §8│");
+        sender.sendMessage("§8│ §e/fs cancel    §8- §7Hủy chế tạo/nung & hoàn trả   §8│");
         sender.sendMessage("§8└───────────────────────────────────┘");
         sender.sendMessage("");
         sender.sendMessage("§7Author: §ephmyhu_1710 §8| §7v" + plugin.getDescription().getVersion());
         sender.sendMessage("");
+    }
+
+    private static final List<String> MENU_TYPES = Arrays.asList("recipes", "upgrades", "smelting");
+
+    private void handleMenu(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player player)) {
+            plugin.getMessageUtil().send(sender, "player-only");
+            return;
+        }
+        if (!player.hasPermission("forgestation.use")) {
+            plugin.getMessageUtil().send(sender, "no-permission");
+            return;
+        }
+        if (args.length >= 2) {
+            String type = args[1].toLowerCase();
+            switch (type) {
+                case "recipes":
+                    plugin.getMenuManager().openMenu(player, "crafting-menu");
+                    return;
+                case "upgrades":
+                    plugin.getMenuManager().openMenu(player, "upgrade-menu");
+                    return;
+                case "smelting":
+                    plugin.getMenuManager().openMenu(player, "smelting-menu");
+                    return;
+                default:
+                    sender.sendMessage("§cMenu không tồn tại: §e" + type);
+                    sender.sendMessage("§7Dùng: §e/fs menu [recipes|upgrades|smelting]");
+                    return;
+            }
+        }
+        plugin.getMenuManager().openMainMenu(player);
+    }
+
+    private void handleCancel(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            plugin.getMessageUtil().send(sender, "player-only");
+            return;
+        }
+        if (!player.hasPermission("forgestation.use")) {
+            plugin.getMessageUtil().send(sender, "no-permission");
+            return;
+        }
+        if (plugin.getCraftingExecutor().isCrafting(player)) {
+            plugin.getCraftingExecutor().cancelCrafting(player);
+            return;
+        }
+        if (plugin.getSmeltingManager().isSmelting(player)) {
+            plugin.getSmeltingManager().cancelSmelting(player);
+            return;
+        }
+        plugin.getMessageUtil().send(sender, "craft.no-active-task");
     }
 
     private void handleCategory(CommandSender sender, String[] args) {
@@ -159,17 +219,21 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
         
         if (args.length == 2) {
             String subCmd = args[0].toLowerCase();
-            
-            // Tab complete category names
+            String prefix = args[1].toLowerCase();
+
+            if (subCmd.equals("menu")) {
+                return MENU_TYPES.stream()
+                    .filter(t -> t.startsWith(prefix))
+                    .collect(Collectors.toList());
+            }
             if (subCmd.equals("category") || subCmd.equals("cat")) {
                 java.util.Set<String> allCategories = plugin.getMenuManager().getAllCategories();
-                
                 return allCategories.stream()
-                    .filter(cat -> cat.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .filter(cat -> cat.toLowerCase().startsWith(prefix))
                     .collect(Collectors.toList());
             }
         }
-        
+
         return new ArrayList<>();
     }
 }

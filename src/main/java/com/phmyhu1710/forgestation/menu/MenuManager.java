@@ -341,10 +341,141 @@ public class MenuManager implements Listener {
         if (template.getAutoPopulate() != null) {
             handleAutoPopulate(player, template.getAutoPopulate(), inv, page);
         }
-        
+
+        // Queue slots (crafting-menu & smelting-menu)
+        String menuName = template.getName();
+        if ("crafting-menu".equals(menuName)) {
+            fillCraftingQueueSlots(player, inv);
+        } else if ("smelting-menu".equals(menuName)) {
+            fillSmeltingQueueSlots(player, inv);
+        }
+
         return inv;
     }
-    
+
+    /** Lấy danh sách slot GUI cho hàng chờ từ config (queue.slots). */
+    private List<Integer> getQueueSlotsFromConfig() {
+        List<?> raw = plugin.getConfigManager().getMainConfig().getList("queue.slots");
+        if (raw == null || raw.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        List<Integer> slots = new ArrayList<>();
+        for (Object o : raw) {
+            if (o instanceof Number) {
+                slots.add(((Number) o).intValue());
+            }
+        }
+        return slots;
+    }
+
+    private Material parseQueueMaterial(String path, Material fallback) {
+        String val = plugin.getConfigManager().getMainConfig().getString(path, fallback.name());
+        if (val == null || val.isEmpty()) return fallback;
+        try {
+            return Material.valueOf(val.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return fallback;
+        }
+    }
+
+    /** Tạo item ô trống hàng chờ (đọc từ config queue.empty-slot). */
+    private ItemStack createQueueEmptySlotItem() {
+        Material mat = parseQueueMaterial("queue.empty-slot.material", Material.GRAY_STAINED_GLASS_PANE);
+        String name = plugin.getConfigManager().getMainConfig().getString("queue.empty-slot.name", "&7Ô trống");
+        return createItem(mat, name, null, false);
+    }
+
+    /** Tạo item ô khóa hàng chờ (đọc từ config queue.locked-slot). */
+    private ItemStack createQueueLockedSlotItem() {
+        Material mat = parseQueueMaterial("queue.locked-slot.material", Material.RED_STAINED_GLASS_PANE);
+        String name = plugin.getConfigManager().getMainConfig().getString("queue.locked-slot.name", "&cChưa mở");
+        List<String> loreRaw = plugin.getConfigManager().getMainConfig().getStringList("queue.locked-slot.lore");
+        List<String> lore = loreRaw != null && !loreRaw.isEmpty() ? new ArrayList<>(loreRaw) : java.util.Collections.singletonList("&7Nâng cấp trong menu Nâng cấp");
+        return createItem(mat, name, lore, false);
+    }
+
+    private String getQueuePendingLabel(int index1Based) {
+        String format = plugin.getConfigManager().getMainConfig().getString("queue.pending-label", "&7Hàng chờ #%index%");
+        return format.replace("%index%", String.valueOf(index1Based));
+    }
+
+    private String getQueuePendingLoreCancel() {
+        return plugin.getConfigManager().getMainConfig().getString("queue.pending-lore-cancel", "&cClick để hủy");
+    }
+
+    private void fillCraftingQueueSlots(Player player, Inventory inv) {
+        List<Integer> guiSlots = getQueueSlotsFromConfig();
+        if (guiSlots.isEmpty()) return;
+        int maxUnlocked = plugin.getCraftingExecutor().getQueueSlotsUnlocked(player);
+        List<com.phmyhu1710.forgestation.crafting.CraftingExecutor.PendingCraftingTask> queue =
+            plugin.getCraftingExecutor().getCraftingQueue(player);
+        Map<String, Integer> invSnapshot = com.phmyhu1710.forgestation.util.InventoryUtil.createInventorySnapshot(player);
+        for (int i = 0; i < guiSlots.size(); i++) {
+            int guiSlot = guiSlots.get(i);
+            if (guiSlot < 0 || guiSlot >= inv.getSize()) continue;
+            ItemStack icon;
+            if (i < queue.size()) {
+                var pending = queue.get(i);
+                var recipe = plugin.getRecipeManager().getRecipe(pending.getRecipeId());
+                if (recipe != null) {
+                    icon = createRecipeIcon(player, recipe, invSnapshot);
+                    ItemMeta meta = icon.getItemMeta();
+                    if (meta != null) {
+                        List<String> lore = meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+                        lore.add("");
+                        lore.add(MessageUtil.colorize(getQueuePendingLabel(i + 1)));
+                        lore.add(MessageUtil.colorize(getQueuePendingLoreCancel()));
+                        meta.setLore(lore);
+                        icon.setItemMeta(meta);
+                    }
+                } else {
+                    icon = createItem(Material.BARRIER, "&cCông thức không tồn tại", null, false);
+                }
+            } else if (i < maxUnlocked) {
+                icon = createQueueEmptySlotItem();
+            } else {
+                icon = createQueueLockedSlotItem();
+            }
+            inv.setItem(guiSlot, icon);
+        }
+    }
+
+    private void fillSmeltingQueueSlots(Player player, Inventory inv) {
+        List<Integer> guiSlots = getQueueSlotsFromConfig();
+        if (guiSlots.isEmpty()) return;
+        int maxUnlocked = plugin.getUpgradeManager().getQueueSlotsUnlocked(player);
+        List<com.phmyhu1710.forgestation.smelting.SmeltingManager.PendingSmeltingTask> queue =
+            plugin.getSmeltingManager().getSmeltingQueue(player);
+        for (int i = 0; i < guiSlots.size(); i++) {
+            int guiSlot = guiSlots.get(i);
+            if (guiSlot < 0 || guiSlot >= inv.getSize()) continue;
+            ItemStack icon;
+            if (i < queue.size()) {
+                var pending = queue.get(i);
+                var recipe = plugin.getSmeltingManager().getRecipe(pending.getRecipeId());
+                if (recipe != null) {
+                    icon = createSmeltingIcon(player, recipe);
+                    ItemMeta meta = icon.getItemMeta();
+                    if (meta != null) {
+                        List<String> lore = meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+                        lore.add("");
+                        lore.add(MessageUtil.colorize(getQueuePendingLabel(i + 1)));
+                        lore.add(MessageUtil.colorize(getQueuePendingLoreCancel()));
+                        meta.setLore(lore);
+                        icon.setItemMeta(meta);
+                    }
+                } else {
+                    icon = createItem(Material.BARRIER, "&cCông thức không tồn tại", null, false);
+                }
+            } else if (i < maxUnlocked) {
+                icon = createQueueEmptySlotItem();
+            } else {
+                icon = createQueueLockedSlotItem();
+            }
+            inv.setItem(guiSlot, icon);
+        }
+    }
+
     private void handleAutoPopulate(Player player, MenuTemplate.AutoPopulateConfig config, Inventory inv, int page) {
         UUID uuid = player.getUniqueId();
         String activeCategory = activeCategories.get(uuid);
@@ -572,7 +703,7 @@ public class MenuManager implements Listener {
             // SPLIT FIX: Support multiline placeholders
             if (parsed.contains("\n")) {
                  for (String subLine : parsed.split("\n")) {
-                      lore.add(parsed); // colorize handled in createItem
+                      lore.add(subLine); // colorize handled in createItem
                  }
             } else {
                  lore.add(parsed);
@@ -619,10 +750,10 @@ public class MenuManager implements Listener {
         
         // Global Currency Placeholders
         if (text.contains("%currency_")) {
-             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfig().getString("currency.vault", "Coins")));
-             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfig().getString("currency.playerpoints", "Points")));
-             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfig().getString("currency.exp", "EXP")));
-             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfig().getString("currency.coinengine", "C")));
+             text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.vault", "Coins")));
+             text = text.replace("%currency_playerpoints%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.playerpoints", "Points")));
+             text = text.replace("%currency_exp%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.exp", "EXP")));
+             text = text.replace("%currency_coinengine%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.coinengine", "C")));
         }
 
         // Custom internal placeholders (dynamic, không cache)
@@ -692,7 +823,7 @@ public class MenuManager implements Listener {
                          double vault = costs.getOrDefault("vault", 0.0);
                          if (vault > 0) {
                              display.append("&8┃ &6💰 &e").append(MessageUtil.formatNumber(vault))
-                                    .append(" &7").append(plugin.getConfig().getString("currency.vault", "Coins"));
+                                    .append(" &7").append(plugin.getConfigManager().getMainConfig().getString("currency.vault", "Coins"));
                              hasCost = true;
                          }
                          
@@ -701,7 +832,7 @@ public class MenuManager implements Listener {
                          if (pp > 0) {
                              if (hasCost) display.append("\n");
                              display.append("&8┃ &b⬤ &e").append(MessageUtil.formatNumber(pp))
-                                    .append(" &7").append(plugin.getConfig().getString("currency.playerpoints", "Points"));
+                                    .append(" &7").append(plugin.getConfigManager().getMainConfig().getString("currency.playerpoints", "Points"));
                              hasCost = true;
                          }
                          
@@ -710,7 +841,7 @@ public class MenuManager implements Listener {
                          if (exp > 0) {
                              if (hasCost) display.append("\n");
                              display.append("&8┃ &a✦ &e").append(MessageUtil.formatNumber(exp))
-                                    .append(" &7").append(plugin.getConfig().getString("currency.exp", "EXP"));
+                                    .append(" &7").append(plugin.getConfigManager().getMainConfig().getString("currency.exp", "EXP"));
                              hasCost = true;
                          }
                          
@@ -1013,6 +1144,30 @@ public class MenuManager implements Listener {
             }
         }
 
+        // Queue slot click (CANCEL_QUEUE_SLOT) - chỉ xử lý khi click vào ô hàng chờ
+        List<Integer> queueSlots = getQueueSlotsFromConfig();
+        if (queueSlots.contains(slot)) {
+            int index = queueSlots.indexOf(slot);
+            if ("crafting-menu".equals(menuName)) {
+                java.util.List<com.phmyhu1710.forgestation.crafting.CraftingExecutor.PendingCraftingTask> cQueue =
+                    plugin.getCraftingExecutor().getCraftingQueue(player);
+                if (index >= 0 && index < cQueue.size()) {
+                    plugin.getCraftingExecutor().cancelCraftingQueueSlot(player, index);
+                    openMenu(player, menuName, menuPages.getOrDefault(player.getUniqueId(), 0), true);
+                }
+                return; // Click vào ô hàng chờ (có task hay không) → không xử lý action khác
+            }
+            if ("smelting-menu".equals(menuName)) {
+                java.util.List<com.phmyhu1710.forgestation.smelting.SmeltingManager.PendingSmeltingTask> sQueue =
+                    plugin.getSmeltingManager().getSmeltingQueue(player);
+                if (index >= 0 && index < sQueue.size()) {
+                    plugin.getSmeltingManager().cancelSmeltingQueueSlot(player, index);
+                    openMenu(player, menuName, menuPages.getOrDefault(player.getUniqueId(), 0), true);
+                }
+                return; // Click vào ô hàng chờ → không xử lý action khác
+            }
+        }
+
         // Find clicked item action
         plugin.debug("Looking for action at slot " + slot + " in menu " + menuName);
         boolean actionFound = false;
@@ -1137,6 +1292,17 @@ public class MenuManager implements Listener {
             case "CLOSE":
                 activeMenus.remove(uuid);
                 player.closeInventory();
+                break;
+            case "CANCEL_TASK":
+                activeMenus.remove(uuid);
+                player.closeInventory();
+                if (plugin.getCraftingExecutor().isCrafting(player)) {
+                    plugin.getCraftingExecutor().cancelCrafting(player);
+                } else if (plugin.getSmeltingManager().isSmelting(player)) {
+                    plugin.getSmeltingManager().cancelSmelting(player);
+                } else {
+                    plugin.getMessageUtil().send(player, "craft.no-active-task");
+                }
                 break;
             case "UPGRADE":
                 plugin.getUpgradeManager().tryUpgrade(player, action.getValue());

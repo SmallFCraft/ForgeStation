@@ -145,15 +145,15 @@ public class RecipeManager {
     }
 
     /**
-     * Get duration for recipe (in seconds) - with upgrade reduction
-     * Used for both crafting and exchange recipes
+     * Get duration for recipe (in seconds) - with upgrade reduction.
+     * Per-item duration: total = getDuration(...) * batchCount (crafting) or * actualExchanges (exchange).
      */
     public int getDuration(Player player, Recipe recipe) {
         return (int) (getDurationTicks(player, recipe) / 20);
     }
-    
+
     /**
-     * TICK-SUPPORT: Get duration in ticks
+     * Per-item duration in ticks. Caller must multiply by batchCount/actualExchanges for total.
      */
     public long getDurationTicks(Player player, Recipe recipe) {
         // 1. Get base duration

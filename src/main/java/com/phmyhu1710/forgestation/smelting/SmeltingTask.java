@@ -11,6 +11,9 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -29,7 +32,13 @@ public class SmeltingTask {
     private long remainingTicks;
     private boolean cancelled = false;
     private int batchCount = 1; // BATCH SMELTING: Số lượng batch đang nung
-    
+
+    /** Snapshot để hoàn trả khi hủy: nguyên liệu nung + nhiên liệu */
+    private List<ItemStack> refundInputItems = new ArrayList<>();
+    private List<ItemStack> refundFuelItems = new ArrayList<>();
+    private Map<String, Integer> refundInputExtraStorage = new java.util.HashMap<>();
+    private Map<String, Integer> refundFuelExtraStorage = new java.util.HashMap<>();
+
     // BOSSBAR PROGRESS - Unified format với CraftingTask
     private BossBar bossBar;
     private static final String BOSSBAR_FORMAT = "&6🔥 &f%s &8| &e%s &8| &a%d%%";
@@ -142,7 +151,8 @@ public class SmeltingTask {
     
     /**
      * BOSSBAR PROGRESS: Format title cho BossBar
-     * UNIFIED: Sử dụng TimeUtil.formatCompact để hiển thị thời gian (hỗ trợ phút/giờ)
+     * UNIFIED: Sử dụng TimeUtil.formatCompact để hiển thị thời gian (hỗ trợ phút/giờ).
+     * BossBar optimization: 1 bar + hiển thị số hàng chờ trong title (tránh nhiều bar).
      */
     private String formatBossBarTitle() {
         String itemName = recipe.getDisplayName();
@@ -151,7 +161,13 @@ public class SmeltingTask {
             itemName = batchCount + "× " + itemName;
         }
         String timeStr = TimeUtil.formatTicksCompact(remainingTicks);
-        return String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
+        String base = String.format(BOSSBAR_FORMAT, itemName, timeStr, getProgress());
+        Player p = getPlayer();
+        int queueSize = (p != null) ? plugin.getSmeltingManager().getSmeltingQueue(p).size() : 0;
+        if (queueSize > 0) {
+            base += " &8| &7Hàng chờ: &e" + queueSize;
+        }
+        return base;
     }
     
     /**
@@ -186,7 +202,7 @@ public class SmeltingTask {
             // Give output item (wrapped trong try/catch)
             giveOutputSafe(player);
             
-            plugin.getMessageUtil().send(player, "smelt.complete", "item", recipe.getDisplayName());
+            plugin.getMessageUtil().send(player, "smelt.complete", "item", recipe.getDisplayName(), "count", String.valueOf(batchCount));
         } catch (Exception e) {
             plugin.getLogger().warning("Smelt complete failed for recipe=" + recipe.getId() + ": " + e.getMessage());
             // SMELTING PERSISTENCE FIX: Vẫn save pending output nếu có lỗi
@@ -244,6 +260,44 @@ public class SmeltingTask {
         cancelled = true;
         // BOSSBAR PROGRESS: Xóa BossBar khi hủy
         removeBossBar();
+    }
+
+    /**
+     * Set snapshot để hoàn trả khi hủy (gọi từ SmeltingManager sau khi đã consume input + fuel).
+     */
+    public void setRefundSnapshot(List<ItemStack> inputItems, List<ItemStack> fuelItems,
+                                  Map<String, Integer> inputES, Map<String, Integer> fuelES) {
+        if (inputItems != null) this.refundInputItems = new ArrayList<>(inputItems);
+        if (fuelItems != null) this.refundFuelItems = new ArrayList<>(fuelItems);
+        if (inputES != null) this.refundInputExtraStorage = new java.util.HashMap<>(inputES);
+        if (fuelES != null) this.refundFuelExtraStorage = new java.util.HashMap<>(fuelES);
+    }
+
+    /**
+     * Hoàn trả nguyên liệu nung + nhiên liệu cho player (khi hủy task).
+     */
+    public void refund(Player player) {
+        if (player == null || !player.isOnline()) return;
+        for (ItemStack item : refundInputItems) {
+            if (item != null && item.getType() != Material.AIR && item.getAmount() > 0) {
+                plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+            }
+        }
+        for (ItemStack item : refundFuelItems) {
+            if (item != null && item.getType() != Material.AIR && item.getAmount() > 0) {
+                plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+            }
+        }
+        refundInputExtraStorage.forEach((id, amount) -> {
+            if (amount > 0 && plugin.getExtraStorageHook().isAvailable()) {
+                plugin.getExtraStorageHook().addItems(player, id, amount);
+            }
+        });
+        refundFuelExtraStorage.forEach((id, amount) -> {
+            if (amount > 0 && plugin.getExtraStorageHook().isAvailable()) {
+                plugin.getExtraStorageHook().addItems(player, id, amount);
+            }
+        });
     }
 
     public Player getPlayer() {

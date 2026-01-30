@@ -34,6 +34,29 @@ output:
 offline-progress: true
 
 # ─────────────────────────────────────────────
+# Queue (Hàng chờ) - Crafting & Smelting
+# ─────────────────────────────────────────────
+# Slot hàng chờ: nâng cấp trong upgrade-menu. Chi phí mở 1 slot → config trong upgrades.yml (queue_slots).
+# Slots hiển thị trong crafting-menu và smelting-menu (vị trí ô trong GUI)
+queue:
+  # Slots trong menu (index 0-9 = 10 ô hàng chờ). Tránh 45=prev, 53=next
+  slots: [38, 39, 40, 41, 42, 47, 48, 49, 50, 51]
+  max-slots: 10
+  # Ô trống (đã mở, chưa có task) — material + tên
+  empty-slot:
+    material: LIME_STAINED_GLASS_PANE
+    name: "&7Ô trống"
+  # Ô chưa mở (chưa nâng cấp) — material + tên + lore
+  locked-slot:
+    material: RED_STAINED_GLASS_PANE
+    name: "&cChưa mở"
+    lore:
+      - "&7Nâng cấp trong menu Nâng cấp"
+  # Nhãn hiển thị trên item đang trong hàng chờ (vd. "Hàng chờ #1", "Click để hủy")
+  pending-label: "&7Hàng chờ #%index%"
+  pending-lore-cancel: "&cClick để hủy"
+
+# ─────────────────────────────────────────────
 # Performance Settings
 # ─────────────────────────────────────────────
 performance:
@@ -47,7 +70,7 @@ performance:
   max-player-cache: 1000
 
 # ─────────────────────────────────────────────
-# Hooks
+# Currency
 # ─────────────────────────────────────────────
 currency:
   vault: "&aBạc"
@@ -55,6 +78,9 @@ currency:
   exp: "&aEXP"
   coinengine: "&dCông Đức"
 
+# ─────────────────────────────────────────────
+# Hooks
+# ─────────────────────────────────────────────
 hooks:
   # Currency
   vault: true
