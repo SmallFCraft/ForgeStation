@@ -1,8 +1,0 @@
-# ═══════════════════════════════════════════════
-#           FORGESTATION WEAPON RECIPES
-# ═══════════════════════════════════════════════
-# Recipes chế tạo vũ khí.
-# PLACEHOLDERS: Mỗi recipe có thể có "placeholders:" (key: value). Trong icon name & lore dùng %key%.
-
-open_command: craftweapon
-recipes:
