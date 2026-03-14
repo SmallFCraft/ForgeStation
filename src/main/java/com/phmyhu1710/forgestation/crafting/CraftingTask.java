@@ -126,7 +126,7 @@ public class CraftingTask {
         String title = formatBossBarTitle();
         bossBar.setTitle(MessageUtil.colorize(title));
         
-        double progress = (double) (totalTicks - remainingTicks) / totalTicks;
+        double progress = totalTicks > 0 ? (double) (totalTicks - remainingTicks) / totalTicks : 1.0;
         bossBar.setProgress(Math.min(1.0, Math.max(0.0, progress)));
         
         bossBar.setColor(getBossBarColor());
@@ -293,6 +293,16 @@ public class CraftingTask {
         
         int totalAmount = result.getAmount() * successes;
         
+        // Result vẫn là MMOItem/VANILLA nhưng giao vào Extra Storage nếu config output-destination: EXTRA_STORAGE
+        if (result.isDeliverToExtraStorage() && plugin.getExtraStorageHook().isAvailable()) {
+            boolean added = plugin.getExtraStorageHook().addItems(player, result.getExtraStorageKey(), totalAmount);
+            if (added) {
+                plugin.debug("Added " + totalAmount + "x " + result.getExtraStorageKey() + " to ExtraStorage (output-destination) for " + player.getName());
+                return;
+            }
+            plugin.getLogger().warning("ExtraStorage addItems failed for key '" + result.getExtraStorageKey() + "', giving item to inventory instead (recipe: " + recipe.getId() + ")");
+        }
+        
         switch (result.getType().toUpperCase()) {
             case "MMOITEMS":
                 // PERF-FIX: Batch items instead of giving 1 by 1
@@ -306,7 +316,7 @@ public class CraftingTask {
                         int batch = Math.min(remaining, maxStack);
                         ItemStack stack = mmoTemplate.clone();
                         stack.setAmount(batch);
-                        plugin.getOutputRouter().routeOutput(player, stack, "MMOITEM_" + result.getMmoitemsId());
+                        plugin.getOutputRouter().routeOutput(player, stack, com.phmyhu1710.forgestation.hook.ExtraStorageHook.buildMmoItemsKey(result.getMmoitemsType(), result.getMmoitemsId()));
                         remaining -= batch;
                     }
                     plugin.debug("Gave " + totalAmount + "x MMOItem in batches to " + player.getName());
@@ -363,23 +373,55 @@ public class CraftingTask {
 
     /**
      * Hoàn trả nguyên liệu + tiền cho player (khi hủy task).
+     * Kiểm tra kết quả addItems/routeOutput; nếu Extra Storage thất bại thì fallback vào inventory (vanilla key).
      */
     public void refund(Player player) {
         if (player == null || !player.isOnline()) return;
         for (ItemStack item : refundItems) {
             if (item != null && item.getType() != Material.AIR && item.getAmount() > 0) {
-                plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+                boolean ok = plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+                if (!ok) {
+                    plugin.getLogger().warning("[ForgeStation] Refund routeOutput failed for " + item.getType() + " x" + item.getAmount() + ", dropping at feet");
+                    player.getWorld().dropItemNaturally(player.getLocation(), item.clone());
+                }
             }
         }
         refundExtraStorage.forEach((storageId, amount) -> {
-            if (amount > 0 && plugin.getExtraStorageHook().isAvailable()) {
-                plugin.getExtraStorageHook().addItems(player, storageId, amount);
+            if (amount <= 0) return;
+            if (plugin.getExtraStorageHook().isAvailable()) {
+                boolean added = plugin.getExtraStorageHook().addItems(player, storageId, amount);
+                if (!added) {
+                    refundExtraStorageFallbackToInventory(player, storageId, amount);
+                }
+            } else {
+                refundExtraStorageFallbackToInventory(player, storageId, amount);
             }
         });
         if (refundVault > 0) plugin.getEconomyManager().depositVault(player, refundVault);
         if (refundPP > 0) plugin.getEconomyManager().givePlayerPoints(player, refundPP);
         if (refundCoinEngine > 0 && !refundCoinEngineCurrency.isEmpty()) {
             plugin.getEconomyManager().depositCoinEngine(player, refundCoinEngineCurrency, refundCoinEngine);
+        }
+    }
+
+    /** Khi Extra Storage add thất bại: nếu key là vanilla material thì trả vào túi, không thì log. */
+    private void refundExtraStorageFallbackToInventory(Player player, String storageId, int amount) {
+        Material mat = null;
+        try {
+            mat = Material.matchMaterial(storageId);
+        } catch (Exception ignored) { }
+        if (mat != null && mat != Material.AIR && mat.isItem()) {
+            int maxStack = mat.getMaxStackSize();
+            int remaining = amount;
+            while (remaining > 0) {
+                int give = Math.min(remaining, maxStack);
+                ItemStack stack = new ItemStack(mat, give);
+                plugin.getOutputRouter().routeOutput(player, stack, storageId);
+                remaining -= give;
+            }
+            plugin.getLogger().warning("[ForgeStation] Refund Extra Storage failed for key '" + storageId + "', gave " + amount + " to inventory instead");
+        } else {
+            plugin.getLogger().warning("[ForgeStation] Refund Extra Storage failed for key '" + storageId + "' x" + amount + " — không thể fallback (key không phải vanilla). Kiểm tra Extra Storage / key format TYPE:ID.");
         }
     }
 

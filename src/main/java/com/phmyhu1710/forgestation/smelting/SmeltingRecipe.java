@@ -4,7 +4,10 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a smelting recipe
@@ -44,6 +47,9 @@ public class SmeltingRecipe {
     private final String fuelType;
     private final String fuelMaterial;
     private final int fuelAmount;
+
+    /** Placeholders tùy chỉnh cho icon name/lore (vd. %item_name%). */
+    private final Map<String, String> placeholders;
 
     public SmeltingRecipe(String id, String sourceFile, ConfigurationSection config) {
         this.id = id;
@@ -124,6 +130,18 @@ public class SmeltingRecipe {
             this.fuelMaterial = "COAL";
             this.fuelAmount = 0;
         }
+
+        // Placeholders: key-value dùng trong icon name/lore
+        Map<String, String> ph = new HashMap<>();
+        ConfigurationSection phSection = config.getConfigurationSection("placeholders");
+        if (phSection != null) {
+            for (String key : phSection.getKeys(false)) {
+                if (phSection.isString(key)) {
+                    ph.put(key, phSection.getString(key, ""));
+                }
+            }
+        }
+        this.placeholders = Collections.unmodifiableMap(ph);
     }
 
     // Getters
@@ -139,7 +157,9 @@ public class SmeltingRecipe {
     public int getIconSlot() { return iconSlot; }
     public String getIconName() { return iconName; }
     public List<String> getIconLore() { return iconLore; }
-    
+    /** Placeholders tùy chỉnh (key → value). Trong icon name/lore dùng %key%. */
+    public Map<String, String> getPlaceholders() { return placeholders; }
+
     public String getInputType() { return inputType; }
     public String getInputMaterial() { return inputMaterial; }
     public String getInputMmoitemsType() { return inputMmoitemsType; }

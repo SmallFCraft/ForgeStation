@@ -1,0 +1,3725 @@
+# ---------------------------------
+# --- SET TULUYEN1 (Sơ Giai) ---
+# ---------------------------------
+TULUYEN1_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_NGOAIMON_SOGIAI
+    name: '&f&lBạch Ảnh &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 8
+    armor-toughness: 2
+    max-health: 8
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11552.0
+
+TULUYEN1_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_NGOAIMON_SOGIAI
+    name: '&f&lBạch Ảnh &f&lY'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 8
+    armor-toughness: 2
+    max-health: 8
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+TULUYEN1_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_NGOAIMON_SOGIAI
+    name: '&f&lBạch Ảnh &f&lHạ Y'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 8
+    armor-toughness: 2
+    max-health: 8
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+TULUYEN1_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_NGOAIMON_SOGIAI
+    name: '&f&lBạch Ảnh &f&lHài'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 8
+    armor-toughness: 2
+    max-health: 8
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+# ---------------------------------
+# --- SET TULUYEN1_2 (+2 chỉ số) ---
+# ---------------------------------
+TULUYEN1_2_HELMET:
+  base:
+    material: paper
+    tier: THILUYEN_NGOAIMON_TRUNGGIAI
+    name: '&f&lBạch Ảnh &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 10
+    armor-toughness: 2
+    max-health: 10
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 11552.0
+
+TULUYEN1_2_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_NGOAIMON_TRUNGGIAI
+    name: '&f&lBạch Ảnh &f&lY'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 10
+    armor-toughness: 2
+    max-health: 10
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+TULUYEN1_2_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_NGOAIMON_TRUNGGIAI
+    name: '&f&lBạch Ảnh &f&lHạ Y'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 10
+    armor-toughness: 2
+    max-health: 10
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+TULUYEN1_2_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_NGOAIMON_TRUNGGIAI
+    name: '&f&lBạch Ảnh &f&lHài'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 10
+    armor-toughness: 2
+    max-health: 10
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+# ---------------------------------
+# --- SET TULUYEN1_3 (+4 chỉ số) ---
+# ---------------------------------
+TULUYEN1_3_HELMET:
+  base:
+    material: paper
+    tier: THILUYEN_NGOAIMON_CAOGIAI
+    name: '&f&lBạch Ảnh &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 12
+    armor-toughness: 2
+    max-health: 12
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 11552.0
+
+TULUYEN1_3_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_NGOAIMON_CAOGIAI
+    name: '&f&lBạch Ảnh &f&lY'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 12
+    armor-toughness: 2
+    max-health: 12
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+TULUYEN1_3_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_NGOAIMON_CAOGIAI
+    name: '&f&lBạch Ảnh &f&lHạ Y'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 12
+    armor-toughness: 2
+    max-health: 12
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+TULUYEN1_3_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_NGOAIMON_CAOGIAI
+    name: '&f&lBạch Ảnh &f&lHài'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 12
+    armor-toughness: 2
+    max-health: 12
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+# ---------------------------------
+# --- SET TULUYEN1_4 (+6 chỉ số) ---
+# ---------------------------------
+TULUYEN1_4_HELMET:
+  base:
+    material: paper
+    tier: THILUYEN_NGOAIMON_THUONGGIAI
+    name: '&f&lBạch Ảnh &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 14
+    armor-toughness: 2
+    max-health: 14
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 11552.0
+
+TULUYEN1_4_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_NGOAIMON_THUONGGIAI
+    name: '&f&lBạch Ảnh &f&lY'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 14
+    armor-toughness: 2
+    max-health: 14
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+TULUYEN1_4_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_NGOAIMON_THUONGGIAI
+    name: '&f&lBạch Ảnh &f&lHạ Y'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 14
+    armor-toughness: 2
+    max-health: 14
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+TULUYEN1_4_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_NGOAIMON_THUONGGIAI
+    name: '&f&lBạch Ảnh &f&lHài'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 2
+    pve-damage-reduction: 2
+    armor: 14
+    armor-toughness: 2
+    max-health: 14
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴘʜàᴍ ɴʜâɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    custom-nbt: []
+    dye-color: 255 255 247
+    custom-model-data: 10106
+
+# ---------------------------------
+# --- SET TULUYEN2 (Sơ Giai) ---
+# ---------------------------------
+TULUYEN2_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_NOIMON_SOGIAI
+    name: '&f&lChiến Thú Chi Khôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 16
+    armor-toughness: 4
+    max-health: 16
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11553
+
+TULUYEN2_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_NOIMON_SOGIAI
+    name: '&f&lChiến Thú Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 16
+    armor-toughness: 4
+    max-health: 16
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+TULUYEN2_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_NOIMON_SOGIAI
+    name: '&f&lChiến Thú Hạ Trang'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 16
+    armor-toughness: 4
+    max-health: 16
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+TULUYEN2_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_NOIMON_SOGIAI
+    name: '&f&lChiến Thú Bộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 16
+    armor-toughness: 4
+    max-health: 16
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+# ---------------------------------
+# --- SET TULUYEN2_2 (+2 chỉ số) ---
+# ---------------------------------
+TULUYEN2_2_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_NOIMON_TRUNGGIAI
+    name: '&f&lChiến Thú Chi Khôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 18
+    armor-toughness: 4
+    max-health: 18
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11553
+
+TULUYEN2_2_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_NOIMON_TRUNGGIAI
+    name: '&f&lChiến Thú Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 18
+    armor-toughness: 4
+    max-health: 18
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+TULUYEN2_2_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_NOIMON_TRUNGGIAI
+    name: '&f&lChiến Thú Hạ Trang'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 18
+    armor-toughness: 4
+    max-health: 18
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+TULUYEN2_2_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_NOIMON_TRUNGGIAI
+    name: '&f&lChiến Thú Bộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 18
+    armor-toughness: 4
+    max-health: 18
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+# ---------------------------------
+# --- SET TULUYEN2_3 (+4 chỉ số) ---
+# ---------------------------------
+TULUYEN2_3_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_NOIMON_CAOGIAI
+    name: '&f&lChiến Thú Chi Khôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 20
+    armor-toughness: 4
+    max-health: 20
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11553
+
+TULUYEN2_3_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_NOIMON_CAOGIAI
+    name: '&f&lChiến Thú Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 20
+    armor-toughness: 4
+    max-health: 20
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+TULUYEN2_3_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_NOIMON_CAOGIAI
+    name: '&f&lChiến Thú Hạ Trang'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 20
+    armor-toughness: 4
+    max-health: 20
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+TULUYEN2_3_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_NOIMON_CAOGIAI
+    name: '&f&lChiến Thú Bộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 20
+    armor-toughness: 4
+    max-health: 20
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+# ---------------------------------
+# --- SET TULUYEN2_4 (+6 chỉ số) ---
+# ---------------------------------
+TULUYEN2_4_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_NOIMON_THUONGGIAI
+    name: '&f&lChiến Thú Chi Khôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 22
+    armor-toughness: 4
+    max-health: 22
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11553
+
+TULUYEN2_4_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_NOIMON_THUONGGIAI
+    name: '&f&lChiến Thú Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 22
+    armor-toughness: 4
+    max-health: 22
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+TULUYEN2_4_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_NOIMON_THUONGGIAI
+    name: '&f&lChiến Thú Hạ Trang'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 22
+    armor-toughness: 4
+    max-health: 22
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+TULUYEN2_4_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_NOIMON_THUONGGIAI
+    name: '&f&lChiến Thú Bộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 4
+    pve-damage-reduction: 4
+    armor: 22
+    armor-toughness: 4
+    max-health: 22
+    lore:
+    - ' &7Yêu cầu tu vi &f[ʟᴜʏệɴ ᴋʜí]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    custom-nbt: []
+    dye-color: 255 255 246
+    custom-model-data: 10107
+
+# ---------------------------------
+# --- SET TULUYEN3 (Sơ Giai) ---
+# ---------------------------------
+TULUYEN3_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_TINHANH_SOGIAI
+    name: '&5&lMa Vực &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 24
+    armor-toughness: 6
+    max-health: 24
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11554
+
+TULUYEN3_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_TINHANH_SOGIAI
+    name: '&5&lMa Vực &f&lChiến Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 24
+    armor-toughness: 6
+    max-health: 24
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+TULUYEN3_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_TINHANH_SOGIAI
+    name: '&5&lMa Vực &f&lHạ Khải'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 24
+    armor-toughness: 6
+    max-health: 24
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+TULUYEN3_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_TINHANH_SOGIAI
+    name: '&5&lMa Vực &f&lBộ Pháp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 24
+    armor-toughness: 6
+    max-health: 24
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+# ---------------------------------
+# --- SET TULUYEN3_2 (+2 chỉ số) ---
+# ---------------------------------
+TULUYEN3_2_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_TINHANH_TRUNGGIAI
+    name: '&5&lMa Vực &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 26
+    armor-toughness: 6
+    max-health: 26
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11554
+
+TULUYEN3_2_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_TINHANH_TRUNGGIAI
+    name: '&5&lMa Vực &f&lChiến Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 26
+    armor-toughness: 6
+    max-health: 26
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+TULUYEN3_2_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_TINHANH_TRUNGGIAI
+    name: '&5&lMa Vực &f&lHạ Khải'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 26
+    armor-toughness: 6
+    max-health: 26
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+TULUYEN3_2_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_TINHANH_TRUNGGIAI
+    name: '&5&lMa Vực &f&lBộ Pháp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 26
+    armor-toughness: 6
+    max-health: 26
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+# ---------------------------------
+# --- SET TULUYEN3_3 (+4 chỉ số) ---
+# ---------------------------------
+TULUYEN3_3_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_TINHANH_CAOGIAI
+    name: '&5&lMa Vực &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 28
+    armor-toughness: 6
+    max-health: 28
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11554
+
+TULUYEN3_3_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_TINHANH_CAOGIAI
+    name: '&5&lMa Vực &f&lChiến Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 28
+    armor-toughness: 6
+    max-health: 28
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+TULUYEN3_3_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_TINHANH_CAOGIAI
+    name: '&5&lMa Vực &f&lHạ Khải'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 28
+    armor-toughness: 6
+    max-health: 28
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+TULUYEN3_3_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_TINHANH_CAOGIAI
+    name: '&5&lMa Vực &f&lBộ Pháp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 28
+    armor-toughness: 6
+    max-health: 28
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+# ---------------------------------
+# --- SET TULUYEN3_4 (+6 chỉ số) ---
+# ---------------------------------
+TULUYEN3_4_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_TINHANH_THUONGGIAI
+    name: '&5&lMa Vực &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 30
+    armor-toughness: 6
+    max-health: 30
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11554
+
+TULUYEN3_4_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_TINHANH_THUONGGIAI
+    name: '&5&lMa Vực &f&lChiến Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 30
+    armor-toughness: 6
+    max-health: 30
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+TULUYEN3_4_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_TINHANH_THUONGGIAI
+    name: '&5&lMa Vực &f&lHạ Khải'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 30
+    armor-toughness: 6
+    max-health: 30
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+TULUYEN3_4_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_TINHANH_THUONGGIAI
+    name: '&5&lMa Vực &f&lBộ Pháp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 6
+    pve-damage-reduction: 6
+    armor: 30
+    armor-toughness: 6
+    max-health: 30
+    damage-reduction: 0.5
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴛʀúᴄ ᴄơ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    custom-nbt: []
+    dye-color: 255 255 245
+    custom-model-data: 10108
+
+# ---------------------------------
+# --- SET TULUYEN4 (Sơ Giai) ---
+# ---------------------------------
+TULUYEN4_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_CHANTRUYEN_SOGIAI
+    name: '&c&lHuyết Chiến &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 32
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 32
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11555
+
+TULUYEN4_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_CHANTRUYEN_SOGIAI
+    name: '&c&lHuyết Chiến &f&lGiáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 32
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 32
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+TULUYEN4_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_CHANTRUYEN_SOGIAI
+    name: '&c&lHuyết Chiến &f&lHộ Thể'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 32
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 32
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+TULUYEN4_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_CHANTRUYEN_SOGIAI
+    name: '&c&lHuyết Chiến &f&lBộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 32
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 32
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+# ---------------------------------
+# --- SET TULUYEN4_2 (+2 chỉ số) ---
+# ---------------------------------
+TULUYEN4_2_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_CHANTRUYEN_TRUNGGIAI
+    name: '&c&lHuyết Chiến &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 34
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 34
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11555
+
+TULUYEN4_2_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_CHANTRUYEN_TRUNGGIAI
+    name: '&c&lHuyết Chiến &f&lGiáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 34
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 34
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+TULUYEN4_2_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_CHANTRUYEN_TRUNGGIAI
+    name: '&c&lHuyết Chiến &f&lHộ Thể'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 34
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 34
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+TULUYEN4_2_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_CHANTRUYEN_TRUNGGIAI
+    name: '&c&lHuyết Chiến &f&lBộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 34
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 34
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+# ---------------------------------
+# --- SET TULUYEN4_3 (+4 chỉ số) ---
+# ---------------------------------
+TULUYEN4_3_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_CHANTRUYEN_CAOGIAI
+    name: '&c&lHuyết Chiến &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 36
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 36
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11555
+
+TULUYEN4_3_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_CHANTRUYEN_CAOGIAI
+    name: '&c&lHuyết Chiến &f&lGiáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 36
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 36
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+TULUYEN4_3_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_CHANTRUYEN_CAOGIAI
+    name: '&c&lHuyết Chiến &f&lHộ Thể'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 36
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 36
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+TULUYEN4_3_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_CHANTRUYEN_CAOGIAI
+    name: '&c&lHuyết Chiến &f&lBộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 36
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 36
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+# ---------------------------------
+# --- SET TULUYEN4_4 (+6 chỉ số) ---
+# ---------------------------------
+TULUYEN4_4_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_CHANTRUYEN_THUONGGIAI
+    name: '&c&lHuyết Chiến &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 38
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 38
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11555
+
+TULUYEN4_4_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_CHANTRUYEN_THUONGGIAI
+    name: '&c&lHuyết Chiến &f&lGiáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 38
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 38
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+TULUYEN4_4_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_CHANTRUYEN_THUONGGIAI
+    name: '&c&lHuyết Chiến &f&lHộ Thể'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 38
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 38
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+TULUYEN4_4_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_CHANTRUYEN_THUONGGIAI
+    name: '&c&lHuyết Chiến &f&lBộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 8
+    pve-damage-reduction: 8
+    armor: 38
+    armor-toughness: 8
+    damage-reduction: 1
+    max-health: 38
+    lore:
+    - ' &7Yêu cầu tu vi &f[ᴋɪᴍ đᴀɴ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    custom-nbt: []
+    dye-color: 255 255 244
+    custom-model-data: 10109
+
+# ---------------------------------
+# --- SET TULUYEN5 (Sơ Giai) ---
+# ---------------------------------
+TULUYEN5_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_TONGMON_TRUONGLAO_SOGIAI
+    name: '&8&lKiên Thạch &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 40
+    armor-toughness: 10
+    max-health: 40
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11556
+
+TULUYEN5_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_TONGMON_TRUONGLAO_SOGIAI
+    name: '&8&lKiên Thạch &f&lHộ Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 40
+    armor-toughness: 10
+    max-health: 40
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+TULUYEN5_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_TONGMON_TRUONGLAO_SOGIAI
+    name: '&8&lKiên Thạch &f&lHạ Trang'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 40
+    armor-toughness: 10
+    max-health: 40
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+TULUYEN5_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_TONGMON_TRUONGLAO_SOGIAI
+    name: '&8&lKiên Thạch &f&lBộ Pháp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 40
+    armor-toughness: 10
+    max-health: 40
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+# ---------------------------------
+# --- SET TULUYEN5_2 (+2 chỉ số) ---
+# ---------------------------------
+TULUYEN5_2_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_TONGMON_TRUONGLAO_TRUNGGIAI
+    name: '&8&lKiên Thạch &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 42
+    armor-toughness: 10
+    max-health: 42
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11556
+
+TULUYEN5_2_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_TONGMON_TRUONGLAO_TRUNGGIAI
+    name: '&8&lKiên Thạch &f&lHộ Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 42
+    armor-toughness: 10
+    max-health: 42
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+TULUYEN5_2_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_TONGMON_TRUONGLAO_TRUNGGIAI
+    name: '&8&lKiên Thạch &f&lHạ Trang'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 42
+    armor-toughness: 10
+    max-health: 42
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+TULUYEN5_2_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_TONGMON_TRUONGLAO_TRUNGGIAI
+    name: '&8&lKiên Thạch &f&lBộ Pháp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 42
+    armor-toughness: 10
+    max-health: 42
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+# ---------------------------------
+# --- SET TULUYEN5_3 (+4 chỉ số) ---
+# ---------------------------------
+TULUYEN5_3_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_TONGMON_TRUONGLAO_CAOGIAI
+    name: '&8&lKiên Thạch &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 44
+    armor-toughness: 10
+    max-health: 44
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11556
+
+TULUYEN5_3_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_TONGMON_TRUONGLAO_CAOGIAI
+    name: '&8&lKiên Thạch &f&lHộ Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 44
+    armor-toughness: 10
+    max-health: 44
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+TULUYEN5_3_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_TONGMON_TRUONGLAO_CAOGIAI
+    name: '&8&lKiên Thạch &f&lHạ Trang'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 44
+    armor-toughness: 10
+    max-health: 44
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+TULUYEN5_3_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_TONGMON_TRUONGLAO_CAOGIAI
+    name: '&8&lKiên Thạch &f&lBộ Pháp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 44
+    armor-toughness: 10
+    max-health: 44
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+# ---------------------------------
+# --- SET TULUYEN5_4 (+6 chỉ số) ---
+# ---------------------------------
+TULUYEN5_4_HELMET:
+  base:
+    material: PAPER
+    tier: THILUYEN_TONGMON_TRUONGLAO_THUONGGIAI
+    name: '&8&lKiên Thạch &f&lKhôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 46
+    armor-toughness: 10
+    max-health: 46
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 251
+    custom-model-data: 11556
+
+TULUYEN5_4_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_TONGMON_TRUONGLAO_THUONGGIAI
+    name: '&8&lKiên Thạch &f&lHộ Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 46
+    armor-toughness: 10
+    max-health: 46
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+TULUYEN5_4_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_TONGMON_TRUONGLAO_THUONGGIAI
+    name: '&8&lKiên Thạch &f&lHạ Trang'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 46
+    armor-toughness: 10
+    max-health: 46
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+TULUYEN5_4_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_TONGMON_TRUONGLAO_THUONGGIAI
+    name: '&8&lKiên Thạch &f&lBộ Pháp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 10
+    pve-damage-reduction: 10
+    armor: 46
+    armor-toughness: 10
+    max-health: 46
+    damage-reduction: 2
+    lore:
+    - ' &7Yêu cầu tu vi &f[ɴɢᴜʏêɴ ᴀɴʜ]'
+    - ''
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    custom-nbt: []
+    dye-color: 255 255 243
+    custom-model-data: 10110
+
+# ---------------------------------
+# --- SET TULUYEN6 (Sơ Giai) ---
+# ---------------------------------
+TULUYEN6_HELMET:
+  base:
+    material: LEATHER_HELMET
+    tier: THILUYEN_HOPHAP_TRUONGLAO_SOGIAI
+    name: '&4&lCuồng Sát &f&lChi Khôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 42
+    armor-toughness: 12
+    max-health: 42
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_HOPHAP_TRUONGLAO_SOGIAI
+    name: '&4&lCuồng Sát &f&lChiến Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 42
+    armor-toughness: 12
+    max-health: 42
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+
+TULUYEN6_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_HOPHAP_TRUONGLAO_SOGIAI
+    name: '&4&lCuồng Sát &f&lHạ Khải'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 42
+    armor-toughness: 12
+    max-health: 42
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_HOPHAP_TRUONGLAO_SOGIAI
+    name: '&4&lCuồng Sát &f&lBộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 42
+    armor-toughness: 12
+    max-health: 42
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+
+# ---------------------------------
+# --- SET TULUYEN6_2 (+2 chỉ số) ---
+# ---------------------------------
+TULUYEN6_2_HELMET:
+  base:
+    material: LEATHER_HELMET
+    tier: THILUYEN_HOPHAP_TRUONGLAO_TRUNGGIAI
+    name: '&4&lCuồng Sát &f&lChi Khôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 44
+    armor-toughness: 12
+    max-health: 44
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_2_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_HOPHAP_TRUONGLAO_TRUNGGIAI
+    name: '&4&lCuồng Sát &f&lChiến Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 44
+    armor-toughness: 12
+    max-health: 44
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_2_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_HOPHAP_TRUONGLAO_TRUNGGIAI
+    name: '&4&lCuồng Sát &f&lHạ Khải'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 44
+    armor-toughness: 12
+    max-health: 44
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+
+TULUYEN6_2_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_HOPHAP_TRUONGLAO_TRUNGGIAI
+    name: '&4&lCuồng Sát &f&lBộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 44
+    armor-toughness: 12
+    max-health: 44
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+
+# ---------------------------------
+# --- SET TULUYEN6_3 (+4 chỉ số) ---
+# ---------------------------------
+TULUYEN6_3_HELMET:
+  base:
+    material: LEATHER_HELMET
+    tier: THILUYEN_HOPHAP_TRUONGLAO_CAOGIAI
+    name: '&4&lCuồng Sát &f&lChi Khôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 46
+    armor-toughness: 12
+    max-health: 46
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_3_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_HOPHAP_TRUONGLAO_CAOGIAI
+    name: '&4&lCuồng Sát &f&lChiến Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 46
+    armor-toughness: 12
+    max-health: 46
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_3_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_HOPHAP_TRUONGLAO_CAOGIAI
+    name: '&4&lCuồng Sát &f&lHạ Khải'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 46
+    armor-toughness: 12
+    max-health: 46
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_3_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_HOPHAP_TRUONGLAO_CAOGIAI
+    name: '&4&lCuồng Sát &f&lBộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 46
+    armor-toughness: 12
+    max-health: 46
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+
+# ---------------------------------
+# --- SET TULUYEN6_4 (+6 chỉ số) ---
+# ---------------------------------
+TULUYEN6_4_HELMET:
+  base:
+    material: LEATHER_HELMET
+    tier: THILUYEN_HOPHAP_TRUONGLAO_THUONGGIAI
+    name: '&4&lCuồng Sát &f&lChi Khôi'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 48
+    armor-toughness: 12
+    max-health: 48
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_4_CHESTPLATE:
+  base:
+    material: LEATHER_CHESTPLATE
+    tier: THILUYEN_HOPHAP_TRUONGLAO_THUONGGIAI
+    name: '&4&lCuồng Sát &f&lChiến Giáp'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 48
+    armor-toughness: 12
+    max-health: 48
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_4_LEGGINGS:
+  base:
+    material: LEATHER_LEGGINGS
+    tier: THILUYEN_HOPHAP_TRUONGLAO_THUONGGIAI
+    name: '&4&lCuồng Sát &f&lHạ Khải'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 48
+    armor-toughness: 12
+    max-health: 48
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251
+TULUYEN6_4_BOOTS:
+  base:
+    material: LEATHER_BOOTS
+    tier: THILUYEN_HOPHAP_TRUONGLAO_THUONGGIAI
+    name: '&4&lCuồng Sát &f&lBộ'
+    unbreakable: true
+    enchants:
+      unbreaking: 1
+      thorns: 1
+    hide-enchants: true
+    disable-crafting: true
+    disable-smelting: true
+    disable-smithing: true
+    disable-enchanting: true
+    disable-repairing: true
+    pvp-damage-reduction: 12
+    pve-damage-reduction: 12
+    armor: 48
+    armor-toughness: 12
+    max-health: 48
+    damage-reduction: 2.5
+    lore:
+    - ' &8| &fVật phẩm trao đổi tại'
+    - ' &8| &e/warp ThiLuyen'
+    - ''
+    - ' &8[ &f&lᴋʜôɴɢ ᴛʜể &c&lʙị ʜỏɴɢ&8 ]'
+    - ''
+    - ' &8| &cᴍᴄ&eᴀᴄᴇ &fɴᴇᴛᴡᴏʀᴋ &8| '
+    - ''
+    - ' &7Yêu cầu tu vi &c[đạɪ ᴛʜừᴀ]'
+    revision-id: 1
+    permission:
+    - rank.luyenkhi
+    - rank.trucco
+    - rank.kimdan
+    - rank.nguyenanh
+    - rank.daithua
+    custom-nbt: []
+    dye-color: 255 255 251

@@ -42,7 +42,6 @@ public class ForgeStationPlugin extends JavaPlugin {
     private MenuManager menuManager;
     private RecipeDetailGUI recipeDetailGUI;
     private SchedulerAdapter scheduler;
-    // ISSUE-014 FIX: Output router for configurable item delivery
     private OutputRouter outputRouter;
     private int persistenceTaskId = -1;
     private com.phmyhu1710.forgestation.command.CustomCommandManager customCommandManager;
@@ -88,7 +87,6 @@ public class ForgeStationPlugin extends JavaPlugin {
         recipeManager = new RecipeManager(this);
         recipeManager.loadRecipes();
         
-        // ISSUE-014 FIX: Initialize output router
         outputRouter = new OutputRouter(this);
         
         taskQueueManager = new com.phmyhu1710.forgestation.queue.TaskQueueManager(this);
@@ -116,9 +114,8 @@ public class ForgeStationPlugin extends JavaPlugin {
             log("&a✓ &7PlaceholderAPI expansion registered");
         }
         
-        // EXTERNAL RELOAD FIX: Restore tasks cho online players sau khi khởi tạo xong
-        // Điều này cần thiết khi plugin được reload bởi PlugMan/PlugManX
-        // PLUGMAN FIX: 40 ticks delay để DB/PlugMan ổn định; runAtEntity cho Folia
+        // PERSISTENCE: Khôi phục tiến trình nung/craft sau reload hoặc restart server
+        // Gọi sau 40 ticks để DB và (nếu dùng) PlugMan ổn định; runAtEntity dùng cho Folia
         scheduler.runLater(() -> restoreTasksForOnlinePlayers(), 40L);
         
         // CRASH PROTECTION: Lưu tasks+queue định kỳ vào DB (khi server crash vẫn restore được)
@@ -144,24 +141,21 @@ public class ForgeStationPlugin extends JavaPlugin {
                 customCommandManager.unregisterAll();
             }
 
-            // ⚠️ CRITICAL ORDER: Phải lưu tasks TRƯỚC KHI đóng database!
-            
+            // ═══ PERSISTENCE: Reload / PlugMan / Restart — không mất tiến trình nung & craft ═══
+            // Thứ tự BẮT BUỘC: Dừng timer lưu định kỳ → Lưu tasks + hàng chờ vào DB → Rồi mới đóng DB.
             if (persistenceTaskId != -1) {
                 scheduler.cancelTask(persistenceTaskId);
                 persistenceTaskId = -1;
             }
-            
-            // 1. Cancel và lưu tất cả smelting tasks vào database
+            // 1. Lưu smelting tasks vào DB (rồi cancel trong memory)
             if (smeltingManager != null) {
                 smeltingManager.cancelAllTasks();
             }
-            
-            // 2. Cancel và lưu tất cả crafting tasks vào database
+            // 2. Lưu crafting tasks + hàng chờ thống nhất vào DB (rồi cancel trong memory)
             if (craftingExecutor != null) {
                 craftingExecutor.cancelAllTasks();
             }
-            
-            // 3. SAU KHI đã lưu tasks xong, mới đóng database
+            // 3. Chỉ sau khi đã ghi xong, mới đóng kết nối DB
             if (playerDataManager != null) {
                 playerDataManager.shutdown();
             }
@@ -171,7 +165,6 @@ public class ForgeStationPlugin extends JavaPlugin {
             log("&7Thank you for using &6ForgeStation&7!");
             log("");
         } finally {
-            // ISSUE-001 FIX: Cắt reference tĩnh để GC có thể thu dọn khi reload
             instance = null;
         }
     }
@@ -234,9 +227,9 @@ public class ForgeStationPlugin extends JavaPlugin {
      * PLUGMAN FIX: runAtEntity cho từng player — trên Folia phải chạy trên entity region
      */
     private void restoreTasksForOnlinePlayers() {
+        if (playerDataManager == null || playerDataManager.getDatabase() == null) return;
         int onlinePlayers = Bukkit.getOnlinePlayers().size();
-        debug("Attempting to restore tasks for " + onlinePlayers + " online players (PlugMan reload)...");
-        
+        debug("Attempting to restore tasks for " + onlinePlayers + " online players (reload/restart)...");
         if (onlinePlayers == 0) return;
         
         java.util.concurrent.atomic.AtomicInteger smeltingRestored = new java.util.concurrent.atomic.AtomicInteger(0);
@@ -259,7 +252,7 @@ public class ForgeStationPlugin extends JavaPlugin {
                         int s = smeltingRestored.get();
                         int c = craftingRestored.get();
                         if (s > 0 || c > 0) {
-                            getLogger().info("Restored " + s + " smelting and " + c + " crafting tasks for online players (PlugMan reload)");
+                            getLogger().info("Restored " + s + " smelting and " + c + " crafting tasks for online players (reload/restart)");
                         } else {
                             debug("No saved tasks found to restore");
                         }
@@ -357,7 +350,6 @@ public class ForgeStationPlugin extends JavaPlugin {
         return scheduler;
     }
     
-    // ISSUE-014 FIX: Getter for output router
     public OutputRouter getOutputRouter() {
         return outputRouter;
     }

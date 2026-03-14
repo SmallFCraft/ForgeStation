@@ -5,7 +5,7 @@
 # Modern styled messages with Unicode icons
 
 # Prefix (sử dụng %prefix% trong các message khác)
-prefix: "&e&lMC&c&lACE &9Chế Tạo Nhanh &r "
+prefix: "&e&lMC&c&lACE &9Chế Tạo Nhanh"
 
 # ─────────────────────────────────────────────
 # General
@@ -73,7 +73,6 @@ craft:
   pending-delivered: "%prefix%&a📦 &7Bạn nhận được &e%count% &7items từ quá trình chế tạo khi offline!"
   complete-while-offline: "%prefix%&a✓ &7Quá trình chế tạo &e%count%× %item% &7đã hoàn tất khi bạn offline!"
   restored: "%prefix%&b⚒ &7Tiếp tục chế tạo &e%item%&7... Còn &e%time%&7!"
-  recipe-removed: "%prefix%&c⚠ &7Công thức chế tạo &e%recipe% &7đã bị xóa! Nguyên liệu không thể hoàn trả. Liên hệ admin."
   # Batch input
   input-prompt: "%prefix%&e✎ &7Nhập số lượng muốn chế tạo &8(Ví dụ: &f10&8, &f5k&8, &fall&8)"
   input-invalid: "%prefix%&c✗ &7Số lượng không hợp lệ!"
@@ -104,7 +103,6 @@ smelt:
   pending-delivered: "%prefix%&a📦 &7Bạn nhận được &e%count% &7items từ quá trình nung khi offline!"
   complete-while-offline: "%prefix%&a✓ &7Quá trình nung &e%count%× %item% &7đã hoàn tất khi bạn offline!"
   restored: "%prefix%&6🔥 &7Tiếp tục nung &e%item%&7... Còn &e%time%&7!"
-  recipe-removed: "%prefix%&c⚠ &7Công thức nung &e%recipe% &7đã bị xóa! Nguyên liệu không thể hoàn trả. Liên hệ admin."
 
 # ─────────────────────────────────────────────
 # Upgrade

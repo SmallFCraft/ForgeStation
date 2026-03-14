@@ -57,16 +57,19 @@ public class UpgradeManager {
 
     /**
      * Số slot hàng chờ đã mở (0-10). Dùng cho crafting/smelting queue.
+     * Dùng effective level để khi config đổi max-level thì không vượt config.
      */
     public int getQueueSlotsUnlocked(Player player) {
-        return Math.min(10, Math.max(0, getPlayerLevel(player, "queue_slots")));
+        int level = getEffectiveLevel(player, "queue_slots");
+        return Math.min(10, Math.max(0, level));
     }
 
     /**
      * Số task chạy song song tối đa (1 + level). Lv.0=1, Lv.1=2, Lv.2=3...
+     * Dùng effective level để khi config đổi max-level thì không vượt config.
      */
     public int getMaxParallelTasks(Player player) {
-        int level = getPlayerLevel(player, "parallel_tasks");
+        int level = getEffectiveLevel(player, "parallel_tasks");
         return Math.max(1, 1 + level);
     }
 
@@ -74,18 +77,27 @@ public class UpgradeManager {
         return upgrades.get(id);
     }
 
-    /**
-     * ISSUE-008 FIX: Returns unmodifiable view instead of copy to reduce allocations
-     */
     public Map<String, Upgrade> getAllUpgrades() {
         return java.util.Collections.unmodifiableMap(upgrades);
     }
 
     /**
-     * Get player's upgrade level
+     * Get player's upgrade level (raw from DB).
      */
     public int getPlayerLevel(Player player, String upgradeId) {
         return plugin.getPlayerDataManager().getPlayerData(player).getUpgradeLevel(upgradeId);
+    }
+
+    /**
+     * Get effective level for calculations and display: min(stored, config max-level).
+     * Khi admin giảm max-level trong config, player có level cũ vẫn bị cap theo max mới
+     * → hiệu ứng và hiển thị đồng bộ với config, không crash.
+     */
+    public int getEffectiveLevel(Player player, String upgradeId) {
+        int stored = getPlayerLevel(player, upgradeId);
+        Upgrade upgrade = upgrades.get(upgradeId);
+        if (upgrade == null) return stored;
+        return Math.min(stored, upgrade.getMaxLevel());
     }
 
     /**

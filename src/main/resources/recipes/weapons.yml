@@ -1,7 +1,8 @@
 # ═══════════════════════════════════════════════
 #           FORGESTATION WEAPON RECIPES
 # ═══════════════════════════════════════════════
-# Recipes chế tạo vũ khí
+# Recipes chế tạo vũ khí.
+# PLACEHOLDERS: Mỗi recipe có thể có "placeholders:" (key: value). Trong icon name & lore dùng %key%.
 
 open_command: craftweapon
 recipes:
@@ -11,15 +12,15 @@ recipes:
   mace_mmo:
     enabled: true
     display-name: "&6&l⚔ Búa Thần"
-    permission: "forgestation.craft.legendary_sword"
-    # Thời gian chế tạo (giây) - upgrade system sẽ áp dụng % reduction
+    permission: "legendary_sword"
     duration: 60
-    
+    placeholders:
+      item_name: "Búa Thần"
     icon:
       material: MACE
       slot: 11
       glow: true
-      name: "&6&l⚔ Mace"
+      name: "&6&l⚔ %item_name%"
       lore:
         - ""
         - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -66,7 +67,7 @@ recipes:
       amount: 1
     
     commands-on-success:
-      - "broadcast &6%player% &eđã chế tạo &6⚔ Búa Thần&e!"
+      - "broadcast &6%player% &eđã chế tạo &6⚔ %item_name%&e!"
     
     effects:
       sound: BLOCK_ANVIL_USE
@@ -79,14 +80,14 @@ recipes:
     enabled: true
     display-name: "&5&l⛏ Cuốc Đá Thần"
     permission: "forgestation.craft.divine_pickaxe"
-    # Thời gian chế tạo (giây) - upgrade system sẽ áp dụng % reduction
     duration: 180
-    
+    placeholders:
+      item_name: "&5&l⛏ Cuốc Đá Thần"
     icon:
       material: DIAMOND_PICKAXE
       slot: 13
       glow: true
-      name: "&5&l⛏ Cuốc Đá Thần"
+      name: "%item_name%"
       lore:
         - ""
         - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"

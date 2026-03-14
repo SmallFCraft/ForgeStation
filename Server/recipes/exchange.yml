@@ -27,7 +27,7 @@ recipes:
       lore:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        - "&fTỷ lệ: &b1800 💎 &f→ &e1 %currency_playerpoints% &7(base)"
+        - "&fTỷ lệ: &b2304 💎 &f→ &e1 %currency_playerpoints% &7(base)"
         - ""
         - "&fRank của bạn: &e%player_rank_display%"
         - "&fHệ số nhân: &ax%multiplier%"
@@ -44,7 +44,7 @@ recipes:
     input:
       type: EXTRA_STORAGE
       material: DIAMOND
-      base-amount: 1800
+      base-amount: 2304
     
     # Phần thưởng (sẽ nhân với multiplier)
     rewards:
@@ -71,7 +71,7 @@ recipes:
       lore:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        - "&fTỷ lệ: &b1800 💎 &f→ &e10 %currency_playerpoints% &7(base)"
+        - "&fTỷ lệ: &b2304 💎 &f→ &e10 %currency_playerpoints% &7(base)"
         - ""
         - "&fRank của bạn: &e%player_rank_display%"
         - "&fHệ số nhân: &ax%multiplier%"
@@ -88,7 +88,7 @@ recipes:
     input:
       type: EXTRA_STORAGE
       material: DIAMOND_BLOCK
-      base-amount: 1800
+      base-amount: 2304
     
     # Phần thưởng (sẽ nhân với multiplier)
     rewards:
@@ -118,7 +118,7 @@ recipes:
       lore:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        - "&fTỷ lệ: &a1800 💚 &f→ &61 %currency_playerpoints% &7(base)"
+        - "&fTỷ lệ: &a2304 💚 &f→ &61 %currency_playerpoints% &7(base)"
         - ""
         - "&fRank của bạn: &e%player_rank_display%"
         - "&fHệ số nhân: &ax%multiplier%"
@@ -134,7 +134,7 @@ recipes:
     input:
       type: EXTRA_STORAGE
       material: EMERALD
-      base-amount: 1800
+      base-amount: 2304
     
     rewards:
       - type: PLAYER_POINTS
@@ -158,7 +158,7 @@ recipes:
       lore:
         - ""
         - "&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-        - "&fTỷ lệ: &a1800 💚 &f→ &610 %currency_playerpoints% &7(base)"
+        - "&fTỷ lệ: &a2304 💚 &f→ &610 %currency_playerpoints% &7(base)"
         - ""
         - "&fRank của bạn: &e%player_rank_display%"
         - "&fHệ số nhân: &ax%multiplier%"
@@ -174,7 +174,7 @@ recipes:
     input:
       type: EXTRA_STORAGE
       material: EMERALD_BLOCK
-      base-amount: 1800
+      base-amount: 2304
     
     rewards:
       - type: PLAYER_POINTS

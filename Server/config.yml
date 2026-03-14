@@ -13,7 +13,12 @@ debug: false
 # Where do crafted/smelted items go?
 # Options: INVENTORY, EXTRA_STORAGE, DROP, HOPPER
 output:
-  type: INVENTORY
+  type: EXTRA_STORAGE
+  
+  # If type is EXTRA_STORAGE
+  extra-storage:
+    enabled: true
+    storage-id: "crafted_items"
   
   # If type is HOPPER
   hopper:

@@ -11,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 
 /**
- * ISSUE-014 FIX: Utility class để route output items theo config
  * Hỗ trợ: INVENTORY, EXTRA_STORAGE, DROP, HOPPER
  */
 public class OutputRouter {
@@ -70,10 +69,9 @@ public class OutputRouter {
             return routeToInventory(player, item);
         }
         
-        // Get storage ID from config if not provided
+        // Fallback to material name if not provided
         if (storageId == null || storageId.isEmpty()) {
-            storageId = plugin.getConfigManager().getMainConfig()
-                .getString("output.extra-storage.storage-id", item.getType().name());
+            storageId = item.getType().name();
         }
         
         boolean success = plugin.getExtraStorageHook().addItems(player, storageId, item.getAmount());

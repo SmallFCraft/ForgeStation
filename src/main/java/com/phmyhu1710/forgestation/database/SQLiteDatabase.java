@@ -348,7 +348,11 @@ public class SQLiteDatabase {
     // SMELTING PERSISTENCE FIX: Active tasks persistence
     // ═══════════════════════════════════════════════════════════════════════
     
-    /** Lưu NHIỀU active smelting tasks. entries: List of [recipeId, remainingTicks, totalTicks, batchCount] */
+    /**
+     * Lưu NHIỀU active smelting tasks.
+     * entries: List of [recipeId, remainingTicks, totalTicks, batchCount] hoặc [..., startedAt] (5 phần tử).
+     * started_at = thời điểm task BẮT ĐẦU (ms) — tránh sau reload báo sai "hoàn tất khi offline".
+     */
     public void saveAllActiveSmeltingTasks(UUID uuid, java.util.List<Object[]> entries) {
         String del = "DELETE FROM active_smelting_tasks_multi WHERE uuid = ?";
         String ins = "INSERT INTO active_smelting_tasks_multi (uuid, task_index, recipe_id, remaining_time, total_duration, batch_count, started_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -368,7 +372,8 @@ public class SQLiteDatabase {
                         stmt.setInt(4, ((Number) e[1]).intValue());
                         stmt.setInt(5, ((Number) e[2]).intValue());
                         stmt.setInt(6, (Integer) e[3]);
-                        stmt.setLong(7, now);
+                        long startedAt = (e.length >= 5 && e[4] instanceof Number) ? ((Number) e[4]).longValue() : now;
+                        stmt.setLong(7, startedAt);
                         stmt.addBatch();
                     }
                     stmt.executeBatch();
@@ -571,7 +576,9 @@ public class SQLiteDatabase {
     }
     
     /**
-     * Lưu NHIỀU active crafting tasks (hỗ trợ song song). entries: List of [recipeId, remainingTicks, totalTicks, batchCount]
+     * Lưu NHIỀU active crafting tasks (hỗ trợ song song).
+     * entries: List of [recipeId, remainingTicks, totalTicks, batchCount] hoặc [..., startedAt] (5 phần tử).
+     * started_at phải là thời điểm task BẮT ĐẦU (ms), không phải thời điểm lưu — tránh sau reload báo sai "hoàn tất khi offline".
      */
     public void saveAllActiveCraftingTasks(UUID uuid, java.util.List<Object[]> entries) {
         String del = "DELETE FROM active_crafting_tasks_multi WHERE uuid = ?";
@@ -592,7 +599,8 @@ public class SQLiteDatabase {
                         stmt.setInt(4, ((Number) e[1]).intValue());
                         stmt.setInt(5, ((Number) e[2]).intValue());
                         stmt.setInt(6, (Integer) e[3]);
-                        stmt.setLong(7, now);
+                        long startedAt = (e.length >= 5 && e[4] instanceof Number) ? ((Number) e[4]).longValue() : now;
+                        stmt.setLong(7, startedAt);
                         stmt.addBatch();
                     }
                     stmt.executeBatch();
@@ -849,7 +857,6 @@ public class SQLiteDatabase {
     }
     
     /**
-     * ISSUE-004 FIX: Deprecated - không expose connection thô để tránh resource leak.
      * Sử dụng các method public của SQLiteDatabase thay thế.
      * @deprecated Sẽ bị xóa trong phiên bản tương lai
      */

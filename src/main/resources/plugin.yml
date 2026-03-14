@@ -32,7 +32,9 @@ commands:
       /<command> cat <id> - Mở menu theo category (blocks, exchange, ores...)
       /<command> help - Xem hướng dẫn
       /<command> reload - Reload plugin (cần forgestation.reload)
-      /<command> cancel - Hủy task đang chạy
+      /<command> cancel - Hủy task đang chạy (cần forgestation.cancel)
+      /<command> setlevel <player> <upgrade_id> <level> - Đặt level nâng cấp (admin, cần forgestation.setlevel)
+      /<command> addlevel <player> <upgrade_id> <amount> - Cộng level nâng cấp (admin, cần forgestation.addlevel)
 
 permissions:
   forgestation.admin:
@@ -41,9 +43,21 @@ permissions:
     children:
       forgestation.reload: true
       forgestation.use: true
+      forgestation.cancel: true
+      forgestation.setlevel: true
+      forgestation.addlevel: true
       forgestation.craft.*: true
       forgestation.smelt.*: true
       forgestation.upgrade.*: true
+  forgestation.setlevel:
+    description: Đặt level nâng cấp cho player (/fs setlevel <player> <upgrade_id> <level>). Dành cho admin/OP.
+    default: op
+  forgestation.addlevel:
+    description: Cộng level nâng cấp cho player (/fs addlevel <player> <upgrade_id> <amount>). Dành cho admin/OP.
+    default: op
+  forgestation.cancel:
+    description: Hủy task đang chạy (/fs cancel hoặc click nút Hủy task trong GUI)
+    default: op
   forgestation.reload:
     description: Reload ForgeStation configurations
     default: op

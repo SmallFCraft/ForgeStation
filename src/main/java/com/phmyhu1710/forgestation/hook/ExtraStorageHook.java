@@ -7,14 +7,21 @@ import java.lang.reflect.Method;
 
 /**
  * ExtraStorage integration using reflection to avoid hard dependency
- * ISSUE-010 FIX: Cache reflection methods để giảm CPU overhead
  */
 public class ExtraStorageHook {
+
+    /**
+     * Build ExtraStorage key cho MMOItems theo đúng format UniItem provider.
+     * Format: MMOITEMS:TYPE:ID (vd: MMOITEMS:MATERIAL:TRENGAYTET)
+     * Khớp với ExtraStorage ItemUtil.toMaterialKey() khi resolve qua UniItem.
+     */
+    public static String buildMmoItemsKey(String mmoitemsType, String mmoitemsId) {
+        return "MMOITEMS:" + (mmoitemsType != null && !mmoitemsType.isEmpty() ? mmoitemsType : "MATERIAL") + ":" + mmoitemsId;
+    }
 
     private final ForgeStationPlugin plugin;
     private boolean available = false;
     
-    // ISSUE-010 FIX: Cached reflection components
     private Class<?> apiClass;
     private Method mGetInstance;
     private Method mGetUser;
@@ -24,6 +31,7 @@ public class ExtraStorageHook {
     private Method mGet;
     private Method mGetQuantity;
     private Method mAdd;
+    private Method mAddNewItem;
     private Method mSubtract;
     private Method mCanStore;
     private Method mGetFreeSpace;
@@ -52,7 +60,6 @@ public class ExtraStorageHook {
      * @param player the player
      * @param storageId the item key (e.g., "DIAMOND" or "DIAMOND:0")
      * @return item count, or 0 if not available
-     * ISSUE-010 FIX: Sử dụng cached methods thay vì lookup mỗi lần
      */
     public long getItemCount(Player player, String storageId) {
         if (!isAvailable()) return 0;
@@ -102,7 +109,6 @@ public class ExtraStorageHook {
      * @param storageId the item key
      * @param amount the amount to add
      * @return true if successful
-     * ISSUE-010 FIX: Sử dụng cached methods
      */
     public boolean addItems(Player player, String storageId, long amount) {
         if (!isAvailable()) return false;
@@ -116,7 +122,12 @@ public class ExtraStorageHook {
             }
             Object storage = mGetStorage.invoke(user);
             
-            // Cache add method
+            // Extra Storage chỉ cộng quantity khi key đã tồn tại — gọi addNewItem trước để tạo slot nếu chưa có
+            if (mAddNewItem == null) {
+                mAddNewItem = storage.getClass().getMethod("addNewItem", Object.class);
+            }
+            mAddNewItem.invoke(storage, storageId);
+            
             if (mAdd == null) {
                 mAdd = storage.getClass().getMethod("add", Object.class, long.class);
             }
@@ -125,6 +136,7 @@ public class ExtraStorageHook {
             
         } catch (Exception e) {
             plugin.debug("ExtraStorage addItems failed: " + e.getMessage());
+            plugin.getLogger().warning("[ForgeStation] ExtraStorage addItems failed (key='" + storageId + "', amount=" + amount + "): " + e.getMessage() + " — kiểm tra key có đúng format/đã đăng ký trong Extra Storage không.");
             return false;
         }
     }
@@ -135,7 +147,6 @@ public class ExtraStorageHook {
      * @param storageId the item key
      * @param amount the amount to remove
      * @return true if successful
-     * ISSUE-010 FIX: Sử dụng cached methods
      */
     public boolean removeItems(Player player, String storageId, long amount) {
         if (!isAvailable()) return false;
@@ -171,7 +182,6 @@ public class ExtraStorageHook {
      * @param player the player
      * @param storageId the item key
      * @return true if can store
-     * ISSUE-010 FIX: Sử dụng cached methods
      */
     public boolean canStore(Player player, String storageId) {
         if (!isAvailable()) return false;
@@ -201,7 +211,6 @@ public class ExtraStorageHook {
      * Check if storage has free space
      * @param player the player
      * @return free space, or -1 if unlimited
-     * ISSUE-010 FIX: Sử dụng cached methods
      */
     public long getFreeSpace(Player player) {
         if (!isAvailable()) return 0;

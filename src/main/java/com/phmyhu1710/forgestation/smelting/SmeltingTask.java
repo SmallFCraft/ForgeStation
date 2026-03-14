@@ -226,9 +226,23 @@ public class SmeltingTask {
         
         switch (recipe.getOutputType()) {
             case "MMOITEMS":
-                // TODO: Create MMOItem with batch support
-                output = new ItemStack(Material.STONE);
-                break;
+                ItemStack mmoItem = com.phmyhu1710.forgestation.util.ItemBuilder.buildMMOItem(
+                    plugin, recipe.getOutputMmoitemsType(), recipe.getOutputMmoitemsId(), 1);
+                if (mmoItem != null && mmoItem.getType() != Material.STONE) {
+                    int maxStack = mmoItem.getMaxStackSize();
+                    int remaining = totalOutputAmount;
+                    while (remaining > 0) {
+                        int batch = Math.min(remaining, maxStack);
+                        ItemStack stack = mmoItem.clone();
+                        stack.setAmount(batch);
+                        plugin.getOutputRouter().routeOutput(player, stack, com.phmyhu1710.forgestation.hook.ExtraStorageHook.buildMmoItemsKey(recipe.getOutputMmoitemsType(), recipe.getOutputMmoitemsId()));
+                        remaining -= batch;
+                    }
+                } else {
+                    plugin.getLogger().warning("[ForgeStation] Failed to create MMOItem output: " 
+                        + recipe.getOutputMmoitemsType() + ":" + recipe.getOutputMmoitemsId());
+                }
+                return;
             case "EXTRA_STORAGE":
                 // BATCH: Thêm totalOutputAmount vào ExtraStorage
                 storageId = recipe.getOutputMaterial();
@@ -275,29 +289,66 @@ public class SmeltingTask {
 
     /**
      * Hoàn trả nguyên liệu nung + nhiên liệu cho player (khi hủy task).
+     * Kiểm tra kết quả addItems/routeOutput; nếu Extra Storage thất bại thì fallback vào inventory (vanilla key).
      */
     public void refund(Player player) {
         if (player == null || !player.isOnline()) return;
         for (ItemStack item : refundInputItems) {
             if (item != null && item.getType() != Material.AIR && item.getAmount() > 0) {
-                plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+                boolean ok = plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+                if (!ok) {
+                    plugin.getLogger().warning("[ForgeStation] Smelt refund routeOutput failed for " + item.getType() + " x" + item.getAmount() + ", dropping at feet");
+                    player.getWorld().dropItemNaturally(player.getLocation(), item.clone());
+                }
             }
         }
         for (ItemStack item : refundFuelItems) {
             if (item != null && item.getType() != Material.AIR && item.getAmount() > 0) {
-                plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+                boolean ok = plugin.getOutputRouter().routeOutput(player, item.clone(), item.getType().name());
+                if (!ok) {
+                    plugin.getLogger().warning("[ForgeStation] Smelt refund routeOutput failed for " + item.getType() + " x" + item.getAmount() + ", dropping at feet");
+                    player.getWorld().dropItemNaturally(player.getLocation(), item.clone());
+                }
             }
         }
         refundInputExtraStorage.forEach((id, amount) -> {
-            if (amount > 0 && plugin.getExtraStorageHook().isAvailable()) {
-                plugin.getExtraStorageHook().addItems(player, id, amount);
+            if (amount <= 0) return;
+            if (plugin.getExtraStorageHook().isAvailable()) {
+                boolean added = plugin.getExtraStorageHook().addItems(player, id, amount);
+                if (!added) refundExtraStorageFallbackToInventory(player, id, amount);
+            } else {
+                refundExtraStorageFallbackToInventory(player, id, amount);
             }
         });
         refundFuelExtraStorage.forEach((id, amount) -> {
-            if (amount > 0 && plugin.getExtraStorageHook().isAvailable()) {
-                plugin.getExtraStorageHook().addItems(player, id, amount);
+            if (amount <= 0) return;
+            if (plugin.getExtraStorageHook().isAvailable()) {
+                boolean added = plugin.getExtraStorageHook().addItems(player, id, amount);
+                if (!added) refundExtraStorageFallbackToInventory(player, id, amount);
+            } else {
+                refundExtraStorageFallbackToInventory(player, id, amount);
             }
         });
+    }
+
+    private void refundExtraStorageFallbackToInventory(Player player, String storageId, int amount) {
+        Material mat = null;
+        try {
+            mat = Material.matchMaterial(storageId);
+        } catch (Exception ignored) { }
+        if (mat != null && mat != Material.AIR && mat.isItem()) {
+            int maxStack = mat.getMaxStackSize();
+            int remaining = amount;
+            while (remaining > 0) {
+                int give = Math.min(remaining, maxStack);
+                ItemStack stack = new ItemStack(mat, give);
+                plugin.getOutputRouter().routeOutput(player, stack, storageId);
+                remaining -= give;
+            }
+            plugin.getLogger().warning("[ForgeStation] Smelt refund Extra Storage failed for key '" + storageId + "', gave " + amount + " to inventory instead");
+        } else {
+            plugin.getLogger().warning("[ForgeStation] Smelt refund Extra Storage failed for key '" + storageId + "' x" + amount + " — không thể fallback (key không phải vanilla).");
+        }
     }
 
     public Player getPlayer() {

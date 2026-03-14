@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,9 @@ public class Recipe {
     
     // Commands
     private final List<String> commandsOnSuccess;
+
+    /** Placeholders tùy chỉnh cho name/lore (vd. %item_name% → "Khối Lưu Ly"). Dùng trong icon name/lore. */
+    private final Map<String, String> placeholders;
 
     public Recipe(String id, String sourceFile, ConfigurationSection config) {
         this.id = id;
@@ -157,6 +161,18 @@ public class Recipe {
         
         // Commands
         this.commandsOnSuccess = config.getStringList("commands-on-success");
+
+        // Placeholders: key-value dùng trong icon name/lore (vd. item_name: "Khối Lưu Ly" → %item_name%)
+        Map<String, String> ph = new HashMap<>();
+        ConfigurationSection phSection = config.getConfigurationSection("placeholders");
+        if (phSection != null) {
+            for (String key : phSection.getKeys(false)) {
+                if (phSection.isString(key)) {
+                    ph.put(key, phSection.getString(key, ""));
+                }
+            }
+        }
+        this.placeholders = Collections.unmodifiableMap(ph);
     }
 
     // Getters
@@ -177,7 +193,9 @@ public class Recipe {
     public boolean isIconGlow() { return iconGlow; }
     public String getIconName() { return iconName; }
     public List<String> getIconLore() { return iconLore; }
-    
+    /** Placeholders tùy chỉnh (key → value). Trong name/lore dùng %key%. */
+    public Map<String, String> getPlaceholders() { return placeholders; }
+
     public List<Ingredient> getIngredients() { return ingredients; }
     
     public String getVaultCostExpr() { return vaultCostExpr; }
@@ -236,6 +254,8 @@ public class Recipe {
         private final String mmoitemsType;
         private final String mmoitemsId;
         private final String storageId;
+        /** Nơi giao hàng: rỗng = theo output config; EXTRA_STORAGE = cộng vào Extra Storage (dùng storageId hoặc mmoitems-id). */
+        private final String outputDestination;
         private final int amount;
         private final String name;
         private final List<String> lore;
@@ -247,6 +267,7 @@ public class Recipe {
             this.mmoitemsType = config.getString("mmoitems-type", "");
             this.mmoitemsId = config.getString("mmoitems-id", "");
             this.storageId = config.getString("storage-id", "");
+            this.outputDestination = config.getString("output-destination", "").toUpperCase();
             this.amount = config.getInt("amount", 1);
             this.name = config.getString("name", null);
             this.lore = config.getStringList("lore");
@@ -258,6 +279,16 @@ public class Recipe {
         public String getMmoitemsType() { return mmoitemsType; }
         public String getMmoitemsId() { return mmoitemsId; }
         public String getStorageId() { return storageId; }
+        /** Rỗng = giao theo output config; EXTRA_STORAGE = giao vào Extra Storage. */
+        public String getOutputDestination() { return outputDestination; }
+        public boolean isDeliverToExtraStorage() { return "EXTRA_STORAGE".equals(outputDestination); }
+        /** Key dùng cho Extra Storage khi deliver. Format UniItem: MMOITEMS:TYPE:ID (vd. MMOITEMS:MATERIAL:TRENGAYTET). */
+        public String getExtraStorageKey() {
+            if (storageId != null && !storageId.isEmpty()) return storageId;
+            if ("MMOITEMS".equals(type) && mmoitemsType != null && mmoitemsId != null && !mmoitemsId.isEmpty())
+                return com.phmyhu1710.forgestation.hook.ExtraStorageHook.buildMmoItemsKey(mmoitemsType, mmoitemsId);
+            return material != null ? material : "ITEM";
+        }
         public int getAmount() { return amount; }
         public String getName() { return name; }
         public List<String> getLore() { return lore; }

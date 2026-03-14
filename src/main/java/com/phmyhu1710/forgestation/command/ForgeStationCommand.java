@@ -3,6 +3,9 @@ package com.phmyhu1710.forgestation.command;
 import com.phmyhu1710.forgestation.ForgeStationPlugin;
 import com.phmyhu1710.forgestation.crafting.Recipe;
 import com.phmyhu1710.forgestation.smelting.SmeltingRecipe;
+import com.phmyhu1710.forgestation.upgrade.UpgradeManager;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -22,7 +26,7 @@ import java.util.stream.Collectors;
 public class ForgeStationCommand implements CommandExecutor, TabCompleter {
 
     private final ForgeStationPlugin plugin;
-    private final List<String> subCommands = Arrays.asList("reload", "help", "menu", "category", "cancel");
+    private final List<String> subCommands = Arrays.asList("reload", "help", "menu", "category", "cancel", "setlevel", "addlevel");
 
     public ForgeStationCommand(ForgeStationPlugin plugin) {
         this.plugin = plugin;
@@ -39,7 +43,7 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             
-            if (!player.hasPermission("forgestation.use")) {
+            if (!player.isOp() && !player.hasPermission("forgestation.use")) {
                 plugin.getMessageUtil().send(sender, "no-permission");
                 return true;
             }
@@ -67,8 +71,14 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
             case "cancel":
                 handleCancel(sender);
                 break;
+            case "setlevel":
+                handleSetLevel(sender, args);
+                break;
+            case "addlevel":
+                handleAddLevel(sender, args);
+                break;
             default:
-                plugin.getMessageUtil().send(sender, "invalid-args", "usage", "/fs [reload|help|menu|category|cancel]");
+                plugin.getMessageUtil().send(sender, "invalid-args", "usage", "/fs [reload|help|menu|category|cancel|setlevel|addlevel]");
                 break;
         }
         
@@ -76,7 +86,7 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
     }
 
     private void handleReload(CommandSender sender) {
-        if (!sender.hasPermission("forgestation.reload")) {
+        if (!(sender.isOp() || sender.hasPermission("forgestation.reload"))) {
             plugin.getMessageUtil().send(sender, "no-permission");
             return;
         }
@@ -101,6 +111,8 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§8│ §e/fs help      §8- §7Hiện trợ giúp                §8│");
         sender.sendMessage("§8│ §e/fs cat <id>  §8- §7Mở menu theo category       §8│");
         sender.sendMessage("§8│ §e/fs cancel    §8- §7Hủy chế tạo/nung & hoàn trả   §8│");
+        sender.sendMessage("§8│ §e/fs setlevel <player> <upgrade> <level> §8- §7Đặt level nâng cấp (admin) §8│");
+        sender.sendMessage("§8│ §e/fs addlevel <player> <upgrade> <amount> §8- §7Cộng level nâng cấp (admin) §8│");
         sender.sendMessage("§8└───────────────────────────────────┘");
         sender.sendMessage("");
         sender.sendMessage("§7Author: §ephmyhu_1710 §8| §7v" + plugin.getDescription().getVersion());
@@ -114,7 +126,7 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
             plugin.getMessageUtil().send(sender, "player-only");
             return;
         }
-        if (!player.hasPermission("forgestation.use")) {
+        if (!player.isOp() && !player.hasPermission("forgestation.use")) {
             plugin.getMessageUtil().send(sender, "no-permission");
             return;
         }
@@ -144,7 +156,7 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
             plugin.getMessageUtil().send(sender, "player-only");
             return;
         }
-        if (!player.hasPermission("forgestation.use")) {
+        if (!player.isOp() && !player.hasPermission("forgestation.cancel")) {
             plugin.getMessageUtil().send(sender, "no-permission");
             return;
         }
@@ -157,13 +169,253 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
         }
     }
 
+    /**
+     * Admin: /fs setlevel <player> <upgrade_id> <level>
+     * Đặt level nâng cấp cho player (online hoặc offline). Cần forgestation.setlevel.
+     */
+    private void handleSetLevel(CommandSender sender, String[] args) {
+        if (!(sender.isOp() || sender.hasPermission("forgestation.setlevel"))) {
+            plugin.getMessageUtil().send(sender, "no-permission");
+            return;
+        }
+        if (args.length < 4) {
+            plugin.getMessageUtil().send(sender, "admin.setlevel.usage");
+            return;
+        }
+        String tenNguoiChoi = args[1];
+        String upgradeId = args[2].toLowerCase();
+        int level;
+        try {
+            level = Integer.parseInt(args[3]);
+        } catch (NumberFormatException e) {
+            plugin.getMessageUtil().send(sender, "admin.setlevel.usage");
+            return;
+        }
+        if (level < 0) {
+            plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-level", "max", "∞");
+            return;
+        }
+
+        UpgradeManager upgradeManager = plugin.getUpgradeManager();
+
+        // upgrade_id = "*" → đặt tất cả upgrade (mỗi cái cap theo max-level của nó)
+        if ("*".equals(upgradeId)) {
+            var allUpgrades = upgradeManager.getAllUpgrades();
+            if (allUpgrades.isEmpty()) {
+                plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-upgrade", "upgrade", "*", "list", "-");
+                return;
+            }
+            if ("*".equals(tenNguoiChoi)) {
+                List<? extends Player> online = new ArrayList<>(Bukkit.getOnlinePlayers());
+                for (Player p : online) {
+                    var data = plugin.getPlayerDataManager().getPlayerData(p.getUniqueId());
+                    for (var e : allUpgrades.entrySet()) {
+                        int cap = Math.min(level, e.getValue().getMaxLevel());
+                        data.setUpgradeLevel(e.getKey(), cap);
+                    }
+                }
+                plugin.getMessageUtil().send(sender, "admin.setlevel.success-all-upgrades",
+                    "count", String.valueOf(allUpgrades.size()),
+                    "level", String.valueOf(level),
+                    "target", online.size() + " player(s)");
+            } else {
+                OfflinePlayer offline = Bukkit.getOfflinePlayer(tenNguoiChoi);
+                UUID uuid = offline.getUniqueId();
+                if (uuid == null || (offline.getName() == null && !offline.hasPlayedBefore())) {
+                    plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-player", "player", tenNguoiChoi);
+                    return;
+                }
+                var data = plugin.getPlayerDataManager().getPlayerData(uuid);
+                for (var e : allUpgrades.entrySet()) {
+                    int cap = Math.min(level, e.getValue().getMaxLevel());
+                    data.setUpgradeLevel(e.getKey(), cap);
+                }
+                String tenHienThi = offline.getName() != null ? offline.getName() : tenNguoiChoi;
+                plugin.getMessageUtil().send(sender, "admin.setlevel.success-all-upgrades",
+                    "count", String.valueOf(allUpgrades.size()),
+                    "level", String.valueOf(level),
+                    "target", tenHienThi);
+            }
+            return;
+        }
+
+        UpgradeManager.Upgrade upgrade = upgradeManager.getUpgrade(upgradeId);
+        if (upgrade == null) {
+            String danhSach = String.join(", ", upgradeManager.getAllUpgrades().keySet());
+            plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-upgrade",
+                "upgrade", upgradeId,
+                "list", danhSach.isEmpty() ? "-" : danhSach);
+            return;
+        }
+        int maxLevel = upgrade.getMaxLevel();
+        if (level > maxLevel) {
+            plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-level", "max", String.valueOf(maxLevel));
+            return;
+        }
+
+        String displayName = upgrade.getDisplayName();
+        String tenUpgrade = (displayName != null && !displayName.isEmpty())
+            ? org.bukkit.ChatColor.stripColor(org.bukkit.ChatColor.translateAlternateColorCodes('&', displayName))
+            : upgradeId;
+
+        if ("*".equals(tenNguoiChoi)) {
+            List<? extends Player> online = new ArrayList<>(Bukkit.getOnlinePlayers());
+            for (Player p : online) {
+                plugin.getPlayerDataManager().getPlayerData(p.getUniqueId()).setUpgradeLevel(upgradeId, level);
+            }
+            plugin.getMessageUtil().send(sender, "admin.setlevel.success-all",
+                "upgrade", tenUpgrade,
+                "level", String.valueOf(level),
+                "count", String.valueOf(online.size()));
+            return;
+        }
+
+        OfflinePlayer offline = Bukkit.getOfflinePlayer(tenNguoiChoi);
+        UUID uuid = offline.getUniqueId();
+        if (uuid == null || (offline.getName() == null && !offline.hasPlayedBefore())) {
+            plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-player", "player", tenNguoiChoi);
+            return;
+        }
+
+        var data = plugin.getPlayerDataManager().getPlayerData(uuid);
+        data.setUpgradeLevel(upgradeId, level);
+
+        String tenHienThi = offline.getName() != null ? offline.getName() : tenNguoiChoi;
+        plugin.getMessageUtil().send(sender, "admin.setlevel.success",
+            "player", tenHienThi,
+            "upgrade", tenUpgrade,
+            "level", String.valueOf(level));
+    }
+
+    /**
+     * Admin: /fs addlevel <player> <upgrade_id> <amount>
+     * Cộng level nâng cấp (amount có thể âm để trừ). Cap theo max-level. Cần forgestation.addlevel.
+     */
+    private void handleAddLevel(CommandSender sender, String[] args) {
+        if (!(sender.isOp() || sender.hasPermission("forgestation.addlevel"))) {
+            plugin.getMessageUtil().send(sender, "no-permission");
+            return;
+        }
+        if (args.length < 4) {
+            plugin.getMessageUtil().send(sender, "admin.addlevel.usage");
+            return;
+        }
+        String tenNguoiChoi = args[1];
+        String upgradeId = args[2].toLowerCase();
+        int amount;
+        try {
+            amount = Integer.parseInt(args[3]);
+        } catch (NumberFormatException e) {
+            plugin.getMessageUtil().send(sender, "admin.addlevel.usage");
+            return;
+        }
+
+        UpgradeManager upgradeManager = plugin.getUpgradeManager();
+
+        if ("*".equals(upgradeId)) {
+            var allUpgrades = upgradeManager.getAllUpgrades();
+            if (allUpgrades.isEmpty()) {
+                plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-upgrade", "upgrade", "*", "list", "-");
+                return;
+            }
+            if ("*".equals(tenNguoiChoi)) {
+                List<? extends Player> online = new ArrayList<>(Bukkit.getOnlinePlayers());
+                for (Player p : online) {
+                    var data = plugin.getPlayerDataManager().getPlayerData(p.getUniqueId());
+                    for (var e : allUpgrades.entrySet()) {
+                        int cur = data.getUpgradeLevel(e.getKey());
+                        int max = e.getValue().getMaxLevel();
+                        int newLevel = Math.min(max, Math.max(0, cur + amount));
+                        data.setUpgradeLevel(e.getKey(), newLevel);
+                    }
+                }
+                plugin.getMessageUtil().send(sender, "admin.addlevel.success-all-upgrades",
+                    "amount", String.valueOf(amount),
+                    "count", String.valueOf(allUpgrades.size()),
+                    "target", online.size() + " player(s)");
+            } else {
+                OfflinePlayer offline = Bukkit.getOfflinePlayer(tenNguoiChoi);
+                UUID uuid = offline.getUniqueId();
+                if (uuid == null || (offline.getName() == null && !offline.hasPlayedBefore())) {
+                    plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-player", "player", tenNguoiChoi);
+                    return;
+                }
+                var data = plugin.getPlayerDataManager().getPlayerData(uuid);
+                for (var e : allUpgrades.entrySet()) {
+                    int cur = data.getUpgradeLevel(e.getKey());
+                    int max = e.getValue().getMaxLevel();
+                    int newLevel = Math.min(max, Math.max(0, cur + amount));
+                    data.setUpgradeLevel(e.getKey(), newLevel);
+                }
+                String tenHienThi = offline.getName() != null ? offline.getName() : tenNguoiChoi;
+                plugin.getMessageUtil().send(sender, "admin.addlevel.success-all-upgrades",
+                    "amount", String.valueOf(amount),
+                    "count", String.valueOf(allUpgrades.size()),
+                    "target", tenHienThi);
+            }
+            return;
+        }
+
+        UpgradeManager.Upgrade upgrade = upgradeManager.getUpgrade(upgradeId);
+        if (upgrade == null) {
+            String danhSach = String.join(", ", upgradeManager.getAllUpgrades().keySet());
+            plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-upgrade",
+                "upgrade", upgradeId,
+                "list", danhSach.isEmpty() ? "-" : danhSach);
+            return;
+        }
+
+        String displayName = upgrade.getDisplayName();
+        String tenUpgrade = (displayName != null && !displayName.isEmpty())
+            ? org.bukkit.ChatColor.stripColor(org.bukkit.ChatColor.translateAlternateColorCodes('&', displayName))
+            : upgradeId;
+        int maxLevel = upgrade.getMaxLevel();
+
+        if ("*".equals(tenNguoiChoi)) {
+            List<? extends Player> online = new ArrayList<>(Bukkit.getOnlinePlayers());
+            int levelShown = 0;
+            for (Player p : online) {
+                var data = plugin.getPlayerDataManager().getPlayerData(p.getUniqueId());
+                int cur = data.getUpgradeLevel(upgradeId);
+                int newLevel = Math.min(maxLevel, Math.max(0, cur + amount));
+                data.setUpgradeLevel(upgradeId, newLevel);
+                levelShown = newLevel;
+            }
+            plugin.getMessageUtil().send(sender, "admin.addlevel.success-all",
+                "amount", String.valueOf(amount),
+                "upgrade", tenUpgrade,
+                "level", String.valueOf(levelShown),
+                "count", String.valueOf(online.size()));
+            return;
+        }
+
+        OfflinePlayer offline = Bukkit.getOfflinePlayer(tenNguoiChoi);
+        UUID uuid = offline.getUniqueId();
+        if (uuid == null || (offline.getName() == null && !offline.hasPlayedBefore())) {
+            plugin.getMessageUtil().send(sender, "admin.setlevel.invalid-player", "player", tenNguoiChoi);
+            return;
+        }
+
+        var data = plugin.getPlayerDataManager().getPlayerData(uuid);
+        int cur = data.getUpgradeLevel(upgradeId);
+        int newLevel = Math.min(maxLevel, Math.max(0, cur + amount));
+        data.setUpgradeLevel(upgradeId, newLevel);
+
+        String tenHienThi = offline.getName() != null ? offline.getName() : tenNguoiChoi;
+        plugin.getMessageUtil().send(sender, "admin.addlevel.success",
+            "player", tenHienThi,
+            "upgrade", tenUpgrade,
+            "amount", String.valueOf(amount),
+            "level", String.valueOf(newLevel));
+    }
+
     private void handleCategory(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             plugin.getMessageUtil().send(sender, "player-only");
             return;
         }
         
-        if (!player.hasPermission("forgestation.use")) {
+        if (!player.isOp() && !player.hasPermission("forgestation.use")) {
             plugin.getMessageUtil().send(sender, "no-permission");
             return;
         }
@@ -229,6 +481,54 @@ public class ForgeStationCommand implements CommandExecutor, TabCompleter {
                 return allCategories.stream()
                     .filter(cat -> cat.toLowerCase().startsWith(prefix))
                     .collect(Collectors.toList());
+            }
+            if (subCmd.equals("setlevel") || subCmd.equals("addlevel")) {
+                List<String> suggestions = new ArrayList<>();
+                if ("*".startsWith(prefix) || "*".toLowerCase().startsWith(prefix)) {
+                    suggestions.add("*");
+                }
+                Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .filter(n -> n != null && n.toLowerCase().startsWith(prefix))
+                    .forEach(suggestions::add);
+                return suggestions;
+            }
+        }
+
+        if (args.length == 3 && ("setlevel".equals(args[0].toLowerCase()) || "addlevel".equals(args[0].toLowerCase()))) {
+            String prefix = args[2].toLowerCase();
+            List<String> suggestions = new ArrayList<>();
+            if ("*".startsWith(prefix) || "*".toLowerCase().startsWith(prefix)) {
+                suggestions.add("*");
+            }
+            plugin.getUpgradeManager().getAllUpgrades().keySet().stream()
+                .filter(id -> id.toLowerCase().startsWith(prefix))
+                .forEach(suggestions::add);
+            return suggestions;
+        }
+
+        if (args.length == 4 && ("setlevel".equals(args[0].toLowerCase()) || "addlevel".equals(args[0].toLowerCase()))) {
+            String prefix = args[3];
+            if ("addlevel".equals(args[0].toLowerCase())) {
+                List<String> amounts = Arrays.asList("1", "5", "10", "50", "-1", "-5", "-10");
+                return amounts.stream().filter(s -> s.startsWith(prefix)).collect(Collectors.toList());
+            }
+            int max = 0;
+            if ("*".equals(args[2])) {
+                for (UpgradeManager.Upgrade u : plugin.getUpgradeManager().getAllUpgrades().values()) {
+                    max = Math.max(max, u.getMaxLevel());
+                }
+            } else {
+                UpgradeManager.Upgrade up = plugin.getUpgradeManager().getUpgrade(args[2].toLowerCase());
+                if (up != null) max = up.getMaxLevel();
+            }
+            if (max >= 0) {
+                List<String> levels = new ArrayList<>();
+                for (int i = 0; i <= max; i++) {
+                    String s = String.valueOf(i);
+                    if (s.startsWith(prefix)) levels.add(s);
+                }
+                return levels;
             }
         }
 

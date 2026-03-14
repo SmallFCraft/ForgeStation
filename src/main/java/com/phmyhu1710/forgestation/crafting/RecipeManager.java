@@ -85,9 +85,6 @@ public class RecipeManager {
         return recipes.get(id);
     }
 
-    /**
-     * ISSUE-004 FIX: Returns unmodifiable view instead of copy to reduce allocations
-     */
     public Map<String, Recipe> getAllRecipes() {
         return java.util.Collections.unmodifiableMap(recipes);
     }
@@ -159,12 +156,10 @@ public class RecipeManager {
         // 1. Get base duration
         long baseTicks = getBaseDurationTicks(recipe);
         
-        // 2. Get crafting level của player
-        PlayerDataManager.PlayerData data = plugin.getPlayerDataManager().getPlayerData(player);
-        int craftingLevel = data.getUpgradeLevel("crafting_speed");
-        
+        // 2. Effective level (cap theo config max-level khi admin đổi config)
+        int craftingLevel = plugin.getUpgradeManager().getEffectiveLevel(player, "crafting_speed");
         if (craftingLevel <= 0) return baseTicks;
-        
+
         // 3. Apply reduction from upgrade config
         var upgrade = plugin.getUpgradeManager().getUpgrade("crafting_speed");
         if (upgrade != null) {
@@ -215,7 +210,7 @@ public class RecipeManager {
         if (upgrade == null || !"CRAFT_SUCCESS_RATE".equals(upgrade.getEffectType())) {
             return Math.min(100, base);
         }
-        int level = plugin.getPlayerDataManager().getPlayerData(player).getUpgradeLevel("success_rate");
+        int level = plugin.getUpgradeManager().getEffectiveLevel(player, "success_rate");
         double bonus = level * upgrade.getPercentPerLevel();
         return Math.min(100.0, base + bonus);
     }

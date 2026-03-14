@@ -1,0 +1,3747 @@
+# ═══════════════════════════════════════════════
+#         FORGESTATION DUNGEON ARMOR RECIPES
+# ═══════════════════════════════════════════════
+# Nâng cấp giáp từng cấp: Sơ → Trung → Cao → Thượng.
+# Mỗi set: 2 cục material → 1 piece Sơ | 3 + piece Sơ → Trung | 4 + piece Trung → Cao | 6 + piece Cao → Thượng.
+# Armor/Material ID theo armor.yml & material.yml. Dùng MMOITEMS (mmoitems-type: ARMOR / MATERIAL).
+# Nếu server dùng ItemsAdder cho giáp/nguyên liệu, cần map id tương ứng hoặc thêm hỗ trợ ITEMSADDER trong code.
+# PLACEHOLDERS: placeholders (key: value) dùng %key% trong icon name & lore.
+
+open_command:
+  - dungeon
+  - nangcapgiap
+  - thiluyen
+
+recipes:
+  # ─────────────── SET 1 (Bạch Ảnh) ───────────────
+  # Sơ giai: 2× TULUYEN1_1 → 1 piece
+  tuluyen1_so_helmet:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Khôi &7(Sơ giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Khôi &7(Sơ giai)"
+    icon:
+      material: PAPER
+      model-data: 11552
+      slot: 11
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 2
+        name: "&c&lHuyết Thi Cô Đọng"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_so_chestplate:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Y &7(Sơ giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Y &7(Sơ giai)"
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10106
+      slot: 12
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 2
+        name: "&c&lHuyết Thi Cô Đọng"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_so_leggings:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Hạ Y &7(Sơ giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Hạ Y &7(Sơ giai)"
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10106
+      slot: 13
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 2
+        name: "&c&lHuyết Thi Cô Đọng"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_so_boots:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Hài &7(Sơ giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Hài &7(Sơ giai)"
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10106
+      slot: 14
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 2
+        name: "&c&lHuyết Thi Cô Đọng"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # Trung giai: 3× TULUYEN1_1 + 1 piece Sơ → 1 piece Trung
+  tuluyen1_trung_helmet:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Khôi &e(Trung giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Khôi &e(Trung giai)"
+    icon:
+      material: PAPER
+      model-data: 11552
+      slot: 15
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 3
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_HELMET
+        amount: 1
+        name: "&f&lBạch Ảnh Khôi (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_2_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_trung_chestplate:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Y &e(Trung giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Y &e(Trung giai)"
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10106
+      slot: 16
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 3
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_CHESTPLATE
+        amount: 1
+        name: "&f&lBạch Ảnh Y (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_2_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_trung_leggings:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Hạ Y &e(Trung giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Hạ Y &e(Trung giai)"
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10106
+      slot: 19
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 3
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_LEGGINGS
+        amount: 1
+        name: "&f&lBạch Ảnh Hạ Y (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_2_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_trung_boots:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Hài &e(Trung giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Hài &e(Trung giai)"
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10106
+      slot: 20
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 3
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_BOOTS
+        amount: 1
+        name: "&f&lBạch Ảnh Hài (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_2_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # Cao giai: 4× TULUYEN1_1 + 1 piece Trung → 1 piece Cao
+  tuluyen1_cao_helmet:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Khôi &6(Cao giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Khôi &6(Cao giai)"
+    icon:
+      material: PAPER
+      model-data: 11552
+      slot: 21
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 4
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_2_HELMET
+        amount: 1
+        name: "&f&lBạch Ảnh Khôi (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_3_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_cao_chestplate:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Y &6(Cao giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Y &6(Cao giai)"
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10106
+      slot: 22
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 4
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_2_CHESTPLATE
+        amount: 1
+        name: "&f&lBạch Ảnh Y (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_3_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_cao_leggings:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Hạ Y &6(Cao giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Hạ Y &6(Cao giai)"
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10106
+      slot: 23
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 4
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_2_LEGGINGS
+        amount: 1
+        name: "&f&lBạch Ảnh Hạ Y (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_3_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_cao_boots:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Hài &6(Cao giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Hài &6(Cao giai)"
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10106
+      slot: 24
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 4
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_2_BOOTS
+        amount: 1
+        name: "&f&lBạch Ảnh Hài (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_3_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # Thượng giai: 6× TULUYEN1_1 + 1 piece Cao → 1 piece Thượng
+  tuluyen1_thuong_helmet:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Khôi &d&l(Thượng giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Khôi &d&l(Thượng giai)"
+    icon:
+      material: PAPER
+      model-data: 11552
+      slot: 25
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 6
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_3_HELMET
+        amount: 1
+        name: "&f&lBạch Ảnh Khôi (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_4_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_thuong_chestplate:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Y &d&l(Thượng giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Y &d&l(Thượng giai)"
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10106
+      slot: 28
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 6
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_3_CHESTPLATE
+        amount: 1
+        name: "&f&lBạch Ảnh Y (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_4_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_thuong_leggings:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Hạ Y &d&l(Thượng giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Hạ Y &d&l(Thượng giai)"
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10106
+      slot: 29
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 6
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_3_LEGGINGS
+        amount: 1
+        name: "&f&lBạch Ảnh Hạ Y (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_4_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen1_thuong_boots:
+    enabled: true
+    display-name: "&f&lBạch Ảnh Hài &d&l(Thượng giai)"
+    duration: 5
+    placeholders:
+      item_name: "&f&lBạch Ảnh Hài &d&l(Thượng giai)"
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10106
+      slot: 30
+      glow: true
+      name: "%item_name%"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN1_1
+        amount: 6
+        name: "&c&lHuyết Thi Cô Đọng"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN1_3_BOOTS
+        amount: 1
+        name: "&f&lBạch Ảnh Hài (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN1_4_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # ─────────────── SET 2 (Chiến Thú) ───────────────
+  # Sơ: 2× TULUYEN2_1 → 1 piece | Trung: 3× + piece Sơ | Cao: 4× + piece Trung | Thượng: 6× + piece Cao
+  tuluyen2_so_helmet:
+    enabled: true
+    display-name: "&f&lChiến Thú Chi Khôi &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11553
+      slot: 31
+      glow: true
+      name: "&f&lChiến Thú Chi Khôi &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 2
+        name: "&f&lTruy Hồn Cốt Tiễn"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_so_chestplate:
+    enabled: true
+    display-name: "&f&lChiến Thú Giáp &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10107
+      slot: 32
+      glow: true
+      name: "&f&lChiến Thú Giáp &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 2
+        name: "&f&lTruy Hồn Cốt Tiễn"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_so_leggings:
+    enabled: true
+    display-name: "&f&lChiến Thú Hạ Y &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10107
+      slot: 33
+      glow: true
+      name: "&f&lChiến Thú Hạ Y &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 2
+        name: "&f&lTruy Hồn Cốt Tiễn"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_so_boots:
+    enabled: true
+    display-name: "&f&lChiến Thú Hài &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10107
+      slot: 34
+      glow: true
+      name: "&f&lChiến Thú Hài &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 2
+        name: "&f&lTruy Hồn Cốt Tiễn"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # Set 2 Trung/Cao/Thượng
+  tuluyen2_trung_helmet:
+    enabled: true
+    display-name: "&f&lChiến Thú Chi Khôi &e(Trung giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11553
+      slot: 35
+      glow: true
+      name: "&f&lChiến Thú Chi Khôi &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 3
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_HELMET
+        amount: 1
+        name: "&fChiến Thú Chi Khôi (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_2_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_trung_chestplate:
+    enabled: true
+    display-name: "&f&lChiến Thú Giáp &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10107
+      slot: 36
+      glow: true
+      name: "&f&lChiến Thú Giáp &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 3
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_CHESTPLATE
+        amount: 1
+        name: "&fChiến Thú Giáp (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_2_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_trung_leggings:
+    enabled: true
+    display-name: "&f&lChiến Thú Hạ Y &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10107
+      slot: 37
+      glow: true
+      name: "&f&lChiến Thú Hạ Y &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 3
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_LEGGINGS
+        amount: 1
+        name: "&fChiến Thú Hạ Y (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_2_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_trung_boots:
+    enabled: true
+    display-name: "&f&lChiến Thú Hài &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10107
+      slot: 38
+      glow: true
+      name: "&f&lChiến Thú Hài &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 3
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_BOOTS
+        amount: 1
+        name: "&fChiến Thú Hài (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_2_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_cao_helmet:
+    enabled: true
+    display-name: "&f&lChiến Thú Chi Khôi &6(Cao giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11553
+      slot: 39
+      glow: true
+      name: "&f&lChiến Thú Chi Khôi &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 4
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_2_HELMET
+        amount: 1
+        name: "&fChiến Thú Chi Khôi (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_3_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_cao_chestplate:
+    enabled: true
+    display-name: "&f&lChiến Thú Giáp &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10107
+      slot: 40
+      glow: true
+      name: "&f&lChiến Thú Giáp &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 4
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_2_CHESTPLATE
+        amount: 1
+        name: "&fChiến Thú Giáp (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_3_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_cao_leggings:
+    enabled: true
+    display-name: "&f&lChiến Thú Hạ Y &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10107
+      slot: 41
+      glow: true
+      name: "&f&lChiến Thú Hạ Y &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 4
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_2_LEGGINGS
+        amount: 1
+        name: "&fChiến Thú Hạ Y (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_3_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_cao_boots:
+    enabled: true
+    display-name: "&f&lChiến Thú Hài &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10107
+      slot: 42
+      glow: true
+      name: "&f&lChiến Thú Hài &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 4
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_2_BOOTS
+        amount: 1
+        name: "&fChiến Thú Hài (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_3_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_thuong_helmet:
+    enabled: true
+    display-name: "&f&lChiến Thú Chi Khôi &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11553
+      slot: 43
+      glow: true
+      name: "&f&lChiến Thú Chi Khôi &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 6
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_3_HELMET
+        amount: 1
+        name: "&fChiến Thú Chi Khôi (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_4_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_thuong_chestplate:
+    enabled: true
+    display-name: "&f&lChiến Thú Giáp &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10107
+      slot: 44
+      glow: true
+      name: "&f&lChiến Thú Giáp &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 6
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_3_CHESTPLATE
+        amount: 1
+        name: "&fChiến Thú Giáp (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_4_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_thuong_leggings:
+    enabled: true
+    display-name: "&f&lChiến Thú Hạ Y &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10107
+      slot: 45
+      glow: true
+      name: "&f&lChiến Thú Hạ Y &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 6
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_3_LEGGINGS
+        amount: 1
+        name: "&fChiến Thú Hạ Y (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_4_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen2_thuong_boots:
+    enabled: true
+    display-name: "&f&lChiến Thú Hài &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10107
+      slot: 46
+      glow: true
+      name: "&f&lChiến Thú Hài &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN2_1
+        amount: 6
+        name: "&f&lTruy Hồn Cốt Tiễn"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN2_3_BOOTS
+        amount: 1
+        name: "&fChiến Thú Hài (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN2_4_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # ─────────────── SET 3 (Ma Vực) ───────────────
+  # Công thức giống Set 1/2: Sơ 2× | Trung 3×+piece Sơ | Cao 4×+piece Trung | Thượng 6×+piece Cao
+  # Material: TULUYEN3_1 (Phệ Hồn Tơ Độc). Armor: TULUYEN3_* / TULUYEN3_2_* / TULUYEN3_3_* / TULUYEN3_4_*
+  # SET 4: TULUYEN4_1, Huyết Chiến Khôi/Giáp/Hộ Thể/Hài. SET 5: TULUYEN5_1, Kiên Thạch. SET 6: TULUYEN6_1, Cuồng Sát.
+  # Copy block Set 2, thay 2→3 (hoặc 4,5,6), tên set & material name, slot +20 mỗi set.
+  tuluyen3_so_helmet:
+    enabled: true
+    display-name: "&5&lMa Vực Khôi &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11554
+      slot: 51
+      glow: true
+      name: "&5&lMa Vực Khôi &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 2
+        name: "&2&lPhệ Hồn Tơ Độc"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_so_chestplate:
+    enabled: true
+    display-name: "&5&lMa Vực Chiến Giáp &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10108
+      slot: 52
+      glow: true
+      name: "&5&lMa Vực Chiến Giáp &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 2
+        name: "&2&lPhệ Hồn Tơ Độc"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_so_leggings:
+    enabled: true
+    display-name: "&5&lMa Vực Hạ Khải &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10108
+      slot: 53
+      glow: true
+      name: "&5&lMa Vực Hạ Khải &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 2
+        name: "&2&lPhệ Hồn Tơ Độc"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_so_boots:
+    enabled: true
+    display-name: "&5&lMa Vực Bộ Pháp &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10108
+      slot: 54
+      glow: true
+      name: "&5&lMa Vực Bộ Pháp &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 2
+        name: "&2&lPhệ Hồn Tơ Độc"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # Set 3 Trung: 3× TULUYEN3_1 + piece Sơ → TULUYEN3_2_*
+  tuluyen3_trung_helmet:
+    enabled: true
+    display-name: "&5&lMa Vực Khôi &e(Trung giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11554
+      slot: 55
+      glow: true
+      name: "&5&lMa Vực Khôi &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 3
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_HELMET
+        amount: 1
+        name: "&5Ma Vực Khôi (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_2_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_trung_chestplate:
+    enabled: true
+    display-name: "&5&lMa Vực Chiến Giáp &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10108
+      slot: 56
+      glow: true
+      name: "&5&lMa Vực Chiến Giáp &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 3
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_CHESTPLATE
+        amount: 1
+        name: "&5Ma Vực Chiến Giáp (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_2_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_trung_leggings:
+    enabled: true
+    display-name: "&5&lMa Vực Hạ Khải &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10108
+      slot: 57
+      glow: true
+      name: "&5&lMa Vực Hạ Khải &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 3
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_LEGGINGS
+        amount: 1
+        name: "&5Ma Vực Hạ Khải (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_2_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_trung_boots:
+    enabled: true
+    display-name: "&5&lMa Vực Bộ Pháp &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10108
+      slot: 58
+      glow: true
+      name: "&5&lMa Vực Bộ Pháp &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 3
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_BOOTS
+        amount: 1
+        name: "&5Ma Vực Bộ Pháp (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_2_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_cao_helmet:
+    enabled: true
+    display-name: "&5&lMa Vực Khôi &6(Cao giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11554
+      slot: 59
+      glow: true
+      name: "&5&lMa Vực Khôi &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 4
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_2_HELMET
+        amount: 1
+        name: "&5Ma Vực Khôi (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_3_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_cao_chestplate:
+    enabled: true
+    display-name: "&5&lMa Vực Chiến Giáp &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10108
+      slot: 60
+      glow: true
+      name: "&5&lMa Vực Chiến Giáp &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 4
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_2_CHESTPLATE
+        amount: 1
+        name: "&5Ma Vực Chiến Giáp (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_3_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_cao_leggings:
+    enabled: true
+    display-name: "&5&lMa Vực Hạ Khải &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10108
+      slot: 61
+      glow: true
+      name: "&5&lMa Vực Hạ Khải &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 4
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_2_LEGGINGS
+        amount: 1
+        name: "&5Ma Vực Hạ Khải (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_3_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_cao_boots:
+    enabled: true
+    display-name: "&5&lMa Vực Bộ Pháp &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10108
+      slot: 62
+      glow: true
+      name: "&5&lMa Vực Bộ Pháp &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 4
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_2_BOOTS
+        amount: 1
+        name: "&5Ma Vực Bộ Pháp (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_3_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_thuong_helmet:
+    enabled: true
+    display-name: "&5&lMa Vực Khôi &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11554
+      slot: 63
+      glow: true
+      name: "&5&lMa Vực Khôi &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 6
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_3_HELMET
+        amount: 1
+        name: "&5Ma Vực Khôi (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_4_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_thuong_chestplate:
+    enabled: true
+    display-name: "&5&lMa Vực Chiến Giáp &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10108
+      slot: 64
+      glow: true
+      name: "&5&lMa Vực Chiến Giáp &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 6
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_3_CHESTPLATE
+        amount: 1
+        name: "&5Ma Vực Chiến Giáp (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_4_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_thuong_leggings:
+    enabled: true
+    display-name: "&5&lMa Vực Hạ Khải &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10108
+      slot: 65
+      glow: true
+      name: "&5&lMa Vực Hạ Khải &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 6
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_3_LEGGINGS
+        amount: 1
+        name: "&5Ma Vực Hạ Khải (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_4_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen3_thuong_boots:
+    enabled: true
+    display-name: "&5&lMa Vực Bộ Pháp &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10108
+      slot: 66
+      glow: true
+      name: "&5&lMa Vực Bộ Pháp &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN3_1
+        amount: 6
+        name: "&2&lPhệ Hồn Tơ Độc"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN3_3_BOOTS
+        amount: 1
+        name: "&5Ma Vực Bộ Pháp (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN3_4_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # ─────────────── SET 4 (Huyết Chiến) ───────────────
+  # Trung/Cao/Thượng: copy block Set 2, thay tuluyen2→tuluyen4, TULUYEN2→TULUYEN4, Chiến Thú→Huyết Chiến, Truy Hồn Cốt Tiễn→Minh Tơ Quỷ Phược, slot +40. Xem docs/DUNGEON_RECIPES.md
+  tuluyen4_so_helmet:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Khôi &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11555
+      slot: 71
+      glow: true
+      name: "&c&lHuyết Chiến Khôi &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 2
+        name: "&d&lMinh Tơ Quỷ Phược"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_so_chestplate:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Giáp &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10109
+      slot: 72
+      glow: true
+      name: "&c&lHuyết Chiến Giáp &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 2
+        name: "&d&lMinh Tơ Quỷ Phược"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_so_leggings:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Hộ Thể &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10109
+      slot: 73
+      glow: true
+      name: "&c&lHuyết Chiến Hộ Thể &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 2
+        name: "&d&lMinh Tơ Quỷ Phược"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_so_boots:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Hài &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10109
+      slot: 74
+      glow: true
+      name: "&c&lHuyết Chiến Hài &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 2
+        name: "&d&lMinh Tơ Quỷ Phược"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # Set 4 Trung/Cao/Thượng (3×+Sơ → Trung | 4×+Trung → Cao | 6×+Cao → Thượng)
+  tuluyen4_trung_helmet:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Khôi &e(Trung giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11555
+      slot: 75
+      glow: true
+      name: "&c&lHuyết Chiến Khôi &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 3
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_HELMET
+        amount: 1
+        name: "&cHuyết Chiến Khôi (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_2_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_trung_chestplate:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Giáp &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10109
+      slot: 76
+      glow: true
+      name: "&c&lHuyết Chiến Giáp &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 3
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_CHESTPLATE
+        amount: 1
+        name: "&cHuyết Chiến Giáp (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_2_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_trung_leggings:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Hộ Thể &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10109
+      slot: 77
+      glow: true
+      name: "&c&lHuyết Chiến Hộ Thể &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 3
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_LEGGINGS
+        amount: 1
+        name: "&cHuyết Chiến Hộ Thể (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_2_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_trung_boots:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Hài &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10109
+      slot: 78
+      glow: true
+      name: "&c&lHuyết Chiến Hài &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 3
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_BOOTS
+        amount: 1
+        name: "&cHuyết Chiến Hài (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_2_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_cao_helmet:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Khôi &6(Cao giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11555
+      slot: 79
+      glow: true
+      name: "&c&lHuyết Chiến Khôi &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 4
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_2_HELMET
+        amount: 1
+        name: "&cHuyết Chiến Khôi (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_3_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_cao_chestplate:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Giáp &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10109
+      slot: 80
+      glow: true
+      name: "&c&lHuyết Chiến Giáp &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 4
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_2_CHESTPLATE
+        amount: 1
+        name: "&cHuyết Chiến Giáp (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_3_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_cao_leggings:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Hộ Thể &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10109
+      slot: 81
+      glow: true
+      name: "&c&lHuyết Chiến Hộ Thể &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 4
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_2_LEGGINGS
+        amount: 1
+        name: "&cHuyết Chiến Hộ Thể (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_3_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_cao_boots:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Hài &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10109
+      slot: 82
+      glow: true
+      name: "&c&lHuyết Chiến Hài &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 4
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_2_BOOTS
+        amount: 1
+        name: "&cHuyết Chiến Hài (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_3_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_thuong_helmet:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Khôi &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11555
+      slot: 83
+      glow: true
+      name: "&c&lHuyết Chiến Khôi &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 6
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_3_HELMET
+        amount: 1
+        name: "&cHuyết Chiến Khôi (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_4_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_thuong_chestplate:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Giáp &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10109
+      slot: 84
+      glow: true
+      name: "&c&lHuyết Chiến Giáp &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 6
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_3_CHESTPLATE
+        amount: 1
+        name: "&cHuyết Chiến Giáp (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_4_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_thuong_leggings:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Hộ Thể &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10109
+      slot: 85
+      glow: true
+      name: "&c&lHuyết Chiến Hộ Thể &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 6
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_3_LEGGINGS
+        amount: 1
+        name: "&cHuyết Chiến Hộ Thể (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_4_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen4_thuong_boots:
+    enabled: true
+    display-name: "&c&lHuyết Chiến Hài &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10109
+      slot: 86
+      glow: true
+      name: "&c&lHuyết Chiến Hài &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN4_1
+        amount: 6
+        name: "&d&lMinh Tơ Quỷ Phược"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN4_3_BOOTS
+        amount: 1
+        name: "&cHuyết Chiến Hài (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN4_4_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # ─────────────── SET 5 (Kiên Thạch) ───────────────
+  tuluyen5_so_helmet:
+    enabled: true
+    display-name: "&8&lKiên Thạch Khôi &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11556
+      slot: 87
+      glow: true
+      name: "&8&lKiên Thạch Khôi &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 2
+        name: "&6&lCát Nóng Tích Hợp"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_so_chestplate:
+    enabled: true
+    display-name: "&8&lKiên Thạch Hộ Giáp &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10110
+      slot: 88
+      glow: true
+      name: "&8&lKiên Thạch Hộ Giáp &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 2
+        name: "&6&lCát Nóng Tích Hợp"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_so_leggings:
+    enabled: true
+    display-name: "&8&lKiên Thạch Hạ Trang &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10110
+      slot: 89
+      glow: true
+      name: "&8&lKiên Thạch Hạ Trang &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 2
+        name: "&6&lCát Nóng Tích Hợp"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_so_boots:
+    enabled: true
+    display-name: "&8&lKiên Thạch Bộ Pháp &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10110
+      slot: 90
+      glow: true
+      name: "&8&lKiên Thạch Bộ Pháp &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 2
+        name: "&6&lCát Nóng Tích Hợp"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # Set 5 Trung/Cao/Thượng
+  tuluyen5_trung_helmet:
+    enabled: true
+    display-name: "&8&lKiên Thạch Khôi &e(Trung giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11556
+      slot: 91
+      glow: true
+      name: "&8&lKiên Thạch Khôi &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 3
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_HELMET
+        amount: 1
+        name: "&8Kiên Thạch Khôi (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_2_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_trung_chestplate:
+    enabled: true
+    display-name: "&8&lKiên Thạch Hộ Giáp &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10110
+      slot: 92
+      glow: true
+      name: "&8&lKiên Thạch Hộ Giáp &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 3
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_CHESTPLATE
+        amount: 1
+        name: "&8Kiên Thạch Hộ Giáp (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_2_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_trung_leggings:
+    enabled: true
+    display-name: "&8&lKiên Thạch Hạ Trang &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10110
+      slot: 93
+      glow: true
+      name: "&8&lKiên Thạch Hạ Trang &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 3
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_LEGGINGS
+        amount: 1
+        name: "&8Kiên Thạch Hạ Trang (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_2_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_trung_boots:
+    enabled: true
+    display-name: "&8&lKiên Thạch Bộ Pháp &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10110
+      slot: 94
+      glow: true
+      name: "&8&lKiên Thạch Bộ Pháp &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 3
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_BOOTS
+        amount: 1
+        name: "&8Kiên Thạch Bộ Pháp (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_2_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_cao_helmet:
+    enabled: true
+    display-name: "&8&lKiên Thạch Khôi &6(Cao giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11556
+      slot: 95
+      glow: true
+      name: "&8&lKiên Thạch Khôi &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 4
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_2_HELMET
+        amount: 1
+        name: "&8Kiên Thạch Khôi (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_3_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_cao_chestplate:
+    enabled: true
+    display-name: "&8&lKiên Thạch Hộ Giáp &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10110
+      slot: 96
+      glow: true
+      name: "&8&lKiên Thạch Hộ Giáp &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 4
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_2_CHESTPLATE
+        amount: 1
+        name: "&8Kiên Thạch Hộ Giáp (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_3_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_cao_leggings:
+    enabled: true
+    display-name: "&8&lKiên Thạch Hạ Trang &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10110
+      slot: 97
+      glow: true
+      name: "&8&lKiên Thạch Hạ Trang &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 4
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_2_LEGGINGS
+        amount: 1
+        name: "&8Kiên Thạch Hạ Trang (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_3_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_cao_boots:
+    enabled: true
+    display-name: "&8&lKiên Thạch Bộ Pháp &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10110
+      slot: 98
+      glow: true
+      name: "&8&lKiên Thạch Bộ Pháp &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 4
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_2_BOOTS
+        amount: 1
+        name: "&8Kiên Thạch Bộ Pháp (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_3_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_thuong_helmet:
+    enabled: true
+    display-name: "&8&lKiên Thạch Khôi &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: PAPER
+      model-data: 11556
+      slot: 99
+      glow: true
+      name: "&8&lKiên Thạch Khôi &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 6
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_3_HELMET
+        amount: 1
+        name: "&8Kiên Thạch Khôi (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_4_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_thuong_chestplate:
+    enabled: true
+    display-name: "&8&lKiên Thạch Hộ Giáp &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      model-data: 10110
+      slot: 100
+      glow: true
+      name: "&8&lKiên Thạch Hộ Giáp &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 6
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_3_CHESTPLATE
+        amount: 1
+        name: "&8Kiên Thạch Hộ Giáp (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_4_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_thuong_leggings:
+    enabled: true
+    display-name: "&8&lKiên Thạch Hạ Trang &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      model-data: 10110
+      slot: 101
+      glow: true
+      name: "&8&lKiên Thạch Hạ Trang &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 6
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_3_LEGGINGS
+        amount: 1
+        name: "&8Kiên Thạch Hạ Trang (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_4_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen5_thuong_boots:
+    enabled: true
+    display-name: "&8&lKiên Thạch Bộ Pháp &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      model-data: 10110
+      slot: 102
+      glow: true
+      name: "&8&lKiên Thạch Bộ Pháp &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN5_1
+        amount: 6
+        name: "&6&lCát Nóng Tích Hợp"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN5_3_BOOTS
+        amount: 1
+        name: "&8Kiên Thạch Bộ Pháp (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN5_4_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # ─────────────── SET 6 (Cuồng Sát) ───────────────
+  tuluyen6_so_helmet:
+    enabled: true
+    display-name: "&4&lCuồng Sát Chi Khôi &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_HELMET
+      slot: 103
+      glow: true
+      name: "&4&lCuồng Sát Chi Khôi &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 2
+        name: "&e&lSa Khí Tinh Hoa"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_so_chestplate:
+    enabled: true
+    display-name: "&4&lCuồng Sát Chiến Giáp &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      slot: 104
+      glow: true
+      name: "&4&lCuồng Sát Chiến Giáp &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 2
+        name: "&e&lSa Khí Tinh Hoa"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_so_leggings:
+    enabled: true
+    display-name: "&4&lCuồng Sát Hạ Khải &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      slot: 105
+      glow: true
+      name: "&4&lCuồng Sát Hạ Khải &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 2
+        name: "&e&lSa Khí Tinh Hoa"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_so_boots:
+    enabled: true
+    display-name: "&4&lCuồng Sát Hài &7(Sơ giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      slot: 106
+      glow: true
+      name: "&4&lCuồng Sát Hài &7(Sơ giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 2
+        name: "&e&lSa Khí Tinh Hoa"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  # Set 6 Trung/Cao/Thượng
+  tuluyen6_trung_helmet:
+    enabled: true
+    display-name: "&4&lCuồng Sát Chi Khôi &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_HELMET
+      slot: 107
+      glow: true
+      name: "&4&lCuồng Sát Chi Khôi &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 3
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_HELMET
+        amount: 1
+        name: "&4Cuồng Sát Chi Khôi (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_2_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_trung_chestplate:
+    enabled: true
+    display-name: "&4&lCuồng Sát Chiến Giáp &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      slot: 108
+      glow: true
+      name: "&4&lCuồng Sát Chiến Giáp &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 3
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_CHESTPLATE
+        amount: 1
+        name: "&4Cuồng Sát Chiến Giáp (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_2_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_trung_leggings:
+    enabled: true
+    display-name: "&4&lCuồng Sát Hạ Khải &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      slot: 109
+      glow: true
+      name: "&4&lCuồng Sát Hạ Khải &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 3
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_LEGGINGS
+        amount: 1
+        name: "&4Cuồng Sát Hạ Khải (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_2_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_trung_boots:
+    enabled: true
+    display-name: "&4&lCuồng Sát Hài &e(Trung giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      slot: 110
+      glow: true
+      name: "&4&lCuồng Sát Hài &e(Trung giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 3
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_BOOTS
+        amount: 1
+        name: "&4Cuồng Sát Hài (Sơ)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_2_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_cao_helmet:
+    enabled: true
+    display-name: "&4&lCuồng Sát Chi Khôi &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_HELMET
+      slot: 111
+      glow: true
+      name: "&4&lCuồng Sát Chi Khôi &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 4
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_2_HELMET
+        amount: 1
+        name: "&4Cuồng Sát Chi Khôi (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_3_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_cao_chestplate:
+    enabled: true
+    display-name: "&4&lCuồng Sát Chiến Giáp &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      slot: 112
+      glow: true
+      name: "&4&lCuồng Sát Chiến Giáp &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 4
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_2_CHESTPLATE
+        amount: 1
+        name: "&4Cuồng Sát Chiến Giáp (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_3_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_cao_leggings:
+    enabled: true
+    display-name: "&4&lCuồng Sát Hạ Khải &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      slot: 113
+      glow: true
+      name: "&4&lCuồng Sát Hạ Khải &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 4
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_2_LEGGINGS
+        amount: 1
+        name: "&4Cuồng Sát Hạ Khải (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_3_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_cao_boots:
+    enabled: true
+    display-name: "&4&lCuồng Sát Hài &6(Cao giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      slot: 114
+      glow: true
+      name: "&4&lCuồng Sát Hài &6(Cao giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 4
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_2_BOOTS
+        amount: 1
+        name: "&4Cuồng Sát Hài (Trung)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_3_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_thuong_helmet:
+    enabled: true
+    display-name: "&4&lCuồng Sát Chi Khôi &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_HELMET
+      slot: 115
+      glow: true
+      name: "&4&lCuồng Sát Chi Khôi &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 6
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_3_HELMET
+        amount: 1
+        name: "&4Cuồng Sát Chi Khôi (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_4_HELMET
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_thuong_chestplate:
+    enabled: true
+    display-name: "&4&lCuồng Sát Chiến Giáp &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_CHESTPLATE
+      slot: 116
+      glow: true
+      name: "&4&lCuồng Sát Chiến Giáp &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 6
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_3_CHESTPLATE
+        amount: 1
+        name: "&4Cuồng Sát Chiến Giáp (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_4_CHESTPLATE
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_thuong_leggings:
+    enabled: true
+    display-name: "&4&lCuồng Sát Hạ Khải &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_LEGGINGS
+      slot: 117
+      glow: true
+      name: "&4&lCuồng Sát Hạ Khải &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 6
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_3_LEGGINGS
+        amount: 1
+        name: "&4Cuồng Sát Hạ Khải (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_4_LEGGINGS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT
+
+  tuluyen6_thuong_boots:
+    enabled: true
+    display-name: "&4&lCuồng Sát Hài &d&l(Thượng giai)"
+    duration: 5
+    icon:
+      material: LEATHER_BOOTS
+      slot: 118
+      glow: true
+      name: "&4&lCuồng Sát Hài &d&l(Thượng giai)"
+      lore:
+        - ""
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&f&lNGUYÊN LIỆU:"
+        - "%ingredients_list%"
+        - "&8━━━━━━━━━━━━━━━━━━━━━━━━━"
+        - "&7Thời gian: &f%duration%s | &7Trạng thái: %status%"
+        - "&a▶ Click để chế tạo!"
+    ingredients:
+      mat:
+        type: MMOITEMS
+        mmoitems-type: MATERIAL
+        mmoitems-id: TULUYEN6_1
+        amount: 6
+        name: "&e&lSa Khí Tinh Hoa"
+      prev:
+        type: MMOITEMS
+        mmoitems-type: ARMOR
+        mmoitems-id: TULUYEN6_3_BOOTS
+        amount: 1
+        name: "&4Cuồng Sát Hài (Cao)"
+    result:
+      type: MMOITEMS
+      mmoitems-type: ARMOR
+      mmoitems-id: TULUYEN6_4_BOOTS
+      amount: 1
+    effects:
+      sound: BLOCK_ANVIL_USE
+      particles: ENCHANT

@@ -36,7 +36,6 @@ public class ForgeStationExpansion extends PlaceholderExpansion {
 
     @Override
     public boolean persist() {
-        // ISSUE-002 FIX: Tránh giữ expansion qua reload vì nó giữ reference tới plugin
         // persist=true gây classloader leak khi plugin reload
         return false;
     }
@@ -47,17 +46,13 @@ public class ForgeStationExpansion extends PlaceholderExpansion {
         
         Player player = offlinePlayer.getPlayer();
         if (player == null) return "";
-        
-        PlayerDataManager.PlayerData data = plugin.getPlayerDataManager().getPlayerData(player);
-        
-        // %forgestation_crafting_level%
+
+        // %forgestation_crafting_level% / %forgestation_smelting_level% (effective level = cap theo config)
         if (params.equals("crafting_level")) {
-            return String.valueOf(data.getUpgradeLevel("crafting_speed"));
+            return String.valueOf(plugin.getUpgradeManager().getEffectiveLevel(player, "crafting_speed"));
         }
-        
-        // %forgestation_smelting_level%
         if (params.equals("smelting_level")) {
-            return String.valueOf(data.getUpgradeLevel("smelting_speed"));
+            return String.valueOf(plugin.getUpgradeManager().getEffectiveLevel(player, "smelting_speed"));
         }
         
         // %forgestation_rank%

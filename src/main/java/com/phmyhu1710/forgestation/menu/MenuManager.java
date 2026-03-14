@@ -780,10 +780,10 @@ public class MenuManager implements Listener {
                  String id = upgrade.getId();
                  if (!text.contains(id)) continue;
                  
-                 // Level
+                 // Level (effective = cap theo config max, khi admin đổi config hiển thị đúng)
                  if (text.contains("upgrade_level_" + id)) {
-                     text = text.replace("%upgrade_level_" + id + "%", 
-                         String.valueOf(data.getUpgradeLevel(id)));
+                     text = text.replace("%upgrade_level_" + id + "%",
+                         String.valueOf(plugin.getUpgradeManager().getEffectiveLevel(player, id)));
                  }
                  
                  // Max Level
@@ -836,8 +836,8 @@ public class MenuManager implements Listener {
                          }
                          
                          if (!hasCost) {
-                             // Check if max level
-                             if (data.getUpgradeLevel(id) >= upgrade.getMaxLevel()) {
+                             // Check if max level (effective level để đồng bộ sau khi đổi config)
+                             if (plugin.getUpgradeManager().getEffectiveLevel(player, id) >= upgrade.getMaxLevel()) {
                                  display.append("&a✔ &fĐã đạt cấp tối đa");
                              } else {
                                  display.append("&a✔ &fMiễn phí");
@@ -863,11 +863,11 @@ public class MenuManager implements Listener {
              }
         }
         
-        // Legacy support remove soon if needed, but keeping for now as backup fallback
-        if (text.contains("%crafting_level%")) 
-             text = text.replace("%crafting_level%", String.valueOf(data.getUpgradeLevel("crafting_speed")));
+        // Legacy support (effective level để đồng bộ sau khi đổi config)
+        if (text.contains("%crafting_level%"))
+             text = text.replace("%crafting_level%", String.valueOf(plugin.getUpgradeManager().getEffectiveLevel(player, "crafting_speed")));
         if (text.contains("%smelting_level%"))
-             text = text.replace("%smelting_level%", String.valueOf(data.getUpgradeLevel("smelting_speed")));
+             text = text.replace("%smelting_level%", String.valueOf(plugin.getUpgradeManager().getEffectiveLevel(player, "smelting_speed")));
         
         // Balances
         text = text.replace("%vault_balance%", MessageUtil.formatNumber(
@@ -895,7 +895,10 @@ public class MenuManager implements Listener {
                 var recipe = plugin.getRecipeManager().getRecipe(value);
                 if (recipe != null) {
                      plugin.debug("Found recipe: " + recipe.getId());
-                    // ISSUE-006 FIX: Sử dụng snapshot để check ingredients thay vì quét inventory mỗi lần
+                    // Placeholders tùy chỉnh từ config (placeholders: item_name: "Khối Lưu Ly" → %item_name%)
+                    for (java.util.Map.Entry<String, String> e : recipe.getPlaceholders().entrySet()) {
+                        text = text.replace("%" + e.getKey() + "%", e.getValue());
+                    }
                     boolean hasIngredients = true;
                     for (var ing : recipe.getIngredients()) {
                          int count;
@@ -930,9 +933,11 @@ public class MenuManager implements Listener {
             } else if (type.equals("SMELT")) {
                 var recipe = plugin.getSmeltingManager().getRecipe(value);
                 if (recipe != null) {
+                    for (java.util.Map.Entry<String, String> e : recipe.getPlaceholders().entrySet()) {
+                        text = text.replace("%" + e.getKey() + "%", e.getValue());
+                    }
                     text = text.replace("%status%", plugin.getSmeltingManager().hasSmeltingMaterials(player, recipe) ? "&aCó thể nung" : "&cThiếu nguyên liệu");
-                    // Cooldown for smelting is just duration usually or N/A
-                    text = text.replace("%cooldown%", "N/A"); 
+                    text = text.replace("%cooldown%", "N/A");
                 }
             }
         } else {
@@ -1270,6 +1275,10 @@ public class MenuManager implements Listener {
                 player.closeInventory();
                 break;
             case "CANCEL_TASK":
+                if (!player.isOp() && !player.hasPermission("forgestation.cancel")) {
+                    plugin.getMessageUtil().send(player, "no-permission");
+                    break;
+                }
                 activeMenus.remove(uuid);
                 player.closeInventory();
                 boolean hadCraft = plugin.getCraftingExecutor().isCrafting(player);
@@ -1583,7 +1592,6 @@ public class MenuManager implements Listener {
     
     /**
      * Handle chat input for custom craft/smelt amounts
-     * ISSUE-007 FIX: Dùng AsyncChatEvent thay cho AsyncPlayerChatEvent (deprecated Paper 1.20.5+)
      */
     @EventHandler(priority = org.bukkit.event.EventPriority.LOWEST)
     public void onAsyncChat(io.papermc.paper.event.player.AsyncChatEvent event) {

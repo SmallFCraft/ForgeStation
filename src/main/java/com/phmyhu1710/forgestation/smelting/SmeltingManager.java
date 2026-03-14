@@ -60,7 +60,6 @@ public class SmeltingManager implements Listener {
     /**
      * PERFORMANCE FIX: Start single global timer để tick tất cả active tasks
      * Thay vì 300 timers riêng biệt, chỉ có 1 timer loop qua tất cả tasks
-     * ISSUE-005 FIX: Sử dụng Iterator thay vì ArrayList snapshot để giảm GC pressure
      */
     private void startGlobalTimer() {
         globalTimerTaskId = plugin.getScheduler().runTimer(() -> {
@@ -88,9 +87,6 @@ public class SmeltingManager implements Listener {
         }, 1L, 1L);
     }
     
-    /**
-     * PERFORMANCE FIX: Stop global timer (on plugin disable)
-     */
     public void stopGlobalTimer() {
         if (globalTimerTaskId != -1) {
             plugin.getScheduler().cancelTask(globalTimerTaskId);
@@ -175,12 +171,10 @@ public class SmeltingManager implements Listener {
         // 1. Lấy base duration (ticks)
         long baseTicks = getBaseDurationTicks(recipe);
         
-        // 2. Lấy smelting level của player
-        PlayerDataManager.PlayerData data = plugin.getPlayerDataManager().getPlayerData(player);
-        int smeltingLevel = data.getUpgradeLevel("smelting_speed");
-        
+        // 2. Effective level (cap theo config max-level khi admin đổi config)
+        int smeltingLevel = plugin.getUpgradeManager().getEffectiveLevel(player, "smelting_speed");
         if (smeltingLevel <= 0) return baseTicks;
-        
+
         // 3. Áp dụng reduction từ upgrade config
         var upgrade = plugin.getUpgradeManager().getUpgrade("smelting_speed");
         if (upgrade != null) {
@@ -236,8 +230,8 @@ public class SmeltingManager implements Listener {
             return true;
         }
 
-        // Check permission
-        if (!recipe.getPermission().isEmpty() && !player.hasPermission(recipe.getPermission())) {
+        // Check permission (OP bypass)
+        if (!player.isOp() && !recipe.getPermission().isEmpty() && !player.hasPermission(recipe.getPermission())) {
             plugin.getMessageUtil().send(player, "smelt.no-permission");
             return false;
         }
@@ -316,6 +310,9 @@ public class SmeltingManager implements Listener {
         list.add(task);
 
         task.initialize();
+
+        // CRASH PROTECTION: Save task ngay vào DB
+        immediatelySaveTask(player.getUniqueId());
 
         return true;
     }
@@ -541,7 +538,8 @@ public class SmeltingManager implements Listener {
      * Cancel smelting task for player và hoàn trả nguyên liệu + nhiên liệu
      */
     public void cancelSmelting(Player player) {
-        java.util.List<SmeltingTask> list = activeTasks.remove(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        java.util.List<SmeltingTask> list = activeTasks.remove(uuid);
         if (list != null && !list.isEmpty()) {
             for (SmeltingTask task : list) {
                 task.refund(player);
@@ -549,12 +547,25 @@ public class SmeltingManager implements Listener {
             }
             plugin.getMessageUtil().send(player, "smelt.cancelled-refund");
         }
+        // ANTI-DUPE: Clear DB entry để tránh restore lại task đã cancel
+        var db = getDatabase();
+        if (db != null) db.clearAllActiveSmeltingTasks(uuid);
     }
 
     /**
      * Called when smelting completes. Promote từ queue chung (chỉ item type SMELT)
      */
     public void onSmeltingComplete(UUID uuid) {
+        // ANTI-DUPE: Sync DB với memory — xóa task đã complete, giữ lại task còn active
+        var db = getDatabase();
+        if (db != null) {
+            java.util.List<SmeltingTask> remaining = activeTasks.get(uuid);
+            if (remaining == null || remaining.isEmpty() || remaining.stream().allMatch(SmeltingTask::isCancelled)) {
+                db.clearAllActiveSmeltingTasks(uuid);
+            } else {
+                immediatelySaveTask(uuid);
+            }
+        }
         Player player = org.bukkit.Bukkit.getPlayer(uuid);
         if (player == null || !player.isOnline()) return;
         plugin.getTaskQueueManager().promoteNext(player, com.phmyhu1710.forgestation.queue.TaskQueueManager.TaskType.SMELT);
@@ -586,6 +597,8 @@ public class SmeltingManager implements Listener {
         task.setRefundSnapshot(refundInput, refundFuel, refundInputES, refundFuelES);
         activeTasks.computeIfAbsent(player.getUniqueId(), k -> new java.util.ArrayList<>()).add(task);
         task.initialize();
+        // CRASH PROTECTION: Save task ngay vào DB
+        immediatelySaveTask(player.getUniqueId());
         return true;
     }
 
@@ -666,12 +679,15 @@ public class SmeltingManager implements Listener {
         java.util.Map<UUID, java.util.List<Object[]>> offlineByUuid = new java.util.HashMap<>();
         int restored = 0;
         
+        long now = System.currentTimeMillis();
         for (Object[] data : savedTasks) {
             UUID uuid = (UUID) data[0];
             org.bukkit.entity.Player player = Bukkit.getPlayer(uuid);
             if (player == null || !player.isOnline()) {
+                long remain = ((Number) data[2]).longValue(), total = ((Number) data[3]).longValue();
+                long startedAt = now - (total - remain) * 50L;
                 offlineByUuid.computeIfAbsent(uuid, k -> new java.util.ArrayList<>())
-                    .add(new Object[]{(String) data[1], ((Number) data[2]).intValue(), ((Number) data[3]).intValue(), (int) data[4]});
+                    .add(new Object[]{(String) data[1], data[2], data[3], data[4], startedAt});
                 continue;
             }
             
@@ -683,13 +699,16 @@ public class SmeltingManager implements Listener {
             // Tìm recipe mới (sau reload)
             SmeltingRecipe recipe = getRecipe(recipeId);
             if (recipe == null) {
-                plugin.getLogger().warning("Cannot restore smelting task: recipe " + recipeId + " not found after reload");
+                plugin.getLogger().warning("[ForgeStation] Cannot restore smelting task: recipe '" + recipeId + "' not found after reload. Notifying " + player.getName());
+                plugin.getMessageUtil().send(player, "smelt.recipe-removed", "recipe", recipeId);
                 continue;
             }
             
             // Tạo task mới với recipe reference mới (ticks)
             SmeltingTask task = new SmeltingTask(plugin, player, recipe, Math.max(1, remainingTicks), batchCount);
             task.setTotalTicks(totalTicks);
+            // REFUND FIX: Rebuild refund snapshot cho task restore sau reload
+            buildAndSetRefundSnapshotForRestoredTask(player, recipe, batchCount, task);
             activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>()).add(task);
             task.initialize();
             
@@ -713,12 +732,16 @@ public class SmeltingManager implements Listener {
     public void saveAllTasksToDatabase() {
         var db = getDatabase();
         if (db == null) return;
+        long now = System.currentTimeMillis();
         for (Map.Entry<UUID, java.util.List<SmeltingTask>> entry : activeTasks.entrySet()) {
             java.util.List<SmeltingTask> tasks = entry.getValue();
             if (tasks == null || tasks.isEmpty()) continue;
             java.util.List<Object[]> entries = new java.util.ArrayList<>();
             for (SmeltingTask t : tasks) {
-                if (t != null) entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+                if (t == null) continue;
+                long total = t.getTotalTicks(), remain = t.getRemainingTicks();
+                long startedAt = now - (total - remain) * 50L;
+                entries.add(new Object[]{ t.getRecipe().getId(), (int) remain, (int) total, t.getBatchCount(), startedAt });
             }
             if (!entries.isEmpty()) db.saveAllActiveSmeltingTasks(entry.getKey(), entries);
         }
@@ -736,6 +759,7 @@ public class SmeltingManager implements Listener {
         int savedCount = 0;
         var db = getDatabase();
         
+        long now = System.currentTimeMillis();
         for (Map.Entry<UUID, java.util.List<SmeltingTask>> entry : activeTasks.entrySet()) {
             UUID uuid = entry.getKey();
             java.util.List<SmeltingTask> tasks = entry.getValue();
@@ -744,7 +768,9 @@ public class SmeltingManager implements Listener {
                 for (SmeltingTask t : tasks) {
                     if (t != null) {
                         savedCount++;
-                        entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+                        long total = t.getTotalTicks(), remain = t.getRemainingTicks();
+                        long startedAt = now - (total - remain) * 50L;
+                        entries.add(new Object[]{ t.getRecipe().getId(), (int) remain, (int) total, t.getBatchCount(), startedAt });
                     }
                 }
                 if (!entries.isEmpty()) db.saveAllActiveSmeltingTasks(uuid, entries);
@@ -771,9 +797,12 @@ public class SmeltingManager implements Listener {
         if (list != null && !list.isEmpty()) {
             var db = getDatabase();
             if (db != null) {
+                long now = System.currentTimeMillis();
                 java.util.List<Object[]> entries = new java.util.ArrayList<>();
                 for (SmeltingTask t : list) {
-                    entries.add(new Object[]{ t.getRecipe().getId(), (int)t.getRemainingTicks(), (int)t.getTotalTicks(), t.getBatchCount() });
+                    long total = t.getTotalTicks(), remain = t.getRemainingTicks();
+                    long startedAt = now - (total - remain) * 50L;
+                    entries.add(new Object[]{ t.getRecipe().getId(), (int) remain, (int) total, t.getBatchCount(), startedAt });
                 }
                 db.saveAllActiveSmeltingTasks(uuid, entries);
                 plugin.getLogger().info("[ForgeStation] Lưu " + list.size() + " smelting task(s) cho " + event.getPlayer().getName() + " khi thoát");
@@ -831,17 +860,43 @@ public class SmeltingManager implements Listener {
             int amount = Integer.parseInt(output[2]);
             String outputType = output[3];
             
-            // Create and give item
             try {
-                if ("VANILLA".equals(outputType)) {
-                    Material mat = Material.valueOf(outputMaterial.toUpperCase());
-                    ItemStack item = new ItemStack(mat, amount);
-                    plugin.getOutputRouter().routeOutput(player, item, outputMaterial);
-                    totalItems += amount;
+                switch (outputType.toUpperCase()) {
+                    case "MMOITEMS":
+                        // Tìm recipe để lấy mmoitems type/id
+                        SmeltingRecipe recipe = getRecipe(recipeId);
+                        if (recipe != null) {
+                            ItemStack mmoItem = com.phmyhu1710.forgestation.util.ItemBuilder.buildMMOItem(
+                                plugin, recipe.getOutputMmoitemsType(), recipe.getOutputMmoitemsId(), 1);
+                            if (mmoItem != null && mmoItem.getType() != Material.STONE) {
+                                int maxStack = mmoItem.getMaxStackSize();
+                                int remaining = amount;
+                                while (remaining > 0) {
+                                    int batch = Math.min(remaining, maxStack);
+                                    ItemStack stack = mmoItem.clone();
+                                    stack.setAmount(batch);
+                                    plugin.getOutputRouter().routeOutput(player, stack, com.phmyhu1710.forgestation.hook.ExtraStorageHook.buildMmoItemsKey(recipe.getOutputMmoitemsType(), recipe.getOutputMmoitemsId()));
+                                    remaining -= batch;
+                                }
+                                totalItems += amount;
+                            }
+                        }
+                        break;
+                    case "EXTRA_STORAGE":
+                        if (plugin.getExtraStorageHook().isAvailable()) {
+                            plugin.getExtraStorageHook().addItems(player, outputMaterial, amount);
+                            totalItems += amount;
+                        }
+                        break;
+                    default: // VANILLA
+                        Material mat = Material.valueOf(outputMaterial.toUpperCase());
+                        ItemStack item = new ItemStack(mat, amount);
+                        plugin.getOutputRouter().routeOutput(player, item, outputMaterial);
+                        totalItems += amount;
+                        break;
                 }
-                // TODO: Handle MMOITEMS, EXTRA_STORAGE
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to deliver pending output " + outputMaterial + " to " + player.getName() + ": " + e.getMessage());
+                plugin.getLogger().warning("Failed to deliver pending smelting output " + outputMaterial + " to " + player.getName() + ": " + e.getMessage());
             }
         }
         
@@ -886,7 +941,8 @@ public class SmeltingManager implements Listener {
             
             SmeltingRecipe recipe = getRecipe(recipeId);
             if (recipe == null) {
-                plugin.getLogger().warning("Cannot restore smelting task: recipe " + recipeId + " not found");
+                plugin.getLogger().warning("[ForgeStation] Cannot restore smelting task: recipe '" + recipeId + "' not found (deleted/renamed?). Notifying " + player.getName());
+                plugin.getMessageUtil().send(player, "smelt.recipe-removed", "recipe", recipeId);
                 continue;
             }
             
@@ -900,6 +956,8 @@ public class SmeltingManager implements Listener {
             
             SmeltingTask task = new SmeltingTask(plugin, player, recipe, Math.max(1, actualRemainingTicks), batchCount);
             task.setTotalTicks(totalTicks);
+            // REFUND FIX: Task restore từ DB không có snapshot — rebuild từ recipe + batchCount để /fs cancel hoàn trả đúng
+            buildAndSetRefundSnapshotForRestoredTask(player, recipe, batchCount, task);
             activeTasks.computeIfAbsent(uuid, k -> new java.util.ArrayList<>()).add(task);
             task.initialize();
             restored++;
@@ -913,6 +971,95 @@ public class SmeltingManager implements Listener {
         }
         return restored > 0;
     }
+
+    /**
+     * REFUND FIX: Rebuild refund snapshot cho smelting task được restore từ DB.
+     * DB chỉ lưu recipeId + batchCount, không lưu actual items đã bị trừ.
+     * Method này tính lại từ recipe definition để /fs cancel hoàn trả đúng.
+     */
+    private void buildAndSetRefundSnapshotForRestoredTask(Player player, SmeltingRecipe recipe, int batchCount, SmeltingTask task) {
+        java.util.List<ItemStack> refundInputItems = new java.util.ArrayList<>();
+        java.util.List<ItemStack> refundFuelItems = new java.util.ArrayList<>();
+        java.util.Map<String, Integer> refundInputES = new java.util.HashMap<>();
+        java.util.Map<String, Integer> refundFuelES = new java.util.HashMap<>();
+
+        // Rebuild input refund
+        int totalInput = recipe.getInputAmount() * batchCount;
+        if ("EXTRA_STORAGE".equalsIgnoreCase(recipe.getInputType())) {
+            refundInputES.put(recipe.getInputMaterial(), totalInput);
+        } else if ("VANILLA".equalsIgnoreCase(recipe.getInputType())) {
+            try {
+                Material mat = Material.valueOf(recipe.getInputMaterial().toUpperCase());
+                if (mat != Material.AIR) {
+                    int maxStack = mat.getMaxStackSize();
+                    int remaining = totalInput;
+                    while (remaining > 0) {
+                        int give = Math.min(remaining, maxStack);
+                        refundInputItems.add(new ItemStack(mat, give));
+                        remaining -= give;
+                    }
+                }
+            } catch (IllegalArgumentException ignored) { }
+        } else if ("MMOITEMS".equalsIgnoreCase(recipe.getInputType())) {
+            com.phmyhu1710.forgestation.hook.ItemHook hook = plugin.getHookManager().getItemHookByPrefix("mmoitems");
+            if (hook != null) {
+                String typeId = (recipe.getInputMmoitemsType() != null ? recipe.getInputMmoitemsType() : "")
+                        + ":" + (recipe.getInputMmoitemsId() != null ? recipe.getInputMmoitemsId() : "");
+                ItemStack template = hook.getItem(typeId);
+                if (template != null && template.getType() != Material.AIR) {
+                    int maxStack = template.getMaxStackSize() > 0 ? template.getMaxStackSize() : 64;
+                    int remaining = totalInput;
+                    while (remaining > 0) {
+                        int give = Math.min(remaining, maxStack);
+                        ItemStack stack = template.clone();
+                        stack.setAmount(give);
+                        refundInputItems.add(stack);
+                        remaining -= give;
+                    }
+                }
+            }
+        }
+
+        // Rebuild fuel refund
+        if (recipe.isFuelRequired()) {
+            int totalFuel = recipe.getFuelAmount() * batchCount;
+            if ("EXTRA_STORAGE".equalsIgnoreCase(recipe.getFuelType())) {
+                refundFuelES.put(recipe.getFuelMaterial(), totalFuel);
+            } else if ("VANILLA".equalsIgnoreCase(recipe.getFuelType())) {
+                try {
+                    Material mat = Material.valueOf(recipe.getFuelMaterial().toUpperCase());
+                    if (mat != Material.AIR) {
+                        int maxStack = mat.getMaxStackSize();
+                        int remaining = totalFuel;
+                        while (remaining > 0) {
+                            int give = Math.min(remaining, maxStack);
+                            refundFuelItems.add(new ItemStack(mat, give));
+                            remaining -= give;
+                        }
+                    }
+                } catch (IllegalArgumentException ignored) { }
+            } else if ("MMOITEMS".equalsIgnoreCase(recipe.getFuelType())) {
+                com.phmyhu1710.forgestation.hook.ItemHook hook = plugin.getHookManager().getItemHookByPrefix("mmoitems");
+                if (hook != null) {
+                    String typeId = (recipe.getFuelMaterial() != null ? recipe.getFuelMaterial() : "");
+                    ItemStack template = hook.getItem(typeId);
+                    if (template != null && template.getType() != Material.AIR) {
+                        int maxStack = template.getMaxStackSize() > 0 ? template.getMaxStackSize() : 64;
+                        int remaining = totalFuel;
+                        while (remaining > 0) {
+                            int give = Math.min(remaining, maxStack);
+                            ItemStack stack = template.clone();
+                            stack.setAmount(give);
+                            refundFuelItems.add(stack);
+                            remaining -= give;
+                        }
+                    }
+                }
+            }
+        }
+
+        task.setRefundSnapshot(refundInputItems, refundFuelItems, refundInputES, refundFuelES);
+    }
     
     /**
      * SMELTING PERSISTENCE FIX: Give output trực tiếp (khi task đã complete offline)
@@ -920,13 +1067,40 @@ public class SmeltingManager implements Listener {
      */
     private void giveSmeltingOutputDirect(Player player, SmeltingRecipe recipe, int batchCount) {
         try {
-            // BATCH FIX: Tính tổng output = recipe amount * batch count
             int totalAmount = recipe.getOutputAmount() * batchCount;
-            Material mat = Material.valueOf(recipe.getOutputMaterial().toUpperCase());
-            ItemStack output = new ItemStack(mat, totalAmount);
-            plugin.getOutputRouter().routeOutput(player, output, mat.name());
             
-            plugin.debug("Gave offline smelting output: " + totalAmount + "x " + mat.name() + " to " + player.getName());
+            switch (recipe.getOutputType().toUpperCase()) {
+                case "MMOITEMS":
+                    ItemStack mmoItem = com.phmyhu1710.forgestation.util.ItemBuilder.buildMMOItem(
+                        plugin, recipe.getOutputMmoitemsType(), recipe.getOutputMmoitemsId(), 1);
+                    if (mmoItem != null && mmoItem.getType() != Material.STONE) {
+                        int maxStack = mmoItem.getMaxStackSize();
+                        int remaining = totalAmount;
+                        while (remaining > 0) {
+                            int batch = Math.min(remaining, maxStack);
+                            ItemStack stack = mmoItem.clone();
+                            stack.setAmount(batch);
+                            plugin.getOutputRouter().routeOutput(player, stack, com.phmyhu1710.forgestation.hook.ExtraStorageHook.buildMmoItemsKey(recipe.getOutputMmoitemsType(), recipe.getOutputMmoitemsId()));
+                            remaining -= batch;
+                        }
+                    } else {
+                        plugin.getLogger().warning("[ForgeStation] Failed to create MMOItem for offline smelting output: " 
+                            + recipe.getOutputMmoitemsType() + ":" + recipe.getOutputMmoitemsId());
+                    }
+                    break;
+                case "EXTRA_STORAGE":
+                    if (plugin.getExtraStorageHook().isAvailable()) {
+                        plugin.getExtraStorageHook().addItems(player, recipe.getOutputMaterial(), totalAmount);
+                    }
+                    break;
+                default: // VANILLA
+                    Material mat = Material.valueOf(recipe.getOutputMaterial().toUpperCase());
+                    ItemStack output = new ItemStack(mat, totalAmount);
+                    plugin.getOutputRouter().routeOutput(player, output, mat.name());
+                    break;
+            }
+            
+            plugin.debug("Gave offline smelting output: " + totalAmount + "x " + recipe.getOutputMaterial() + " to " + player.getName());
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to give smelting output: " + e.getMessage());
         }
@@ -951,5 +1125,25 @@ public class SmeltingManager implements Listener {
      */
     private com.phmyhu1710.forgestation.database.SQLiteDatabase getDatabase() {
         return plugin.getPlayerDataManager().getDatabase();
+    }
+
+    /**
+     * CRASH PROTECTION: Lưu tất cả active smelting tasks của player ngay vào DB.
+     * Gọi khi task mới bắt đầu để đảm bảo không mất nếu server crash trước periodic save.
+     */
+    private void immediatelySaveTask(UUID uuid) {
+        var db = getDatabase();
+        if (db == null) return;
+        java.util.List<SmeltingTask> tasks = activeTasks.get(uuid);
+        if (tasks == null || tasks.isEmpty()) return;
+        long now = System.currentTimeMillis();
+        java.util.List<Object[]> entries = new java.util.ArrayList<>();
+        for (SmeltingTask t : tasks) {
+            if (t == null || t.isCancelled()) continue;
+            long total = t.getTotalTicks(), remain = t.getRemainingTicks();
+            long startedAt = now - (total - remain) * 50L;
+            entries.add(new Object[]{ t.getRecipe().getId(), (int) remain, (int) total, t.getBatchCount(), startedAt });
+        }
+        if (!entries.isEmpty()) db.saveAllActiveSmeltingTasks(uuid, entries);
     }
 }

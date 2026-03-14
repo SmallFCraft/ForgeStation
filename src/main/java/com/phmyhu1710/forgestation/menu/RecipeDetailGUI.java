@@ -184,7 +184,12 @@ public class RecipeDetailGUI {
      */
     private String parseRecipePlaceholdersWithSnapshot(Player player, Recipe recipe, String text, Map<String, Integer> invSnapshot) {
         if (text == null) return "";
-        
+
+        // Placeholders tùy chỉnh từ config (placeholders: item_name: "Khối Lưu Ly" → %item_name%)
+        for (java.util.Map.Entry<String, String> e : recipe.getPlaceholders().entrySet()) {
+            text = text.replace("%" + e.getKey() + "%", e.getValue());
+        }
+
         // Global Currency Placeholders
         if (text.contains("%currency_")) {
              text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.vault", "Coins")));
@@ -407,6 +412,11 @@ public class RecipeDetailGUI {
             InventoryUtil.SmeltingSnapshot snapshot) {
         if (text == null) return "";
 
+        // Placeholders tùy chỉnh từ config (placeholders: item_name: "..." → %item_name%)
+        for (java.util.Map.Entry<String, String> e : recipe.getPlaceholders().entrySet()) {
+            text = text.replace("%" + e.getKey() + "%", e.getValue());
+        }
+
         // Global Currency Placeholders
         if (text.contains("%currency_")) {
              text = text.replace("%currency_vault%", MessageUtil.colorize(plugin.getConfigManager().getMainConfig().getString("currency.vault", "Coins")));
@@ -426,7 +436,7 @@ public class RecipeDetailGUI {
         text = text.replace("%cooldown%", formattedDuration); // Alias cho thống nhất với crafting
         
         // Smelting level
-        int smeltingLevel = plugin.getPlayerDataManager().getPlayerData(player).getUpgradeLevel("smelting_speed");
+        int smeltingLevel = plugin.getUpgradeManager().getEffectiveLevel(player, "smelting_speed");
         text = text.replace("%smelting_level%", String.valueOf(smeltingLevel));
         
         // Time reduction

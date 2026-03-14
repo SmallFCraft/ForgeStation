@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 /**
  * Mathematical expression parser using exp4j
- * ISSUE-008 FIX: Cache parsed Expression để giảm CPU khi evaluate nhiều lần
  */
 public class ExpressionParser {
 
@@ -54,9 +53,6 @@ public class ExpressionParser {
         }
     }
 
-    /**
-     * ISSUE-008: Lấy Expression từ cache hoặc build mới
-     */
     private static Expression getOrBuildExpression(String expressionStr) {
         return EXPR_CACHE.computeIfAbsent(expressionStr, s -> {
             if (EXPR_CACHE.size() >= CACHE_MAX_SIZE) {

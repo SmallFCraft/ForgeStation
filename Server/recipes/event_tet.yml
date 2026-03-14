@@ -217,7 +217,7 @@ recipes:
 
     input:
       type: EXTRA_STORAGE
-      material: HAY_BLOCK
+      material: WHEAT
       amount: 128
     result:
       type: MMOITEMS

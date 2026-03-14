@@ -25,7 +25,7 @@ public class ConfigManager {
         "main-menu.yml", "crafting-menu.yml", "smelting-menu.yml", "upgrade-menu.yml"
     };
     private static final String[] DEFAULT_RECIPES = {
-        "blocks.yml", "event_tet.yml", "exchange.yml", "luyendan.yml", "weapons.yml"
+        "blocks.yml", "dungeon.yml", "event_tet.yml", "exchange.yml", "luyendan.yml"
     };
     private static final String[] DEFAULT_SMELTING = { "metals.yml", "ores.yml" };
 
