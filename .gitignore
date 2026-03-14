@@ -3,5 +3,6 @@
 *.jar
 *.txt
 /DeluxeMenus/
+/ExtraStorage/
 dependency-reduced-pom.xml
 *.md
